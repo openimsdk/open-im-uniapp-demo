@@ -1,6 +1,6 @@
 # Open-IM-SDK-Uniapp
 
-## 1.npm intall
+## 1.npm install
 
 ## 2.through HBuilder X generate your custom debugging package or formal package
 
