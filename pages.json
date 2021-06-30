@@ -1,0 +1,100 @@
+{
+	"easycom": {
+			"^u-(.*)": "uview-ui/components/u-$1/u-$1.vue"
+		},
+    "pages": [
+		{
+            "path": "pages/login/login"
+
+        },
+        {
+            "path": "pages/login/register"
+
+        },
+        {
+            "path": "pages/login/confirm"
+
+        },
+        {
+            "path": "pages/conversation/home"
+
+        }, 
+        {
+            "path": "pages/profile/my"
+
+        }, 
+        {
+            "path": "pages/profile/editNickname"
+
+        }, 
+        {
+            "path": "pages/profile/blockList"
+
+        }, 
+		{
+		    "path": "pages/conversation/chatWin"
+		
+		},
+		{
+            "path" : "pages/mailList/mailList"
+            
+        },
+		{
+            "path" : "pages/mailList/addFriend"
+            
+        },
+		{
+            "path" : "pages/mailList/addFriendDetail"
+            
+        },
+		{
+            "path" : "pages/mailList/newFriends"
+            
+        },
+		{
+            "path" : "pages/conversation/setFriend"
+            
+        },
+		{
+            "path" : "pages/mailList/addFriendInput"
+            
+        },
+		{
+            "path" : "pages/mailList/searchFriend"
+            
+        },
+		{
+		    "path": "pages/conversation/playVideo"
+		}
+    ],
+    "globalStyle": {
+        "app-plus": {
+            "titleNView": false
+        }
+    },
+    "tabBar": {
+        "color":"#1B72EC",
+        "selectedColor": "#1B72EC",
+        "list": [{
+                "text": "EEchat",
+                "pagePath": "pages/conversation/home",
+                "iconPath": "static/tab-home.png",
+                "selectedIconPath": "static/tab-home-selected.png"
+            },
+			{
+			    "text": "mail list",
+			    "pagePath": "pages/mailList/mailList",
+			    "iconPath": "static/tab-mailList.png",
+			    "selectedIconPath": "static/tab-mailList-selected.png"
+			},
+            {
+                "text": "my",
+                "pagePath": "pages/profile/my",
+                "iconPath": "static/tab-my.png",
+                "selectedIconPath": "static/tab-my-selected.png"
+            }
+            
+        ]
+    }
+
+}

@@ -1,0 +1,28 @@
+{
+  "name": "EEchat-uniapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "dependencies": {
+    "bip39": "^3.0.4",
+    "ethereumjs-util": "^7.0.10",
+    "ethereumjs-wallet": "^1.0.1",
+    "qs": "^6.10.1",
+    "uview-ui": "^1.8.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EEchatGroup/EEchat-uniapp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EEchatGroup/EEchat-uniapp/issues"
+  },
+  "homepage": "https://github.com/EEchatGroup/EEchat-uniapp#readme"
+}
