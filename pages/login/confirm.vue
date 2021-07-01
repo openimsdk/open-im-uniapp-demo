@@ -150,7 +150,7 @@ export default {
                 data: accountInfo,
                 success(res) {
                   let userInfo = _this.$store.state.registerInfo;
-                  _this.$store.commit("UserInfoValue", userInfo);
+                  _this.$store.dispatch("UserInfoValue", userInfo);
                   uni.setStorage({
                     key: "token",
                     data: res.data.data.token,
@@ -175,7 +175,7 @@ export default {
 					    delete accountInfo.name;
 					    user_token(accountInfo).then(async (res) => {
 					      let userInfo = this.$store.state.registerInfo;
-					      await this.$store.commit("UserInfoValue", userInfo);
+					      await this.$store.dispatch("UserInfoValue", userInfo);
 					      await sessionStorage.setItem("token", res.data.data.token);
 					      await uni.setStorage({
 					        key: "token",

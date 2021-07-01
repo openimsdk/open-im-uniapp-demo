@@ -60,7 +60,7 @@ export default {
     },
     addFriend() {
       if (this.isFriend) {
-        this.$store.commit("setConversationUser", this.searchFriendData.uid);
+        this.$store.dispatch("setConversationUser", this.searchFriendData.uid);
         uni.navigateTo({
           url: "/pages/conversation/chatWin",
         });
@@ -99,6 +99,7 @@ export default {
     },
     friendListener() {
       this.$globalEvent.addEventListener("onFriendListAdded", (data) => {
+		  console.log(data);
         this.checkShip();
       });
     },
@@ -106,7 +107,7 @@ export default {
   onLoad: function (options) {
     const tmpArr = JSON.parse(options.userInfo);
     this.searchFriendData = tmpArr[0];
-	console.log(this.searchFriendData);
+	this.friendListener()
     this.checkShip(this.searchFriendData.uid);
   },
 };

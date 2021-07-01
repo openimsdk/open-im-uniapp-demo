@@ -10,7 +10,7 @@ export const calculateDiffTime = (start_time) => {
 }
 
 export const formatDate = (timestamp) => {
-	const now = new Date(timestamp*1000)
+	const now = new Date(timestamp)
 	const year = now.getFullYear();
 	const month = now.getMonth() + 1;
 	const date = now.getDate();
@@ -21,7 +21,7 @@ export const formatDate = (timestamp) => {
 	if(second.toString().length===1) second = "0"+second
 	const str1 = year + "-" + month + "-" + date
 	const str2 = hour + ":" + minute + ":" + second
-	return [str1, str2];
+	return [year,month,date,str1, str2];
 }
 
 export const asyncGetImgInfo = (url) =>{

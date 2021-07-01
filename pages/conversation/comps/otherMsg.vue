@@ -143,6 +143,7 @@
 			margin-top: 11px;
 			margin-left: 12px;
 			display: flex;
+			align-items: center;
 
 			.msg-image {
 				display: inline-block;

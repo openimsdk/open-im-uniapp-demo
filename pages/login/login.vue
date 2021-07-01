@@ -27,6 +27,7 @@
 		hdkey
 	} = require("ethereumjs-wallet");
 	const util = require("ethereumjs-util");
+	import {setMnemonic,getMnemonic} from "../../utils/storage.js"
 
 	export default {
 		data() {
@@ -60,18 +61,20 @@
 				accountInfo.operationID = this.loginInfo.address + Date.now().toString()
 				let _this = this;
 				uni.request({
-					url: "http://47.112.160.66:20000/eechat/user/login",
+					url: "https://open-im.rentsoft.cn/eechat/user/login",
 					method: "POST",
 					data: accountInfo,
 					success(res) {
+						console.log(res);
 						_this.$openSdk.login(res.data.data.uid, res.data.data.openImToken.token, (val) => {
 							console.log(val);
 							if (!val.err) {
+								setMnemonic(_this.account)
 								const reqData = [res.data.data.uid]
 								_this.$openSdk.getUsersInfo(JSON.stringify(reqData), data => {
 									let userInfoRes = JSON.parse(data.msg)
-									_this.$store.commit("UserInfoValue", userInfoRes);
-									_this.$store.commit("getToken", res.data.data.token
+									_this.$store.dispatch("UserInfoValue", userInfoRes);
+									_this.$store.dispatch("getToken", res.data.data.token
 										.accessToken);
 								})
 								_this.loginLoading = false
@@ -96,7 +99,7 @@
 				});
 			},
 			getLastAccount() {
-				const lastWord = uni.getStorageSync("lastMnemonic")
+				const lastWord = getMnemonic()
 				if (lastWord) this.account = lastWord
 			}
 		},

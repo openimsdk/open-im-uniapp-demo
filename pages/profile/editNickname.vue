@@ -18,7 +18,8 @@
 				nickname: "xxx",
 				title: "",
 				fromMy: true,
-				where: ""
+				where: "",
+				friendInfo:{}
 			}
 		},
 		onShow() {
@@ -42,49 +43,38 @@
 							const reqData = [_this.$store.state.userInfo[0].uid]
 							_this.$openSdk.getUsersInfo(JSON.stringify(reqData), async data => {
 								let userInfoRes = JSON.parse(data.msg)
-								await _this.$store.commit("UserInfoValue", userInfoRes);
+								await _this.$store.dispatch("UserInfoValue", userInfoRes);
 								uni.switchTab({
 									url: '/pages/profile/my'
 								});
 							})
-
 						}
-
-
 					})
 				} else if (this.where == "setFriend") {
 					let parameter = {}
-					parameter.uid = this.$store.state.setFriendData.uid
+					parameter.uid = this.friendInfo.uid
 					parameter.comment = this.nickname
 					this.$openSdk.setFriendInfo(parameter, data => {
 						if (data.err) {
 							_this.$u.toast('change fail：' + data.err)
 						} else {
-							let transfer = this.$store.state.setFriendData
-							transfer.name = this.nickname
-							this.$store.commit('getSetFriendData', transfer)
 							uni.navigateBack()
 						}
 					})
-
 				}
-
 			}
 		},
 		onLoad: function(options) {
+			console.log(options);
 			this.where = options.where
 			if (options.where == "my") {
 				this.title = "Change nickname"
 				this.nickname = this.$store.state.userInfo[0].name
 			} else if (options.where == "setFriend") {
 				this.title = "Set notes"
-				if (!this.$store.state.setFriendData.comment) {
-					this.nickname = ""
-				} else {
-					this.nickname = this.$store.state.setFriendData.comment
-
-				}
-
+				this.friendInfo = JSON.parse(options.friendData)
+				this.nickname=this.friendInfo.comment||""
+				console.log(this.nickname);
 			}
 		}
 	}

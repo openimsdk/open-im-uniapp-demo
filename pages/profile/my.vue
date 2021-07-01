@@ -70,7 +70,7 @@
 								const reqData = [_this.$store.state.userInfo[0].uid]
 								_this.$openSdk.getUsersInfo(JSON.stringify(reqData), async data => {
 									let userInfoRes = JSON.parse(data.msg)
-									await _this.$store.commit("UserInfoValue",
+									await _this.$store.dispatch("UserInfoValue",
 										userInfoRes);
 									_this.userInfo = _this.$store.state.userInfo[0];
 								})
@@ -82,7 +82,7 @@
 			},
 			goEditNickname() {
 				uni.navigateTo({
-					url: "/pages/mailList/editNickname?where=my",
+					url: "/pages/profile/editNickname?where=my",
 				});
 			},
 			goBlockList() {

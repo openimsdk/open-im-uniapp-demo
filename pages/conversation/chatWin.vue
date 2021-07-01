@@ -18,9 +18,12 @@
 			<scroll-view @click="clickScroll" :scroll-into-view="listItem" :style="{height:scrollHeight+'px'}"
 				class="chat-list" scroll-y>
 				<template v-for="msg in msgList">
-					<OtherMsg v-if="msg.sendID==recvID&&!msg.isDelete" :msg="msg" :key="msg.positionId"
+					<view v-if="msg.contentType===201" class="agree-msg">
+						<text>You've become friends, so start chatting</text>
+					</view>
+					<OtherMsg v-if="msg.sendID==recvID&&!msg.isDelete&&msg.contentType!==201" :msg="msg" :key="msg.positionId"
 						:id="msg.positionId" />
-					<MyMsg v-if="msg.sendID!==recvID&&!msg.isDelete" :msg="msg" :key="msg.positionId"
+					<MyMsg v-if="msg.sendID!==recvID&&!msg.isDelete&&msg.contentType!==201" :msg="msg" :key="msg.positionId"
 						:id="msg.positionId" />
 				</template>
 			</scroll-view>
@@ -94,7 +97,276 @@
 				voicePath: "",
 				recvID: "",
 				recorderManager: null,
-				msgList: [],
+				// msgList: [],
+				msgList: [{
+	"clientMsgID": "2021-07-01 10:09:28-412e389ce94fb7da-4430431962070682835",
+	"serverMsgID": "2021-07-01 10:09:28-412e389ce94fb7da-4430431962070682835",
+	"createTime": 0,
+	"sendTime": 1625105368,
+	"sessionType": 1,
+	"sendID": "412e389ce94fb7da",
+	"recvID": "7c413e7d75e208f8",
+	"msgFrom": 100,
+	"contentType": 201,
+	"platformID": 0,
+	"forceList": null,
+	"senderNickName": "",
+	"senderFaceUrl": "",
+	"groupID": "",
+	"content": "Oxtrop....sper agreed to add you as a friend.",
+	"seq": 2,
+	"isRead": true,
+	"status": 2,
+	"remark": "",
+	"pictureElem": {
+		"sourcePath": "",
+		"sourcePicture": {
+			"uuid": "",
+			"type": "",
+			"size": 0,
+			"width": 0,
+			"height": 0,
+			"url": ""
+		},
+		"bigPicture": {
+			"uuid": "",
+			"type": "",
+			"size": 0,
+			"width": 0,
+			"height": 0,
+			"url": ""
+		},
+		"snapshotPicture": {
+			"uuid": "",
+			"type": "",
+			"size": 0,
+			"width": 0,
+			"height": 0,
+			"url": ""
+		}
+	},
+	"soundElem": {
+		"uuid": "",
+		"soundPath": "",
+		"sourceUrl": "",
+		"dataSize": 0,
+		"duration": 0
+	},
+	"videoElem": {
+		"videoPath": "",
+		"videoUUID": "",
+		"videoUrl": "",
+		"videoType": "",
+		"videoSize": 0,
+		"duration": 0,
+		"snapshotPath": "",
+		"snapshotUUID": "",
+		"snapshotSize": 0,
+		"snapshotUrl": "",
+		"snapshotWidth": 0,
+		"snapshotHeight": 0
+	},
+	"fileElem": {
+		"filePath": "",
+		"uuid": "",
+		"sourceUrl": "",
+		"fileName": "",
+		"fileSize": 0
+	},
+	"mergeElem": {
+		"title": "",
+		"abstractList": null,
+		"multiMessage": null
+	},
+	"RevokeMessage": {
+		"serverMsgID": "",
+		"sendID": "",
+		"senderNickname": "",
+		"recvID": "",
+		"groupID": "",
+		"contentType": 0,
+		"sendTime": 0
+	}
+}, {
+	"clientMsgID": "2021-07-01 10:12:37-7c413e7d75e208f8-5043647724381310008",
+	"serverMsgID": "2021-07-01 10:12:37-7c413e7d75e208f8-5043647724381310008",
+	"createTime": 1625105558,
+	"sendTime": 1625105557,
+	"sessionType": 1,
+	"sendID": "7c413e7d75e208f8",
+	"recvID": "412e389ce94fb7da",
+	"msgFrom": 100,
+	"contentType": 101,
+	"platformID": 1,
+	"forceList": null,
+	"senderNickName": "",
+	"senderFaceUrl": "",
+	"groupID": "",
+	"content": "123",
+	"seq": 3,
+	"isRead": false,
+	"status": 2,
+	"remark": "",
+	"pictureElem": {
+		"sourcePath": "",
+		"sourcePicture": {
+			"uuid": "",
+			"type": "",
+			"size": 0,
+			"width": 0,
+			"height": 0,
+			"url": ""
+		},
+		"bigPicture": {
+			"uuid": "",
+			"type": "",
+			"size": 0,
+			"width": 0,
+			"height": 0,
+			"url": ""
+		},
+		"snapshotPicture": {
+			"uuid": "",
+			"type": "",
+			"size": 0,
+			"width": 0,
+			"height": 0,
+			"url": ""
+		}
+	},
+	"soundElem": {
+		"uuid": "",
+		"soundPath": "",
+		"sourceUrl": "",
+		"dataSize": 0,
+		"duration": 0
+	},
+	"videoElem": {
+		"videoPath": "",
+		"videoUUID": "",
+		"videoUrl": "",
+		"videoType": "",
+		"videoSize": 0,
+		"duration": 0,
+		"snapshotPath": "",
+		"snapshotUUID": "",
+		"snapshotSize": 0,
+		"snapshotUrl": "",
+		"snapshotWidth": 0,
+		"snapshotHeight": 0
+	},
+	"fileElem": {
+		"filePath": "",
+		"uuid": "",
+		"sourceUrl": "",
+		"fileName": "",
+		"fileSize": 0
+	},
+	"mergeElem": {
+		"title": "",
+		"abstractList": null,
+		"multiMessage": null
+	},
+	"RevokeMessage": {
+		"serverMsgID": "",
+		"sendID": "",
+		"senderNickname": "",
+		"recvID": "",
+		"groupID": "",
+		"contentType": 0,
+		"sendTime": 0
+	}
+}, {
+	"clientMsgID": "2021-07-01 10:26:49-412e389ce94fb7da-6723294376453109235",
+	"serverMsgID": "2021-07-01 10:26:49-412e389ce94fb7da-6723294376453109235",
+	"createTime": 0,
+	"sendTime": 1625106409,
+	"sessionType": 1,
+	"sendID": "412e389ce94fb7da",
+	"recvID": "7c413e7d75e208f8",
+	"msgFrom": 100,
+	"contentType": 101,
+	"platformID": 1,
+	"forceList": null,
+	"senderNickName": "",
+	"senderFaceUrl": "",
+	"groupID": "",
+	"content": "1223",
+	"seq": 4,
+	"isRead": true,
+	"status": 2,
+	"remark": "",
+	"pictureElem": {
+		"sourcePath": "",
+		"sourcePicture": {
+			"uuid": "",
+			"type": "",
+			"size": 0,
+			"width": 0,
+			"height": 0,
+			"url": ""
+		},
+		"bigPicture": {
+			"uuid": "",
+			"type": "",
+			"size": 0,
+			"width": 0,
+			"height": 0,
+			"url": ""
+		},
+		"snapshotPicture": {
+			"uuid": "",
+			"type": "",
+			"size": 0,
+			"width": 0,
+			"height": 0,
+			"url": ""
+		}
+	},
+	"soundElem": {
+		"uuid": "",
+		"soundPath": "",
+		"sourceUrl": "",
+		"dataSize": 0,
+		"duration": 0
+	},
+	"videoElem": {
+		"videoPath": "",
+		"videoUUID": "",
+		"videoUrl": "",
+		"videoType": "",
+		"videoSize": 0,
+		"duration": 0,
+		"snapshotPath": "",
+		"snapshotUUID": "",
+		"snapshotSize": 0,
+		"snapshotUrl": "",
+		"snapshotWidth": 0,
+		"snapshotHeight": 0
+	},
+	"fileElem": {
+		"filePath": "",
+		"uuid": "",
+		"sourceUrl": "",
+		"fileName": "",
+		"fileSize": 0
+	},
+	"mergeElem": {
+		"title": "",
+		"abstractList": null,
+		"multiMessage": null
+	},
+	"RevokeMessage": {
+		"serverMsgID": "",
+		"sendID": "",
+		"senderNickname": "",
+		"recvID": "",
+		"groupID": "",
+		"contentType": 0,
+		"sendTime": 0
+	}
+}]
+,
 				actionList: [{
 						text: "picture",
 					},
@@ -107,7 +379,8 @@
 				isRecord: false,
 				intervalTime: 0,
 				voicePath: "",
-				myList: []
+				myList: [],
+				conversationID:""
 
 			}
 		},
@@ -144,7 +417,8 @@
 				};
 				this.$openSdk.getHistoryMessageList(JSON.stringify(reqData), async data => {
 					const tmpArr = JSON.parse(data.msg)
-					const msgTypeList = [101, 102, 103, 104]
+					console.log(tmpArr);
+					const msgTypeList = [101, 102, 103, 104,201]
 					let newArr = tmpArr.filter(m => msgTypeList.includes(m.contentType))
 					newArr.forEach(m => m.positionId = "msg" + randomString(19))
 					this.msgList = newArr
@@ -391,6 +665,13 @@
 				uni.$on("reSend", (item) => {
 					console.log(item);
 				})
+			},
+			setDraft(){
+				if(this.conversationID){
+					this.$openSdk.setConversationDraft(this.conversationID,this.inputValue,(data)=>{
+						console.log(data);
+					})
+				}
 			}
 		},
 		watch: {
@@ -418,11 +699,14 @@
 		},
 		onLoad: function(options) {
 			_this = this
+			if(options.conversationID)this.conversationID = options.conversationID
+			if(options.draft)this.inputValue = options.draft
 			recorderManager.onStop(function(res) {
 				_this.voicePath = res.tempFilePath;
 			});
 		},
 		onUnload() {
+			this.setDraft()
 			this.marAsRead(this.recvID)
 		}
 	}
@@ -479,6 +763,13 @@
 	.chat-list {
 		// height: calc(100vh - 202rpx);
 		background-color: #FFFFFF;
+		.agree-msg{
+			    height: 80rpx;
+			    line-height: 80rpx;
+			    text-align: center;
+			    font-size: 24rpx;
+			    color: #e5e5e5;
+		}
 	}
 
 	.more-operation {

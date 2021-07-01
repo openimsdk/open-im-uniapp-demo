@@ -16,7 +16,7 @@
 		</view>
 		<view class="main">
 			<view class="chatList">
-				<uni-swipe-action @click="pageClick">
+				<uni-swipe-action>
 					<uni-swipe-action-item autoClose v-for="item in sessionList" :key="item.conversationID">
 						<template>
 							<view @click="clickConversation(item)" class="chatItem">
@@ -80,6 +80,9 @@
 		},
 		filters: {
 			msgFilter(value) {
+				if(value.draftText!==""){
+					return value.draftText.length > 24?"draft:"+value.draftText.slice(0, 24) + "...":"draft:"+value.draftText
+				}
 				switch (value.latestMsg.contentType) {
 					case 101:
 						if (value.latestMsg.content.length > 30) {
@@ -105,16 +108,26 @@
 				}
 			},
 			dateFilter(val) {
-				const fromDay = calculateDiffTime(val);
-				const sendTimeArr = formatDate(val);
-				switch (fromDay) {
-					case 0:
-						return sendTimeArr[1];
-					case 1:
+				// const fromDay = calculateDiffTime(val);
+				const sendTimeArr = formatDate(val*1000);
+				const currentTimeArr = formatDate(new Date().getTime());
+				if(sendTimeArr[0]<currentTimeArr[0]||sendTimeArr[1]<currentTimeArr[1]||sendTimeArr[2]<currentTimeArr[2]){
+					if(sendTimeArr[0]===currentTimeArr[0]&&sendTimeArr[1]===currentTimeArr[1]&&sendTimeArr[0]<currentTimeArr[0]){
 						return "last day";
-					default:
-						return sendTimeArr[0];
+					}else{
+						return sendTimeArr[3]
+					}
+				}else{
+					return sendTimeArr[4]
 				}
+				// switch (fromDay) {
+				// 	case 0:
+				// 		return sendTimeArr[1];
+				// 	case 1:
+				// 		return "last day";
+				// 	default:
+				// 		return sendTimeArr[0];
+				// }
 			},
 		},
 		methods: {
@@ -191,9 +204,9 @@
 				this.showOperationsMenu = false;
 			},
 			clickConversation(item) {
-				this.$store.commit("setConversationUser", item.userID);
+				this.$store.dispatch("setConversationUser", item.userID);
 				uni.navigateTo({
-					url: "/pages/conversation/chatWin",
+					url: "/pages/conversation/chatWin?conversationID="+item.conversationID+"&draft="+item.draftText,
 				});
 			},
 			deleteConversation(id) {

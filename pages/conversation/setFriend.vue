@@ -12,7 +12,7 @@
 			</view>
 			<view class="operationSet">
 				<view class="operationSetItem" @click="goEditNickname">
-					<text>Friends settings</text>
+					<text>Set notes</text>
 					<image src="../../static/arrow.png" mode="" class="arrow"></image>
 				</view>
 				<view class="operationSetItem">
@@ -84,11 +84,12 @@
 		methods: {
 			goEditNickname() {
 				uni.navigateTo({
-					url: "/pages/profile/editNickname?where=setFriend",
+					url: "/pages/profile/editNickname?where=setFriend&friendData="+JSON.stringify(this.friendData),
 				});
 			},
 			topContact(e) {
-				console.log(e);
+				this.$u.toast("developing")
+				// console.log(e);
 			},
 
 			//blackList
@@ -121,7 +122,7 @@
 				this.$refs.deleteRecordConfirm.open();
 			},
 			deleteRecordConfir() {
-				console.log(111);
+				this.$u.toast("developing")
 			},
 			deleteRecordCancel() {
 				this.$refs.deleteRecordConfirm.close();
@@ -161,6 +162,9 @@
 			}
 		},
 		beforeMount() {
+			this.initData()
+		},
+		onShow() {
 			this.initData()
 		}
 	};

@@ -74,12 +74,22 @@
 					this.applicationList = JSON.parse(data.msg)
 					const tmpArr = this.applicationList.filter(a => a.flag === 0)
 					this.application = tmpArr.length
+					if(this.application===0){
+						uni.removeTabBarBadge({
+							index: 1,
+						});
+					}else{
+						uni.setTabBarBadge({
+							index: 1,
+							text: this.application > 99 ? "99+" : this.application,
+						});
+					}
 				})
 			},
 			bindClick(item) {
 				this.pageClick()
 				const user = item.item.name
-				this.$store.commit("setConversationUser", user.uid);
+				this.$store.dispatch("setConversationUser", user.uid);
 				uni.navigateTo({
 					url: "/pages/conversation/chatWin",
 				});
@@ -216,7 +226,8 @@
 
 		.newFriend {
 			// padding-top: 90rpx;
-			height: 136rpx;
+			height: 90rpx;
+			line-height: 90rpx;
 			background-color: #fff;
 			margin-top: 6rpx;
 			display: flex;
@@ -228,8 +239,8 @@
 				align-items: center;
 
 				.newFriendIcon {
-					width: 88rpx;
-					height: 88rpx;
+					width: 66rpx;
+					height: 66rpx;
 					margin-left: 44rpx;
 				}
 

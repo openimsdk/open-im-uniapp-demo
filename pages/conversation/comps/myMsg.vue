@@ -174,6 +174,7 @@
 			margin-top: 11px;
 			margin-right: 12px;
 			display: flex;
+			align-items: center;
 
 			.msg-image {
 				display: inline-block;
@@ -235,8 +236,8 @@
 			.msg-text {
 				position: relative;
 				background-color: #dfebff;
-				padding: 7px;
-				border-radius: 4px;
+				padding: 14rpx;
+				border-radius: 8rpx;
 				word-break: break-all;
 
 				&::before {
