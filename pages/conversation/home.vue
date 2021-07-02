@@ -26,7 +26,7 @@
 								<view class="chatItemMain">
 									<view class="mainHead">
 										<text class="nickName">
-										{{item.userID.length > 20? item.userID.slice(0, 20) + "...": item.userID}}
+										{{item.showName}}
 										</text>
 										<text class="latestTime">
 										{{item.latestMsg.sendTime | dateFilter}}

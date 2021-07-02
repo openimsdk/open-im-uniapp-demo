@@ -182,7 +182,7 @@
 				align-items: center;
 				justify-content: center;
 				background-color: #fff;
-				margin-top: 440rpx;
+				margin-top: 240rpx;
 
 				.logOutIcon {
 					width: 40rpx;

@@ -18,21 +18,23 @@
 			<scroll-view @click="clickScroll" :scroll-into-view="listItem" :style="{height:scrollHeight+'px'}"
 				class="chat-list" scroll-y>
 				<template v-for="msg in msgList">
-					<view v-if="msg.contentType===201" class="agree-msg">
+					<view v-if="msg.content===tmpStr" class="agree-msg">
 						<text>You've become friends, so start chatting</text>
 					</view>
-					<OtherMsg v-if="msg.sendID==recvID&&!msg.isDelete&&msg.contentType!==201" :msg="msg" :key="msg.positionId"
+					<OtherMsg v-if="msg.sendID==recvID&&!msg.isDelete&&msg.content!==tmpStr" :msg="msg" :key="msg.positionId"
 						:id="msg.positionId" />
-					<MyMsg v-if="msg.sendID!==recvID&&!msg.isDelete&&msg.contentType!==201" :msg="msg" :key="msg.positionId"
+					<MyMsg v-if="msg.sendID!==recvID&&!msg.isDelete&&msg.content!==tmpStr" :msg="msg" :key="msg.positionId"
 						:id="msg.positionId" />
 				</template>
 			</scroll-view>
 			<view class="bottom-bar">
-				<u-icon @click="voice" size="51" name="../../static/voice.png" />
-				<u-input @focus="focusInput" v-model="inputValue" height="58" placeholder="" class="bottom-input">
-				</u-input>
-				<u-icon @click="moreAction" size="51" name="../../static/moreOperation.png" />
-				<u-button class="bottom-btn" size="mini" @click="sendTextMsg">Send</u-button>
+				<view class="bar-list">
+					<u-icon @click="voice" size="51" name="../../static/voice.png" />
+					<u-input @focus="focusInput" v-model="inputValue" height="58" placeholder="" class="bottom-input">
+					</u-input>
+					<u-icon @click="moreAction" size="51" name="../../static/moreOperation.png" />
+					<u-button class="bottom-btn" size="mini" @click="sendTextMsg">Send</u-button>
+				</view>
 			</view>
 			<view v-show="operationState" class="more-operation">
 				<view @click="clickShot" class="operation-item">
@@ -64,7 +66,7 @@
 			</view>
 		</u-mask>
 
-		<u-action-sheet @click="imageOrVideo" :list="actionList" v-model="actionShow"></u-action-sheet>
+		<u-action-sheet cancel-text="cancel" @click="imageOrVideo" :list="actionList" v-model="actionShow"></u-action-sheet>
 	</view>
 </template>
 
@@ -88,6 +90,7 @@
 		data() {
 			return {
 				nickname: "",
+				tmpStr:"You have successfully become friends, so start chatting",
 				scrollHeight: 0,
 				inputValue: "",
 				operationState: false,
@@ -205,14 +208,14 @@
 				}
 			},
 			getScreen() {
-				this.scrollHeight = uni.getSystemInfoSync().safeArea.height - 101
+				this.scrollHeight = uni.getSystemInfoSync().safeArea.height - 109
 			},
 			moreAction() {
 				if (this.operationState) {
 					this.getScreen()
 					this.operationState = false
 				} else {
-					this.scrollHeight = uni.getSystemInfoSync().safeArea.height - 201
+					this.scrollHeight = uni.getSystemInfoSync().safeArea.height - 209
 					this.operationState = true
 					this.listItem = null
 					if (this.msgList.length === 0) return false
@@ -238,6 +241,7 @@
 							const snapshot = '../..' + thumbPath.slice(thumbIndex)
 							let newVideoMessage = _this.$openSdk.createVideoMessage(url, suffix, res.duration,
 								snapshot);
+								console.log(newVideoMessage);
 							const clientMsgID = _this.$openSdk.sendMessage(
 								newVideoMessage,
 								_this.recvID,
@@ -245,6 +249,7 @@
 								false
 							);
 							let newVideoMessage2 = JSON.parse(newVideoMessage)
+							console.log(newVideoMessage2);
 							newVideoMessage2.clientMsgID = clientMsgID
 							_this.myList.push(newVideoMessage2)
 							_this.msgList.push(newVideoMessage2)
@@ -467,27 +472,29 @@
 	}
 
 	.bottom-bar {
-		display: flex;
-		align-items: center;
-		justify-content: space-around;
-		background-color: #e8f2ff;
-		height: 57px;
-
-		.bottom-input {
-			background-color: #FFFFFF;
-			border-radius: 12rpx;
-			// height: 56rpx;
-		}
-
-		.bottom-btn {
-			color: #FFFFFF;
-			background-color: #1b72ec;
-			font-size: 28rpx;
-			margin-right: 16rpx;
-		}
-
-		.u-icon {
-			margin: 0 16rpx;
+		max-height: 57px;
+		.bar-list{
+			display: flex;
+			align-items: center;
+			justify-content: space-around;
+			background-color: #e8f2ff;
+			padding: 16rpx 0;
+			.bottom-input {
+				background-color: #FFFFFF;
+				border-radius: 12rpx;
+				// height: 56rpx;
+			}
+			
+			.bottom-btn {
+				color: #FFFFFF;
+				background-color: #1b72ec;
+				font-size: 28rpx;
+				margin-right: 16rpx;
+			}
+			
+			.u-icon {
+				margin: 0 16rpx;
+			}
 		}
 	}
 
@@ -522,12 +529,6 @@
 
 
 	.mask-warp {
-		// width: 100%;
-		// height: 100vh;
-		// background-color: rgba(0, 0, 0, 0.2);
-		// position: absolute;
-		// z-index: 999;
-		// top: 0;
 		left: 0;
 		display: flex;
 		flex-direction: column;
@@ -576,8 +577,6 @@
 					margin: 0;
 				}
 			}
-
-			// width: 252px;
 		}
 
 		.press-btn {

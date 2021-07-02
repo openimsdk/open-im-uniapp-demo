@@ -65,9 +65,7 @@
 					method: "POST",
 					data: accountInfo,
 					success(res) {
-						console.log(res);
 						_this.$openSdk.login(res.data.data.uid, res.data.data.openImToken.token, (val) => {
-							console.log(val);
 							if (!val.err) {
 								setMnemonic(_this.account)
 								const reqData = [res.data.data.uid]

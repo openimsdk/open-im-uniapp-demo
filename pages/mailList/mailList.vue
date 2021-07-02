@@ -81,7 +81,7 @@
 					}else{
 						uni.setTabBarBadge({
 							index: 1,
-							text: this.application > 99 ? "99+" : this.application,
+							text: this.application > 99 ? "99+" : this.application+"",
 						});
 					}
 				})

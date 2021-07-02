@@ -2,9 +2,10 @@
 	<view id="addFriend">
 		<uni-nav-bar left-icon="back" title="Add friends" @clickLeft="goBack"></uni-nav-bar>
 		<view class="main">
-			<u-search action-text="search" class="my-search" disabled shape="square" @click="goInput" />
-			<view class="myUid"> <text>My Account: </text> <text
-					class="uidValue">{{ this.$store.state.userInfo[0].uid}}</text> </view>
+			<u-search action-text="search" placeholder="please enter the account number" class="my-search" disabled shape="square" @click="goInput" />
+			<view class="myUid">
+				<text>My Account: {{ this.$store.state.userInfo[0].uid}}</text>
+			</view>
 		</view>
 	</view>
 </template>
@@ -35,24 +36,10 @@
 		.main {
 			display: flex;
 			flex-direction: column;
-			align-items: center;
-
-			.searchInput {
-				width: 580rpx;
-				height: 82rpx;
-				background-color: #E8F2FF;
-				border-radius: 8rpx;
-				margin-top: 50rpx;
-				background-image: url(../../static/search2.png);
-				background-size: 36rpx 36rpx;
-				background-repeat: no-repeat;
-				background-position: 20rpx 50%;
-				padding-left: 76rpx;
-				padding-right: 20rpx;
-			}
+			// align-items: center;
 
 			.my-search {
-				padding: 50rpx 20rpx 0 76rpx;
+				padding: 50rpx 48rpx;
 
 				/deep/.u-action {
 					overflow: inherit;
@@ -63,14 +50,10 @@
 				font-size: 30rpx;
 				font-weight: 400;
 				color: #666666;
-				width: 82%;
+				justify-content: center;
 				display: flex;
-				margin-top: 32rpx;
-
-				.uidValue {
+				text{
 					word-wrap: break-word;
-					flex: 1;
-					width: 0;
 				}
 
 			}
