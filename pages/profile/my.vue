@@ -60,19 +60,19 @@
 					sourceType: ["album"],
 					success: async function(res) {
 						const tempFilePaths = res.tempFilePaths;
-						let upLoadImgUrl = await uploadFile(tempFilePaths[0]);
+						let upLoadImgUrl = await uploadFile(tempFilePaths[0],_this);
+						console.log(upLoadImgUrl);
 						let parameter = {};
 						parameter.icon = upLoadImgUrl
 						_this.$openSdk.setSelfInfo(parameter, (data) => {
 							if (data.err) {
 								_this.$u.toast('change fail：' + data.err)
 							} else {
-								const reqData = [_this.$store.state.userInfo[0].uid]
+								const reqData = [_this.vuex_user_info[0].uid]
 								_this.$openSdk.getUsersInfo(JSON.stringify(reqData), async data => {
 									let userInfoRes = JSON.parse(data.msg)
-									await _this.$store.dispatch("UserInfoValue",
-										userInfoRes);
-									_this.userInfo = _this.$store.state.userInfo[0];
+									_this.$u.vuex('vuex_user_info',userInfoRes)
+									_this.userInfo = _this.vuex_user_info[0];
 								})
 
 							}
@@ -108,7 +108,7 @@
 			},
 		},
 		onShow() {
-			this.userInfo = this.$store.state.userInfo[0];
+			this.userInfo = this.vuex_user_info[0];
 		},
 	};
 </script>

@@ -87,12 +87,14 @@
 					method: 'POST',
 					data: JSON.stringify(accountInfo),
 					success(res) {
+						console.log(res);
 						if (res.data.errCode == 0) {
 							uni.request({
 								url: "https://open-im.rentsoft.cn/eechat/user/login",
 								method: 'POST',
 								data: JSON.stringify(accountInfo),
 								success(res) {
+									console.log(res);
 									_this.$openSdk.login(res.data.data.uid, res.data.data.openImToken
 										.token, (val) => {
 											if (!val.err) {
@@ -100,10 +102,8 @@
 												const reqData = [res.data.data.uid]
 												_this.$openSdk.getUsersInfo(JSON.stringify(reqData), data => {
 													let userInfoRes = JSON.parse(data.msg)
-													_this.$store.dispatch("UserInfoValue",
-														userInfoRes);
-													_this.$store.dispatch("getToken", res.data
-														.data.token.accessToken);
+													_this.$u.vuex('vuex_user_info',userInfoRes)
+													_this.$u.vuex('vuex_token',res.data.data.token.accessToken)
 												})
 												_this.registerLoading = false
 												uni.switchTab({

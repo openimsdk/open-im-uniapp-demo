@@ -77,7 +77,7 @@
 
 <style lang="scss">
 	.bottom-action {
-		bottom: -45px;
+		bottom: -90rpx;
 		z-index: 9;
 		position: absolute;
 		display: flex;
@@ -119,7 +119,7 @@
 	// }
 	.top-action {
 		position: absolute;
-		top: -67px;
+		top:  -92rpx;
 		display: flex;
 		background-color: #666666;
 		border-radius: 8rpx;

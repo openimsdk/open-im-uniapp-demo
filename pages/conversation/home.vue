@@ -2,70 +2,20 @@
 	<view @click="pageClick" id="home">
 		<view class="head">
 			<text class="title">EEchat</text>
-			<view class="headRight">
-				<image src="../../static/more-operations.png" mode="" class="headIcon" @click.stop="controlDisplay"></image>
-				<view class="my-menuCon" v-show="showOperationsMenu">
-					<view class="operationsMenu">
-						<view class="operationsMenu-item" @click="goAddFriend">
-							<image src="../../static/addFriend.png" mode="" class="itemImg"></image>
-							<text>Add friends</text>
-						</view>
-					</view>
-				</view>
-			</view>
+			<HeaderModal :showOperationsMenu="showOperationsMenu" @controlDisplay="controlDisplay" />
 		</view>
 		<view class="main">
 			<view class="chatList">
-				<uni-swipe-action>
-					<uni-swipe-action-item autoClose v-for="item in sessionList" :key="item.conversationID">
-						<template>
-							<view @click="clickConversation(item)" class="chatItem">
-								<image
-									src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png"
-									mode="" class="portrait"></image>
-								<view class="chatItemMain">
-									<view class="mainHead">
-										<text class="nickName">
-										{{item.showName}}
-										</text>
-										<text class="latestTime">
-										{{item.latestMsg.sendTime | dateFilter}}
-										</text>
-									</view>
-									<view class="mainBottom">
-										<text class="latestContent">{{ item | msgFilter }}</text>
-										<view class="msgNumber" v-if="item.unreadCount > 0">
-											{{ item.unreadCount > 99 ? "99+" : item.unreadCount }}
-										</view>
-									</view>
-								</view>
-							</view>
-						</template>
-						<template v-slot:right>
-							<view class="action-item action-item-top"
-								@click="pinConversation(item.conversationID, item.isPinned)"><text>{{
-                  item.isPinned === 0 ? "Top" : "Cancel Top"
-                }}</text></view>
-							<view class="action-item action-item-del" @click="deleteConversation(item.conversationID)">
-								<text>Delete</text>
-							</view>
-							<view v-show="item.unreadCount > 0" class="action-item action-item-mark"
-								@click="markAsRead(item.userID)">
-								<text>Mark as read</text>
-							</view>
-						</template>
-					</uni-swipe-action-item>
-				</uni-swipe-action>
+				<u-empty v-if="sessionList.length===0" class="empty" text="There is no conversation" mode="message"/>
+				<ConversationIist v-else :sessionList="sessionList" />
 			</view>
 		</view>
 	</view>
 </template>
 
 <script>
-	import {
-		calculateDiffTime,
-		formatDate
-	} from "../../utils/tools.js";
+	import HeaderModal from '@/components/HeaderModal/HeaderModal.vue'
+	import ConversationIist from './comps/ConversationIist.vue'
 	export default {
 		data() {
 			return {
@@ -78,62 +28,14 @@
 				listener: null,
 			};
 		},
-		filters: {
-			msgFilter(value) {
-				if(value.draftText!==""){
-					return value.draftText.length > 24?"draft:"+value.draftText.slice(0, 24) + "...":"draft:"+value.draftText
-				}
-				switch (value.latestMsg.contentType) {
-					case 101:
-						if (value.latestMsg.content.length > 30) {
-							return value.latestMsg.content.slice(0, 30) + "...";
-						} else {
-							return value.latestMsg.content;
-						}
-						break;
-					case 102:
-						return "[picture]";
-						break;
-					case 103:
-						return "[voice]";
-						break;
-					case 104:
-						return "[video]";
-						break;
-					case 201:
-						return value.latestMsg.content;
-						break;
-					default:
-						return "";
-				}
-			},
-			dateFilter(val) {
-				// const fromDay = calculateDiffTime(val);
-				const sendTimeArr = formatDate(val*1000);
-				const currentTimeArr = formatDate(new Date().getTime());
-				if(sendTimeArr[0]<currentTimeArr[0]||sendTimeArr[1]<currentTimeArr[1]||sendTimeArr[2]<currentTimeArr[2]){
-					if(sendTimeArr[0]===currentTimeArr[0]&&sendTimeArr[1]===currentTimeArr[1]&&sendTimeArr[0]<currentTimeArr[0]){
-						return "last day";
-					}else{
-						return sendTimeArr[3]
-					}
-				}else{
-					return sendTimeArr[4]
-				}
-				// switch (fromDay) {
-				// 	case 0:
-				// 		return sendTimeArr[1];
-				// 	case 1:
-				// 		return "last day";
-				// 	default:
-				// 		return sendTimeArr[0];
-				// }
-			},
+		components: {
+			HeaderModal,
+			ConversationIist
 		},
 		methods: {
 			pageClick() {
 				console.log("pageClick");
-				if(this.showOperationsMenu) this.showOperationsMenu = false
+				if (this.showOperationsMenu) this.showOperationsMenu = false
 			},
 			setConversationListener() {
 				let _this = this;
@@ -146,7 +48,11 @@
 					let res = JSON.parse(params.msg);
 					console.log(res);
 					if (res) {
-						res.forEach((r) => (r.latestMsg = JSON.parse(r.latestMsg)));
+						res.forEach((r) => {
+							if (r.latestMsg !== "") {
+								r.latestMsg = JSON.parse(r.latestMsg)
+							}
+						});
 						_this.sessionList = res;
 					}
 				});
@@ -171,11 +77,14 @@
 					let tmpList = JSON.parse(data.msg);
 					console.log(tmpList);
 					for (let i = 0; i < tmpList.length; i++) {
-						tmpList[i].latestMsg = JSON.parse(tmpList[i].latestMsg);
-						tmpList[i].isShow = false;
+						if (tmpList[i].latestMsg !== '') {
+							tmpList[i].latestMsg = JSON.parse(tmpList[i].latestMsg);
+							tmpList[i].isShow = false;
+						}
 					}
 					this.sessionList = tmpList;
-					console.log(this.sessionList);
+					uni.stopPullDownRefresh()
+					// console.log(this.sessionList);
 				});
 			},
 			getTotalUnreadMsgCount() {
@@ -197,44 +106,65 @@
 			controlDisplay() {
 				this.showOperationsMenu = !this.showOperationsMenu;
 			},
-			goAddFriend() {
-				uni.navigateTo({
-					url: "/pages/mailList/addFriend",
-				});
-				this.showOperationsMenu = false;
+			
+			getGroupList(){
+				this.$openSdk.getJoinedGroupList(data=>{
+					const originalList = JSON.parse(data.msg)
+					this.$u.vuex('vuex_group_list',originalList)
+				})
 			},
-			clickConversation(item) {
-				this.$store.dispatch("setConversationUser", item.userID);
-				uni.navigateTo({
-					url: "/pages/conversation/chatWin?conversationID="+item.conversationID+"&draft="+item.draftText,
+			groupListner(){
+				this.$globalEvent.addEventListener("onGroupInfoChanged", (params) => {
+					console.log('onGroupInfoChanged-------------------');
+					const tmpData = JSON.parse(params.msg)
+					console.log(tmpData);
+					this.getGroupList()
+					// const tmpInfo = JSON.parse(tmpData.groupInfo)
+					// for(let i=0;i<this.originalList.length;i++){
+					// 	console.log(this.originalList[i].groupID);
+					// 	console.log(tmpData.groupId);
+					// 	if(this.originalList[i].groupID===tmpData.groupId){
+					// 		this.originalList[i] = {...this.originalList[i],...tmpInfo}
+					// 		this.groupList[0].data = this.originalList
+					// 	}
+					// }
 				});
-			},
-			deleteConversation(id) {
-				this.$openSdk.deleteConversation(id, (data) => {
-					console.log(data);
+				this.$globalEvent.addEventListener("onApplicationProcessed", (params) => {
+					console.log('onApplicationProcessed----------');
+					console.log(params);
+					this.getGroupList()
 				});
-				this.chooseConversationID = 0;
-			},
-			pinConversation(id, state) {
-				const newState = state === 0 ? true : false;
-				this.$openSdk.pinConversation(id, newState, (data) => {
-					console.log(data);
+				this.$globalEvent.addEventListener("onMemberEnter", (params) => {
+					console.log('onMemberEnter----------');
+					console.log(params);
+					this.getGroupList()
 				});
-			},
-			markAsRead(id) {
-				console.log(id);
-				this.$openSdk.markSingleMessageHasRead(id, (data) => {
-					console.log(data);
+				this.$globalEvent.addEventListener("onGroupCreated", (params) => {
+					console.log('onGroupCreated----------');
+					console.log(params);
+					this.getGroupList()
 				});
-			},
+				this.$globalEvent.addEventListener("onMemberKicked", (params) => {
+					console.log('onMemberKicked----------');
+					console.log(params);
+					// this.getGroupList()
+				});
+				uni.$on('quitGroup',()=>{
+					this.getGroupList()
+				})
+			}
 		},
 		onHide() {
-			if(this.showOperationsMenu) this.showOperationsMenu = false
+			if (this.showOperationsMenu) this.showOperationsMenu = false
+		},
+		onPullDownRefresh(){
+			this.getAllConversationListList()
 		},
 		beforeMount() {
 			this.setConversationListener();
 			this.getAllConversationListList();
 			this.getTotalUnreadMsgCount();
+			this.getGroupList()
 		},
 	};
 </script>
@@ -299,10 +229,14 @@
 							font-weight: 600;
 							color: #ffffff;
 
+							&:nth-child(2) {
+								padding: 24rpx 0;
+							}
+
 							.itemImg {
-								width: 44rpx;
-								height: 44rpx;
-								margin-right: 28rpx;
+								width: 36rpx;
+								height: 36rpx;
+								margin-right: 24rpx;
 							}
 						}
 					}
@@ -316,148 +250,8 @@
 
 			.chatList {
 				margin-top: 6rpx;
-
-				.action-item {
-					width: 148rpx;
-					box-shadow: 0px 4rpx 8rpx 0rpx rgba(0, 0, 0, 0.5);
-					font-size: 28rpx;
-					color: #ffffff;
-					display: flex;
-					align-items: center;
-					justify-content: center;
-					text-align: center;
-
-					&-del {
-						background: linear-gradient(135deg, #ffd576 0%, #ffab41 100%);
-					}
-
-					&-top {
-						background: linear-gradient(135deg, #87c0ff 0%, #0060e7 100%);
-					}
-
-					&-mark {
-						background: linear-gradient(135deg, #c9c9c9 0%, #7a7a7a 100%);
-					}
-				}
-
-				.chatItem {
-					background-color: #fff;
-					height: 146rpx;
-					display: flex;
-					align-items: center;
-
-					.portrait {
-						flex-shrink: 0;
-						width: 92rpx;
-						height: 92rpx;
-						border-radius: 92rpx;
-						margin-left: 44rpx;
-					}
-
-					.chatItemMain {
-						height: 144rpx;
-						display: flex;
-						flex-direction: column;
-						width: 100%;
-						margin-left: 28rpx;
-						border-bottom: 1px solid #e5ebff;
-						margin-right: 44rpx;
-
-						.mainHead {
-							display: flex;
-							justify-content: space-between;
-							margin-top: 38rpx;
-
-							.nickName {
-								font-size: 28rpx;
-								font-weight: 600;
-								color: #333333;
-							}
-
-							.latestTime {
-								font-size: 24rpx;
-								font-weight: 600;
-								color: #999999;
-							}
-						}
-
-						.mainBottom {
-							display: flex;
-							justify-content: space-between;
-							align-items: center;
-
-							.latestContent {
-								font-size: 24rpx;
-								font-weight: 500;
-								color: #666666;
-								margin-top: 10rpx;
-							}
-
-							.msgNumber {
-								width: 32rpx;
-								height: 32rpx;
-								border-radius: 32rpx;
-								background-color: #f44038;
-								text-align: center;
-								line-height: 32rpx;
-								font-size: 24rpx;
-								font-weight: 600;
-								color: #ffffff;
-							}
-						}
-					}
-
-					.operationBox {
-						width: 100%;
-						height: 136rpx;
-						position: absolute;
-						z-index: 99;
-						right: 0;
-						display: flex;
-						font-size: 28rpx;
-						font-weight: 500;
-						color: #ffffff;
-						text-align: center;
-						line-height: 136rpx;
-
-						.transparent {
-							width: 100%;
-							height: 100%;
-						}
-
-						&-left {
-							flex-shrink: 0;
-							width: 160rpx;
-							height: 100%;
-							background-image: linear-gradient(to right bottom,
-									#7cbaff,
-									#1b72ec);
-							box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.5);
-						}
-
-						&-right {
-							flex-shrink: 0;
-							width: 160rpx;
-							height: 100%;
-							background-image: linear-gradient(to right bottom,
-									#ffd576,
-									#ffab41);
-							box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.5);
-						}
-
-						&-add {
-							display: flex;
-							align-items: center;
-							flex-shrink: 0;
-							width: 160rpx;
-							height: 100%;
-							background-image: linear-gradient(to right bottom,
-									#c9c9c9,
-									#7a7a7a);
-							box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.5);
-							line-height: 20px;
-						}
-					}
+				.empty{
+					padding-top: 120rpx;
 				}
 			}
 		}

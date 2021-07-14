@@ -1,7 +1,7 @@
 <template>
 	<view id="addFriendInput">
 		<view class="head">
-			<u-search bg-color="#fff" action-text="cancel" @custom="goBack" class="my-search" v-model="searchValue" focus clearabled placeholder="Please enter the account number" shape="square" @change="noUser = false"/>
+			<u-search bg-color="#fff" action-text="cancel" @custom="goBack" class="my-search" v-model="searchValue" focus clearabled :placeholder="`Please enter the ${target} number`" shape="square" @change="noUser = false"/>
 		</view>
 		<view class="searchResult" @click="searchFriend" v-show="searchValue.length>0 && !noUser">
 			<image src="../../static/searchFriend.png" mode="" class="searchFriend"></image>
@@ -9,7 +9,7 @@
 			<text class="searchFriendValue">{{searchValue}}</text>
 		</view>
 		<view class="searchResult2" v-show="noUser">
-			<text class="noUserTitle">The user does not exist</text>
+			<text class="noUserTitle">{{`The ${target} does not exist`}}</text>
 		</view>
 	</view>
 </template>
@@ -21,7 +21,8 @@
 			return {
 				searchValue: "",
 				noUser: false,
-				userInfo: ""
+				userInfo: "",
+				target:"user"
 			}
 		},
 		methods: {
@@ -33,20 +34,36 @@
 			},
 			searchFriend() {
 				const reqData = [this.searchValue]
-				this.$openSdk.getUsersInfo(JSON.stringify(reqData), data => {
-					if (data.msg === '[]') {
-						this.noUser = true
-					} else {
-						this.noUser= false
-						uni.navigateTo({
-							url: '/pages/mailList/addFriendDetail?userInfo=' + data.msg
-						});
-					}
-				})
-
+				if(this.target === "user"){
+					this.$openSdk.getUsersInfo(JSON.stringify(reqData), data => {
+						if (data.msg === '[]') {
+							this.noUser = true
+						} else {
+							this.noUser= false
+							uni.navigateTo({
+								url: '/pages/mailList/addFriendDetail?userInfo=' + data.msg
+							});
+						}
+					})
+				}else{
+					this.$openSdk.getGroupsInfo(JSON.stringify(reqData), data => {
+						if (data.msg === '[]') {
+							this.noUser = true
+						} else {
+							this.noUser= false
+							uni.navigateTo({
+								url: '/pages/conversation/Group/groupInfo?type=searchShow&groupInfo=' + data.msg
+							});
+						}
+					})
+				}
 			},
 		},
-
+		onLoad:function(options){
+			if(options.from === "group"){
+				this.target = "group"
+			}
+		}
 	}
 </script>
 

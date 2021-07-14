@@ -65,15 +65,15 @@
 					method: "POST",
 					data: accountInfo,
 					success(res) {
+						console.log(res);
 						_this.$openSdk.login(res.data.data.uid, res.data.data.openImToken.token, (val) => {
 							if (!val.err) {
 								setMnemonic(_this.account)
 								const reqData = [res.data.data.uid]
 								_this.$openSdk.getUsersInfo(JSON.stringify(reqData), data => {
 									let userInfoRes = JSON.parse(data.msg)
-									_this.$store.dispatch("UserInfoValue", userInfoRes);
-									_this.$store.dispatch("getToken", res.data.data.token
-										.accessToken);
+									_this.$u.vuex('vuex_user_info',userInfoRes)
+									_this.$u.vuex('vuex_token',res.data.data.token.accessToken)
 								})
 								_this.loginLoading = false
 								uni.switchTab({
@@ -86,6 +86,7 @@
 						});
 					},
 					fail(err) {
+						console.log(err);
 						_this.loginLoading = false
 						_this.$u.toast('login fail：' + err)
 					}

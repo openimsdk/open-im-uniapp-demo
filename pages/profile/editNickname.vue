@@ -40,10 +40,10 @@
 						if (data.err) {
 							_this.$u.toast('change fail：' + data.err)
 						} else {
-							const reqData = [_this.$store.state.userInfo[0].uid]
+							const reqData = [_this.vuex_user_info[0].uid]
 							_this.$openSdk.getUsersInfo(JSON.stringify(reqData), async data => {
 								let userInfoRes = JSON.parse(data.msg)
-								await _this.$store.dispatch("UserInfoValue", userInfoRes);
+								_this.$u.vuex('vuex_user_info',userInfoRes)
 								uni.switchTab({
 									url: '/pages/profile/my'
 								});
@@ -69,7 +69,7 @@
 			this.where = options.where
 			if (options.where == "my") {
 				this.title = "Change nickname"
-				this.nickname = this.$store.state.userInfo[0].name
+				this.nickname = this.vuex_user_info[0].name
 			} else if (options.where == "setFriend") {
 				this.title = "Set notes"
 				this.friendInfo = JSON.parse(options.friendData)
@@ -85,14 +85,13 @@
 		.main {
 			display: flex;
 			align-items: center;
-			padding: 0 44rpx;
-			margin-top: 88rpx;
+			margin: 88rpx 44rpx;
+			border-bottom: 1px solid #999999;
 
 			.input {
 				font-size: 40rpx;
 				font-weight: 500;
 				color: #333333;
-				border-bottom: 1px solid #999999;
 				padding-left: 20rpx;
 				padding-bottom: 12rpx;
 				width: 510rpx;

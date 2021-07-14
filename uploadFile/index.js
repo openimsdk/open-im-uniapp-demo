@@ -1,19 +1,15 @@
-// var CosAuth = require('./cos-auth.js');
 import CosAuth from './cos-auth.js'
-// import {
-// 	tencent_cloud_storage_credential
-// } from '../api/index.js'
-import store from '../store/index.js'
 
 
 // 请求用到的参数
 // var prefix = 'https://cos.' + config.Region + '.myqcloud.com/' + config.Bucket + '/'; // 这个后缀式，签名也要指定 Pathname: '/' + config.Bucket + '/'
 var prefix = 'https://echat-1302656840.cos.ap-chengdu.myqcloud.com/';
+var that;
 
 const tencentCloudStorageCredential = () => {
 	let parameter = {
-		operationID: store.state.userInfo[0].uid + Date.now().toString(),
-		token: store.state.token
+		operationID: that.vuex_user_info[0].uid + Date.now().toString(),
+		token: that.vuex_token
 	}
 	return new Promise((resolve, reject) => {
 		uni.request({
@@ -21,7 +17,6 @@ const tencentCloudStorageCredential = () => {
 			url: "http://47.112.160.66:10000/third/tencent_cloud_storage_credential",
 			data: parameter,
 			success(res) {
-				console.log(res);
 				resolve(res)
 			},
 			fail(err) {
@@ -51,15 +46,11 @@ var getCredentials = async function () {
 
 
 	const result = await tencentCloudStorageCredential()
-	console.log(result, "result");
+
 	var data = result.data.data;
-	console.log(data, "data");
 	var credentials = data.Credentials;
 	if (credentials) {
-		console.log("成功")
 		stsCache = data
-	} else {
-		console.log("失败")
 	}
 	return stsCache && stsCache.Credentials
 
@@ -85,12 +76,11 @@ var getAuthorization = function (options, callback) {
 };
 
 // 上传文件
-var uploadFile = function (filePath) {
+var uploadFile = function (filePath,_this) {
+	that = _this
 	return new Promise(async (resolve, reject) => {
 		var Key = filePath.substr(filePath.lastIndexOf('/') + 1); // 这里指定上传的文件名
-		console.log(Key, "KeyKeyKeyKey");
 		const credentials = await getCredentials()
-		console.log(credentials, "credentials");
 		const AuthData = {
 			XCosSecurityToken: credentials.Token,
 			Authorization: CosAuth({
@@ -100,7 +90,6 @@ var uploadFile = function (filePath) {
 				Pathname: '/',
 			})
 		}
-		console.log(AuthData, "AuthData");
 		var imgUrl = uni.uploadFile({
 			url: prefix,
 			filePath: filePath,
@@ -115,7 +104,7 @@ var uploadFile = function (filePath) {
 			success: (uploadFileRes) => {
 				var url = prefix + camSafeUrlEncode(Key).replace(/%2F/g, '/');
 				resolve(url)
-				store.commit("getUpLoadImgUrl", url)
+				// store.commit("getUpLoadImgUrl", url)
 			},
 			fail(err) {
 				reject(err)

@@ -55,6 +55,7 @@ export default {
   onLaunch: function () {
     this.$openSdk.setConversationListener();
     this.$openSdk.addAdvancedMsgListener();
+	this.$openSdk.setGroupListener()
     this.fileInfo();
     this.initFriendListener();
     this.setFriendListener();
@@ -69,7 +70,8 @@ page {
   height: 100% !important;
 }
 
-.uni-navbar {
-  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.15);
+.uni-navbar,
+.u-navbar{
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
 }
 </style>

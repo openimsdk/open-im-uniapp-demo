@@ -1,100 +1,142 @@
 {
 	"easycom": {
-			"^u-(.*)": "uview-ui/components/u-$1/u-$1.vue"
-		},
-    "pages": [
-		{
-            "path": "pages/login/login"
+		"^u-(.*)": "uview-ui/components/u-$1/u-$1.vue"
+	},
+	"pages": [{
+			"path": "pages/login/login"
 
-        },
-        {
-            "path": "pages/login/register"
-
-        },
-        {
-            "path": "pages/login/confirm"
-
-        },
-        {
-            "path": "pages/conversation/home"
-
-        }, 
-        {
-            "path": "pages/profile/my"
-
-        }, 
-        {
-            "path": "pages/profile/editNickname"
-
-        }, 
-        {
-            "path": "pages/profile/blockList"
-
-        }, 
-		{
-		    "path": "pages/conversation/chatWin"
-		
 		},
 		{
-            "path" : "pages/mailList/mailList"
-            
-        },
+			"path": "pages/login/register"
+
+		},
 		{
-            "path" : "pages/mailList/addFriend"
-            
-        },
+			"path": "pages/login/confirm"
+
+		},
 		{
-            "path" : "pages/mailList/addFriendDetail"
-            
-        },
+			"path": "pages/conversation/home",
+			"style": {
+				"enablePullDownRefresh": true
+			}
+
+		},
 		{
-            "path" : "pages/mailList/newFriends"
-            
-        },
+			"path": "pages/profile/my"
+
+		},
 		{
-            "path" : "pages/conversation/setFriend"
-            
-        },
+			"path": "pages/profile/editNickname"
+
+		},
 		{
-            "path" : "pages/mailList/addFriendInput"
-            
-        },
+			"path": "pages/profile/blockList"
+
+		},
 		{
-            "path" : "pages/mailList/searchFriend"
-            
-        },
+			"path": "pages/conversation/chatWin"
+
+		},
 		{
-		    "path": "pages/conversation/playVideo"
+			"path": "pages/mailList/mailList",
+			"style": {
+				"enablePullDownRefresh": true
+			}
+
+		},
+		{
+			"path": "pages/mailList/addFriend"
+
+		},
+		{
+			"path": "pages/mailList/addFriendDetail"
+
+		},
+		{
+			"path": "pages/mailList/newFriends"
+
+		},
+		{
+			"path": "pages/conversation/setFriend"
+
+		},
+		{
+			"path": "pages/mailList/addFriendInput"
+
+		},
+		{
+			"path": "pages/mailList/searchFriend"
+
+		},
+		{
+			"path": "pages/conversation/playVideo"
+		},
+		{
+			"path": "pages/conversation/Group/groupInfo"
+		},
+		{
+			"path": "pages/conversation/Group/launchGroup"
+		},
+		{
+			"path": "pages/conversation/Group/setsGroup"
+		},
+		{
+			"path": "pages/conversation/Group/modifyGroup"
+		},
+		{
+			"path": "pages/conversation/Group/modifyGroupName"
+		},
+		{
+			"path": "pages/conversation/Group/deleteGroupMember"
+		},
+		{
+			"path": "pages/conversation/Group/groupMember"
+		},
+		{
+			"path": "pages/conversation/Group/groupAnnouncement"
+		},
+		{
+			"path": "pages/conversation/Group/nickInGroup"
+		},
+		{
+			"path": "pages/mailList/groupNotification"
+		},
+		{
+			"path": "pages/mailList/groupList"
+		},
+		{
+			"path": "pages/conversation/Group/transferOwener"
 		}
-    ],
-    "globalStyle": {
-        "app-plus": {
-            "titleNView": false
-        }
-    },
-    "tabBar": {
-        "color":"#1B72EC",
-        "selectedColor": "#1B72EC",
-        "list": [{
-                "text": "EEchat",
-                "pagePath": "pages/conversation/home",
-                "iconPath": "static/tab-home.png",
-                "selectedIconPath": "static/tab-home-selected.png"
-            },
-			{
-			    "text": "mail list",
-			    "pagePath": "pages/mailList/mailList",
-			    "iconPath": "static/tab-mailList.png",
-			    "selectedIconPath": "static/tab-mailList-selected.png"
+
+	],
+	"globalStyle": {
+		"app-plus": {
+			"titleNView": false
+		}
+	},
+	"tabBar": {
+		"color": "#1B72EC",
+		"selectedColor": "#1B72EC",
+		"list": [{
+				"text": "EEchat",
+				"pagePath": "pages/conversation/home",
+				"iconPath": "static/tab-home.png",
+				"selectedIconPath": "static/tab-home-selected.png"
 			},
-            {
-                "text": "my",
-                "pagePath": "pages/profile/my",
-                "iconPath": "static/tab-my.png",
-                "selectedIconPath": "static/tab-my-selected.png"
-            }
-            
-        ]
-    }
+			{
+				"text": "mail list",
+				"pagePath": "pages/mailList/mailList",
+				"iconPath": "static/tab-mailList.png",
+				"selectedIconPath": "static/tab-mailList-selected.png"
+			},
+			{
+				"text": "my",
+				"pagePath": "pages/profile/my",
+				"iconPath": "static/tab-my.png",
+				"selectedIconPath": "static/tab-my-selected.png"
+			}
+
+		]
+	}
 
 }

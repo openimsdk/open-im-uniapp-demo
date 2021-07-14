@@ -55,16 +55,12 @@
 		}
 
 		.friendList {
-
 			margin-top: 6rpx;
-
 			.friendListItem {
 				background-color: #fff;
 				height: 146rpx;
 				display: flex;
 				align-items: center;
-
-
 				.portrait {
 					flex-shrink: 0;
 					width: 92rpx;
@@ -72,7 +68,6 @@
 					border-radius: 92rpx;
 					margin-left: 44rpx;
 				}
-
 				.ItemMain {
 					height: 144rpx;
 					display: flex;
@@ -81,15 +76,7 @@
 					margin-left: 28rpx;
 					border-bottom: 1px solid #E5EBFF;
 				}
-
-
 			}
-
-
-
-
-
-
 		}
 	}
 </style>

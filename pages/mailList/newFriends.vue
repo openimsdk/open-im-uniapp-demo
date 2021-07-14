@@ -2,7 +2,24 @@
 	<view id="newFriends">
 		<uni-nav-bar left-icon="back" title="new friends" @clickLeft="goBack"></uni-nav-bar>
 
-		<view class="requestList">
+		<scroll-view scroll-y class="scroll-box">
+			<view v-for="item in requestList" :key="item.uid" class="notice-item">
+				<u-avatar :src="item.icon||'../../static/user.png'"/>
+				<view class="info-area">
+					<text class="nick">{{item.name}}</text>
+					<!-- <text class="info u-line-3">Apply to join Computer group Invitation from group member LiliApply to join Computer group Invitation from group member LiliApply to join Computer group Invitation from group member Lili</text> -->
+				</view>
+				<view v-if="item.flag===0" class="btns-area">
+					<u-button :hair-line="false" @click="addConfirm(item.uid)" type="primary" size="mini">agree</u-button>
+					<u-button :hair-line="false" @click="refuseAdd(item.uid)" type="info" size="mini">refuse</u-button>
+				</view>
+				<view v-else class="status-area">
+					<text>{{item.flag===1?"agreed":"refused"}}</text>
+				</view>
+			</view>
+		</scroll-view>
+<!-- 
+		<scroll-view scroll-y class="requestList">
 			<view class="listItem" v-for="item in requestList">
 				<image src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png"
 					mode="" class="portrait"></image>
@@ -21,7 +38,7 @@
 					</view>
 				</view>
 			</view>
-		</view>
+		</scroll-view> -->
 
 	</view>
 </template>
@@ -55,14 +72,14 @@
 				this.$globalEvent.addEventListener(
 					"onFriendApplicationListAccept",
 					(params) => {
-						this.$u.toast("add success")
+						// this.$u.toast("add success")
 						this.getList()
 					}
 				);
 				this.$globalEvent.addEventListener(
 					"onFriendApplicationListReject",
 					(params) => {
-						this.$u.toast("refused")
+						// this.$u.toast("refused")
 						this.getList()
 						// console.log(params);
 					}
@@ -71,9 +88,9 @@
 		},
 
 		onLoad: function(options) {
-			if (options.list) {
-				this.requestList = JSON.parse(options.list)
-			}
+			// if (options.list) {
+			// 	this.requestList = JSON.parse(options.list)
+			// }
 		},
 		beforeMount() {
 			this.frrendListener()
@@ -86,66 +103,139 @@
 </script>
 
 <style lang="scss" scoped>
-	#newFriends {
-
-		.requestList {
-			height: 100%;
-			background-color: #fff;
-
-			.listItem {
-				height: 146rpx;
+	.scroll-box{
+		height: calc(100vh - 44px);
+		.notice-item{
+			display: flex;
+			position: relative;
+			padding: 24rpx 36rpx;
+			.info-area{
+				flex: 3;
+				margin-left: 34rpx;
 				display: flex;
-				align-items: center;
-
-
-				.portrait {
-					flex-shrink: 0;
-					width: 90rpx;
-					height: 90rpx;
-					border-radius: 90rpx;
-					margin-left: 44rpx;
+				justify-content: center;
+				flex-direction: column;
+				margin-right: 24rpx;
+				.nick{
+					font-weight: 500;
+					font-size: 32rpx;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
 				}
-
-
-				.listItemMain {
-					height: 144rpx;
-					display: flex;
-					align-items: center;
-					justify-content: space-between;
-					width: 100%;
-					margin-left: 28rpx;
-					border-bottom: 1px solid #E5EBFF;
-
-						.btn-list{
-							display: flex;
-							// justify-content: space-between;
-							.increase {
-								padding: 0;
-								margin: 0;
-								width: 92rpx;
-								height: 52rpx;
-								font-size: 28rpx;
-								font-weight: 500;
-								line-height: 52rpx;
-								margin-left: 24rpx;
-							}
-						}
-					
-
-					.alreadyIncrease {
-						font-size: 28rpx;
-						font-weight: 500;
-						color: #666666;
-						margin-right: 42rpx;
-					}
-
-
+				.info{
+					font-size: 24rpx;
+					 overflow: hidden;
+					 line-clamp: 3;
+					 word-break: break-word;
 				}
-
-
-
-
+			}
+			.btns-area{
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				/deep/.u-btn{
+					height: 40rpx;
+					width: 94rpx;
+				}
+				/deep/.u-btn--info{
+					background-color: #D8D8D8;
+					margin-top: 18rpx;
+				}
+			}
+			.status-area{
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				text{
+					font-size: 32rpx;
+					color: #999;
+				}
+			}
+			&::after{
+				content: '';
+				position: absolute;
+				bottom: 0;
+				width: 100%;
+				margin-left: 122rpx;
+				height: 1px;
+				background-color: #E5EBFF;
 			}
 		}
 	}
+	
+	
+	// #newFriends {
+
+	// 	.requestList {
+	// 		// height: 100%;
+	// 		height: calc(100vh - 44px);
+	// 		background-color: #fff;
+
+	// 		.listItem {
+	// 			height: 146rpx;
+	// 			display: flex;
+	// 			align-items: center;
+
+
+	// 			.portrait {
+	// 				flex-shrink: 0;
+	// 				width: 90rpx;
+	// 				height: 90rpx;
+	// 				border-radius: 90rpx;
+	// 				margin-left: 44rpx;
+	// 				overflow: hidden;
+	// 			}
+
+
+	// 			.listItemMain {
+	// 				height: 144rpx;
+	// 				display: flex;
+	// 				align-items: center;
+	// 				// justify-content: space-between;
+	// 				width: 100%;
+	// 				margin-left: 28rpx;
+	// 				border-bottom: 1px solid #E5EBFF;
+					
+						
+	// 				.req-user{
+	// 					flex: 1;
+	// 				}
+
+	// 					.btn-list{
+	// 						display: flex;
+	// 						flex: 1;
+	// 						margin-left: 24rpx;
+	// 						// justify-content: space-around;
+	// 						.increase {
+	// 							padding: 0;
+	// 							margin: 0;
+	// 							width: 92rpx;
+	// 							height: 52rpx;
+	// 							font-size: 28rpx;
+	// 							font-weight: 500;
+	// 							line-height: 52rpx;
+	// 							margin-left: 24rpx;
+	// 						}
+	// 					}
+					
+
+	// 				.alreadyIncrease {
+	// 					font-size: 28rpx;
+	// 					font-weight: 500;
+	// 					color: #666666;
+	// 					margin-right: 42rpx;
+	// 				}
+
+
+	// 			}
+
+
+
+
+	// 		}
+	// 	}
+	// }
 </style>

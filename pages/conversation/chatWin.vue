@@ -4,8 +4,8 @@
 			<u-navbar>
 				<view class="slot-wrap">
 					<view class="nick-title">
-						<text>{{recvID.slice(0,10)+"..."}}</text>
-						<view class="user-status">
+						<text>{{vuex_conversation.showName||vuex_conversation.groupName||vuex_conversation.userID}}</text>
+						<view v-if="groupID==''" class="user-status">
 							<text>Mobile Online</text>
 							<u-icon name="arrow-right" size="14" />
 						</view>
@@ -15,23 +15,22 @@
 					<u-icon @click="rightSet" name="more-dot-fill" size="48" />
 				</view>
 			</u-navbar>
-			<scroll-view @click="clickScroll" :scroll-into-view="listItem" :style="{height:scrollHeight+'px'}"
+			<scroll-view refresher-enabled refresher-default-style="white" :refresher-triggered="refresherState" @refresherabort="refreshAbort" @refresherrestore="refreshFnish" @refresherrefresh="refreshStart" @click="clickScroll" :scroll-into-view="listItem" :style="{height:scrollHeight+'px'}"
 				class="chat-list" scroll-y>
 				<template v-for="msg in msgList">
-					<view v-if="msg.content===tmpStr" class="agree-msg">
-						<text>You've become friends, so start chatting</text>
+					<view :id="msg.positionId" v-if="!(contentTypeFilter(msg.contentType))" class="agree-msg">
+						<text>{{JSON.parse(msg.content).defaultTips}}</text>
 					</view>
-					<OtherMsg v-if="msg.sendID==recvID&&!msg.isDelete&&msg.content!==tmpStr" :msg="msg" :key="msg.positionId"
-						:id="msg.positionId" />
-					<MyMsg v-if="msg.sendID!==recvID&&!msg.isDelete&&msg.content!==tmpStr" :msg="msg" :key="msg.positionId"
+					<OtherMsg v-if="msg.sendID!==vuex_user_info[0].uid&&!msg.isDelete&&contentTypeFilter(msg.contentType)" :msg="msg" :key="msg.positionId"
+						:id="msg.positionId" @atOne="atOne" />
+					<MyMsg v-if="msg.sendID==vuex_user_info[0].uid&&!msg.isDelete&&contentTypeFilter(msg.contentType)" :msg="msg" :key="msg.positionId"
 						:id="msg.positionId" />
 				</template>
 			</scroll-view>
 			<view class="bottom-bar">
 				<view class="bar-list">
 					<u-icon @click="voice" size="51" name="../../static/voice.png" />
-					<u-input @focus="focusInput" v-model="inputValue" height="58" placeholder="" class="bottom-input">
-					</u-input>
+					<u-input @focus="focusInput" v-model="inputValue" height="58" placeholder="" class="bottom-input"/>
 					<u-icon @click="moreAction" size="51" name="../../static/moreOperation.png" />
 					<u-button class="bottom-btn" size="mini" @click="sendTextMsg">Send</u-button>
 				</view>
@@ -71,8 +70,8 @@
 </template>
 
 <script>
-	import OtherMsg from "./comps/otherMsg.vue"
-	import MyMsg from "./comps/myMsg.vue"
+	import OtherMsg from "./comps/OtherMsg.vue"
+	import MyMsg from "./comps/MyMsg.vue"
 	import {
 		asyncGetImgInfo,
 		randomString,
@@ -114,24 +113,56 @@
 				intervalTime: 0,
 				voicePath: "",
 				myList: [],
-				conversationID:""
-
+				conversationID:"",
+				groupID:"",
+				groupInfo:{},
+				groupMemberList:[],
+				refresherState:false,
+				refreshing:false,
+				atUserId:[],
+				atStatus:false
 			}
 		},
 		computed: {
 			intIntervalTime() {
 				return Math.round(this.intervalTime);
-			}
+			},
 		},
 		components: {
 			OtherMsg,
 			MyMsg
 		},
 		methods: {
+			contentTypeFilter(type){
+				const msgTypeList = [101,102,103,104,106]
+				return msgTypeList.indexOf(type)>-1
+			},
+			refreshStart(){
+				console.log(this.refreshing);
+				if(this.refreshing) return false
+				this.refreshing = true
+				if(!this.refresherState) this.refresherState = true
+				console.log('refreshStart');
+				this.getHistoryMessageList(this.msgList[0])
+			},
+			refreshFnish(){
+				console.log('refreshFnish');
+				// this.refresherState = "restore"
+				// this.refreshing = false
+			},
+			refreshAbort(){
+				console.log('refreshAbort');
+			},
 			rightSet() {
-				uni.navigateTo({
-					url: '/pages/conversation/setFriend'
-				});
+				if(this.recvID){
+					uni.navigateTo({
+						url: '/pages/conversation/setFriend'
+					});
+				}else{
+					uni.navigateTo({
+						url: '/pages/conversation/Group/setsGroup'
+					});
+				}
 			},
 			focusInput() {
 				if (this.operationState){
@@ -142,20 +173,25 @@
 			clickAlbum() {
 				this.actionShow = true
 			},
-			getHistoryMessageList() {
-				const reqData = {
-					groupID: "",
-					startMsg: null,
-					count: 50,
-					userID: this.$store.state.conversationUser
+			getHistoryMessageList(start) {
+				let reqData = {
+					groupID: this.vuex_conversation.groupID||"",
+					startMsg: start,
+					count: 12,
+					userID: this.vuex_conversation.userID||""
 				};
-				this.$openSdk.getHistoryMessageList(JSON.stringify(reqData), async data => {
+				console.log(reqData);
+				this.$openSdk.getHistoryMessageList(JSON.stringify(reqData), data => {
 					const tmpArr = JSON.parse(data.msg)
 					console.log(tmpArr);
-					const msgTypeList = [101, 102, 103, 104,201]
-					let newArr = tmpArr.filter(m => msgTypeList.includes(m.contentType))
-					newArr.forEach(m => m.positionId = "msg" + randomString(19))
-					this.msgList = newArr
+					// const msgTypeList = [101, 102, 103, 104,201]
+					// let newArr = tmpArr.filter(m => msgTypeList.includes(m.contentType))
+					// newArr.forEach(m => m.positionId = "msg" + randomString(19))
+					tmpArr.forEach(m => m.positionId = "msg" + randomString(19))
+					this.msgList = [...tmpArr,...this.msgList]
+					this.refresherState = false
+					this.refreshing = false
+					// this.getMemberList()
 				})
 			},
 
@@ -163,7 +199,7 @@
 				this.$globalEvent.addEventListener("onRecvNewMessage", (params) => {
 					let res = JSON.parse(params.msg)
 					console.log(res);
-					if (res.sendID == this.recvID) this.msgList.push(res);
+					if (res.recvID === this.vuex_user_info[0].uid || res.recvID === this.groupID) this.msgList.push(res);
 				});
 			},
 			sendMessageListener() {
@@ -245,7 +281,7 @@
 							const clientMsgID = _this.$openSdk.sendMessage(
 								newVideoMessage,
 								_this.recvID,
-								"",
+								_this.groupID,
 								false
 							);
 							let newVideoMessage2 = JSON.parse(newVideoMessage)
@@ -272,7 +308,7 @@
 							const clientMsgID = _this.$openSdk.sendMessage(
 								newImgMessage,
 								_this.recvID,
-								"",
+								_this.groupID,
 								false
 							);
 							let newImgMessage2 = JSON.parse(newImgMessage)
@@ -295,7 +331,7 @@
 						const clientMsgID = _this.$openSdk.sendMessage(
 							newImgMessage,
 							_this.recvID,
-							"",
+							_this.groupID,
 							false
 						);
 						let newImgMessage2 = JSON.parse(newImgMessage)
@@ -311,21 +347,36 @@
 			},
 			sendTextMsg() {
 				if (this.inputValue) {
-					let newTextMessage = this.$openSdk.createTextMessage(
-						this.inputValue
-					);
+					let newTextMessage
+					if(this.atStatus){
+						newTextMessage = this.$openSdk.createTextAtMessage(this.inputValue,JSON.stringify(this.atUserId))
+					}else{
+						newTextMessage = this.$openSdk.createTextMessage(
+							this.inputValue
+						);
+					}
+					console.log(newTextMessage);
 					const clientMsgID = this.$openSdk.sendMessage(
 						newTextMessage,
-						this.recvID,
-						"",
+						_this.recvID,
+						_this.groupID,
 						false
 					);
+					// console.log(clientMsgID);
 					let newTextMessage2 = JSON.parse(newTextMessage)
 					newTextMessage2.clientMsgID = clientMsgID
 					this.inputValue = "";
 					this.myList.push(newTextMessage2)
 					this.msgList.push(newTextMessage2);
+					this.atStatus = false
+					this.atUserId = []
 				}
+			},
+			atOne(item){
+				console.log(222222222);
+				this.atStatus = true
+				this.atUserId.push(item.sendID)
+				this.inputValue += `@${item.senderNickName} `
 			},
 			sendVoice() {
 				if (this.voicePath == "") return false
@@ -335,7 +386,7 @@
 				const clientMsgID = _this.$openSdk.sendMessage(
 					newVoiceMessage,
 					_this.recvID,
-					"",
+					_this.groupID,
 					false
 				);
 				let newVoiceMessage2 = JSON.parse(newVoiceMessage)
@@ -378,10 +429,16 @@
 					}, 500);
 				}
 			},
-			marAsRead(id) {
-				this.$openSdk.markSingleMessageHasRead(id, data => {
-					console.log(data);
-				})
+			marAsRead() {
+				if(this.recvID){
+					this.$openSdk.markSingleMessageHasRead(this.recvID, data => {
+						console.log(data);
+					})
+				}else{
+					this.$openSdk.markGroupMessageHasRead(this.groupID, data => {
+						console.log(data);
+					})
+				}
 			},
 			delMsgListen() {
 				uni.$on("deleteMsg", ({
@@ -408,7 +465,23 @@
 						console.log(data);
 					})
 				}
-			}
+			},
+			getMemberList() {
+				if(this.groupID=="") return false
+				this.$openSdk.getGroupMemberList(this.groupID, 0, 0, (data) => {
+					const tmpArr = JSON.parse(data.msg).data
+					this.groupMemberList = tmpArr
+					this.msgList.forEach(msg=>{
+						this.groupMemberList.forEach(member=>{
+							if(msg.sendID===member.userId){
+								msg.senderNickName = member.nickName
+								msg.senderFaceUrl = member.faceUrl
+							}
+						})
+					})
+					console.log(this.msgList);
+				})
+			},
 		},
 		watch: {
 			msgList: {
@@ -424,18 +497,19 @@
 			}
 		},
 		beforeMount() {
-			this.recvID = this.$store.state.conversationUser
+			this.recvID = this.vuex_conversation.userID||""
+			this.groupID = this.vuex_conversation.groupID||""
+			this.conversationID = this.vuex_conversation.conversationID
 			this.getScreen()
 			this.delMsgListen()
 			this.reSendListen()
-			this.getHistoryMessageList();
+			this.getHistoryMessageList(null);
 			this.newMsgListener();
 			this.sendMessageListener()
-			this.marAsRead(this.recvID)
+			this.marAsRead()
 		},
 		onLoad: function(options) {
 			_this = this
-			if(options.conversationID)this.conversationID = options.conversationID
 			if(options.draft)this.inputValue = options.draft
 			recorderManager.onStop(function(res) {
 				_this.voicePath = res.tempFilePath;
@@ -443,7 +517,7 @@
 		},
 		onUnload() {
 			this.setDraft()
-			this.marAsRead(this.recvID)
+			this.marAsRead()
 		}
 	}
 </script>

@@ -8,7 +8,7 @@
 				<scroll-view :scroll-into-view="scrollViewId" class="uni-indexed-list__scroll" scroll-y>
 					<view v-for="(list, idx) in lists" :key="idx" :id="'uni-indexed-list-' + idx">
 						<!-- #endif -->
-						<indexed-list-item :list="list" :loaded="loaded" :idx="idx" :showSelect="showSelect" @itemClick="onClick"></indexed-list-item>
+						<indexed-list-item :isShowSection="isShowSection" :list="list" :loaded="loaded" :idx="idx" :showSelect="showSelect" @itemClick="onClick"></indexed-list-item>
 						<!-- #ifndef APP-NVUE -->
 					</view>
 				</scroll-view>
@@ -17,7 +17,7 @@
 			</cell>
 		</list>
 		<!-- #endif -->
-		<view class="uni-indexed-list__menu" :class="touchmove ? 'uni-indexed-list__menu--active' : ''" @touchstart="touchStart"
+		<view v-if="showIndex" class="uni-indexed-list__menu" :class="touchmove ? 'uni-indexed-list__menu--active' : ''" @touchstart="touchStart"
 		 @touchmove.stop.prevent="touchMove" @touchend="touchEnd" @mousedown.stop="mousedown" @mousemove.stop.prevent="mousemove"
 		 @mouseleave.stop="mouseleave">
 			<view v-for="(list, key) in lists" :key="key" class="uni-indexed-list__menu-item">
@@ -97,6 +97,14 @@
 			showSelect: {
 				type: Boolean,
 				default: false
+			},
+			showIndex:{
+				type:Boolean,
+				default:true
+			},
+			isShowSection:{
+				type:Boolean,
+				default:true
 			}
 		},
 		data() {

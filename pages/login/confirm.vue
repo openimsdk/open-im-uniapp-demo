@@ -133,7 +133,7 @@ export default {
       if (this.originMnemonicArr.toString() == pp.toString()) {
         let accountInfo = {};
         accountInfo.secret = "tuoyun";
-        accountInfo.uid = this.$store.state.registerInfo.address;
+        accountInfo.uid = this.vuex_register_info.address;
         accountInfo.name = "newUser";
         accountInfo.platform = 5;
         let _this = this;
@@ -149,8 +149,8 @@ export default {
                 method: "POST",
                 data: accountInfo,
                 success(res) {
-                  let userInfo = _this.$store.state.registerInfo;
-                  _this.$store.dispatch("UserInfoValue", userInfo);
+                  let userInfo = _this.vuex_register_info;
+				  _this.$u.vuex('vuex_user_info',userInfo)
                   uni.setStorage({
                     key: "token",
                     data: res.data.data.token,
@@ -174,8 +174,8 @@ export default {
 					  if (res.data.errCode == 0) {
 					    delete accountInfo.name;
 					    user_token(accountInfo).then(async (res) => {
-					      let userInfo = this.$store.state.registerInfo;
-					      await this.$store.dispatch("UserInfoValue", userInfo);
+					      let userInfo = this.vuex_register_info;
+						  _this.$u.vuex('vuex_user_info',userInfo)
 					      await sessionStorage.setItem("token", res.data.data.token);
 					      await uni.setStorage({
 					        key: "token",
@@ -238,9 +238,9 @@ export default {
   },
   computed: {},
   mounted() {
-    this.originMnemonicArr = this.$store.state.registerInfo.mnemonic.split(" ");
-    // let randomArr = this.$store.state.registerInfo.mnemonic.split(" ").sort(this.randomsort);
-    let randomArr = this.$store.state.registerInfo.mnemonic.split(" ");
+    this.originMnemonicArr = this.vuex_register_info.mnemonic.split(" ");
+    // let randomArr = this.vuex_register_info.mnemonic.split(" ").sort(this.randomsort);
+    let randomArr = this.vuex_register_info.mnemonic.split(" ");
 
     for (let i = 0; i < randomArr.length; i++) {
       let chooseArrItem = {};

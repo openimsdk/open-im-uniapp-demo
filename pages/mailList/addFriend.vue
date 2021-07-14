@@ -1,10 +1,10 @@
 <template>
 	<view id="addFriend">
-		<uni-nav-bar left-icon="back" title="Add friends" @clickLeft="goBack"></uni-nav-bar>
+		<uni-nav-bar left-icon="back" :title="title" @clickLeft="goBack"></uni-nav-bar>
 		<view class="main">
-			<u-search action-text="search" placeholder="please enter the account number" class="my-search" disabled shape="square" @click="goInput" />
+			<u-search action-text="search" :placeholder="placeholder" class="my-search" disabled shape="square" @click="goInput" />
 			<view class="myUid">
-				<text>My Account: {{ this.$store.state.userInfo[0].uid}}</text>
+				<text>My Account: {{ this.vuex_user_info[0].uid}}</text>
 			</view>
 		</view>
 	</view>
@@ -14,7 +14,9 @@
 	export default {
 		data() {
 			return {
-				noUser: false
+				noUser: false,
+				title:"Add friends",
+				placeholder:"Please enter the account number"
 			}
 		},
 		methods: {
@@ -22,11 +24,20 @@
 				uni.navigateBack()
 			},
 			goInput() {
+				let from = "single"
+				if(this.title === "Add group chat") from = "group"
 				uni.navigateTo({
-					url: '/pages/mailList/addFriendInput'
+					url: '/pages/mailList/addFriendInput?from='+from
 				});
 			},
 
+		},
+		onLoad:function(options){
+			if(options.from==="group"){
+				this.title = "Add group chat"
+				this.placeholder = "Please enter group number"
+				
+			}
 		}
 	}
 </script>

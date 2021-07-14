@@ -152,7 +152,7 @@
 				uni.navigateBack();
 			},
 			initData() {
-				const reqData = [this.$store.state.conversationUser]
+				const reqData = [this.vuex_conversation_user]
 				this.$openSdk.getFriendsInfo(JSON.stringify(reqData), (data) => {
 					if (data.msg) {
 						const tmpArr = JSON.parse(data.msg)

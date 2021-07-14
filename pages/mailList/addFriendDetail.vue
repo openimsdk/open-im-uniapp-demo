@@ -46,7 +46,11 @@
 			},
 			addFriend() {
 				if (this.isFriend) {
-					this.$store.dispatch("setConversationUser", this.searchFriendData.uid);
+					let conversation = JSON.parse(JSON.stringify(this.searchFriendData))
+					conversation.userID = conversation.uid
+					conversation.conversationID = 'single_'+conversation.uid
+					this.$u.vuex('vuex_conversation', conversation)
+					this.$u.vuex('vuex_conversation_user', this.searchFriendData.uid)
 					uni.navigateTo({
 						url: "/pages/conversation/chatWin",
 					});

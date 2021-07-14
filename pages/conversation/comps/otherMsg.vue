@@ -1,8 +1,11 @@
 <template>
 	<view :id="id" class="other-msg-box">
-		<u-avatar src="../../../static/user.png" mode="circle"></u-avatar>
+		<view @longpress.prevent="atOther">
+			<u-avatar :src="msg.senderFaceUrl" mode="circle"/>
+		</view>
 		<view @longpress.prevent="pressAtion" class="msg-box">
-			<text v-if="msg.contentType==101" class="msg-text">{{msg.content}}</text>
+			<text v-if="msg.sessionType===2" class="send-user">{{msg.senderNickName}}</text>
+			<text v-if="msg.contentType==101||msg.contentType==106" class="msg-text">{{msg.contentType==101?msg.content:msg.atElem.text}}</text>
 			<view v-if="msg.contentType==103" @click="playVoice(msg.soundElem)" class="msg-text msg-voice">
 				<image class="voice-icon" src="../../../static/voice_other.png" />
 				<text>{{msg.soundElem.duration}}''</text>
@@ -24,7 +27,7 @@
 </template>
 
 <script>
-	import MsgAction from './msgAction.vue'
+	import MsgAction from './MsgAction.vue'
 	let _this = null
 	export default {
 		data() {
@@ -52,6 +55,10 @@
 			},
 			videoError() {
 				this.errorVideo = true
+			},
+			atOther(){
+				console.log(111111);
+				this.$emit('atOne',this.msg)
 			},
 			playVoice(item) {
 				if (!this.innerAudioContext.paused && this.uuid == item.uuid) {
@@ -136,7 +143,7 @@
 	.other-msg-box {
 		display: flex;
 		padding: 22px;
-		padding-bottom: 0;
+		padding-bottom: 8px;
 
 		.msg-box {
 			position: relative;
@@ -144,6 +151,12 @@
 			margin-left: 12px;
 			display: flex;
 			align-items: center;
+			.send-user{
+				position: absolute;
+				top: -24rpx;
+				left: 0px;
+				font-size: 20rpx;
+			}
 
 			.msg-image {
 				display: inline-block;

@@ -2,18 +2,7 @@
 	<view @click="pageClick" id="mailList">
 		<view class="head">
 			<text class="title">mail list</text>
-			<view class="headRight">
-				<image src="../../static/search.png" mode="" class="headIcon" @click="goSearch"></image>
-				<image src="../../static/more-operations.png" mode="" class="headIcon" @click.stop="controlDisplay"></image>
-				<view class="menuCon" v-if="showOperationsMenu">
-					<view class="operationsMenu">
-						<view class="operationsMenu-item" @click="goAddFriend">
-							<image src="../../static/addFriend.png" mode="" class="itemImg"></image>
-							<text>Add friends</text>
-						</view>
-					</view>
-				</view>
-			</view>
+			<HeaderModal :showOperationsMenu="showOperationsMenu" @controlDisplay="controlDisplay"/>
 		</view>
 		<view class="newFriend" @click="goNewFriends">
 			<view class="newFriendMain">
@@ -24,21 +13,28 @@
 				{{application}}
 			</view>
 		</view>
-		<view class="">
-			<!-- 	<u-index-list :sticky="false" :scrollTop="scrollTop">
-				<view v-for="(item, index) in indexList" :key="index">
-					<u-index-anchor :index="item" />
-					<view v-for="dataItem in data" v-if="dataItem.title==item" class="list-cell">
-						{{dataItem.msg}}
-					</view>
-				</view>
-			</u-index-list> -->
-			<uni-indexed-list :options="friendList" :showSelect="false" @click="bindClick"></uni-indexed-list>
+		<view class="newFriend" @click="goNewGroup">
+			<view class="newFriendMain">
+				<image src="../../static/group_notification.png" mode="" class="newFriendIcon"></image>
+				<text class="newFriendText">Group notification</text>
+			</view>
+			<view v-if="groupApplication>0" class="newFriendNumber">
+				{{groupApplication}}
+			</view>
 		</view>
+		<view class="newFriend" @click="goGroupList">
+			<view class="newFriendMain">
+				<image src="../../static/group_list.png" mode="" class="newFriendIcon"></image>
+				<text class="newFriendText">Group list</text>
+			</view>
+		</view>
+		<u-empty v-if="originalList.length===0" class="empty" text="There is no contact" mode="list"/>
+		<uni-indexed-list v-else :options="friendList" :showSelect="false" @click="bindClick"></uni-indexed-list>
 	</view>
 </template>
 
 <script>
+	import HeaderModal from '@/components/HeaderModal/HeaderModal.vue'
 	export default {
 		data() {
 			return {
@@ -49,24 +45,54 @@
 				Initials: ['#'],
 				friendList: [],
 				originalList: [],
+				groupList:[],
 				applicationList: [],
+				groupApplicationList: [],
 				application: 0,
+				groupApplication:0,
 				showOperationsMenu: false,
 			}
 		},
+		components:{
+			HeaderModal
+		},
 		methods: {
+			launchGroup(){
+				uni.navigateTo({
+					url:"/pages/conversation/Group/launchGroup?type=launch"
+				})
+			},
+			addNewGroup(){
+				uni.navigateTo({
+					url:"/pages/mailList/addFriend?from=group"
+				})
+			},
 			getMailList() {
 				this.$openSdk.getFriendList((data) => {
 					this.originalList = JSON.parse(data.msg)
-					this.originalList.map(i => {
-						i.img =
-							"https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png"
-					})
 					console.log(this.originalList);
+					this.$u.vuex('vuex_mail_list',this.originalList)
 					this.friendList = [{
 						letter: "#",
 						data: this.originalList
 					}]
+					uni.stopPullDownRefresh()
+					// this.initMailList()
+				})
+			},
+			// initMailList(){
+			// 	this.friendList = [{
+			// 		letter: "#",
+			// 		data: [...this.originalList,...this.groupList]
+			// 	}]
+			// 	uni.stopPullDownRefresh()
+			// 	console.log(this.friendList);
+			// },
+			getGroupList(){
+				this.$openSdk.getJoinedGroupList(data=>{
+					this.groupList = JSON.parse(data.msg)
+					this.$u.vuex('vuex_group_list',this.groupList)
+					// this.initMailList()
 				})
 			},
 			getFriendApplicationList() {
@@ -74,22 +100,45 @@
 					this.applicationList = JSON.parse(data.msg)
 					const tmpArr = this.applicationList.filter(a => a.flag === 0)
 					this.application = tmpArr.length
-					if(this.application===0){
+					const totalNum = this.groupApplication + this.application
+					if(totalNum===0){
 						uni.removeTabBarBadge({
 							index: 1,
 						});
 					}else{
 						uni.setTabBarBadge({
 							index: 1,
-							text: this.application > 99 ? "99+" : this.application+"",
+							text: totalNum > 99 ? "99+" : totalNum+"",
+						});
+					}
+				})
+			},
+			getGroupApplicationList(){
+				this.$openSdk.getGroupApplicationList((data) => {
+					const tmpInfo = JSON.parse(data.msg)
+					this.groupApplicationList = tmpInfo.user;
+					const tmpArr = this.groupApplicationList.filter(a => a.flag === 0)
+					this.groupApplication = tmpArr.length;
+					const totalNum = this.groupApplication + this.application
+					if(totalNum===0){
+						uni.removeTabBarBadge({
+							index: 1,
+						});
+					}else{
+						uni.setTabBarBadge({
+							index: 1,
+							text: totalNum > 99 ? "99+" : totalNum+"",
 						});
 					}
 				})
 			},
 			bindClick(item) {
 				this.pageClick()
-				const user = item.item.name
-				this.$store.dispatch("setConversationUser", user.uid);
+				let newItem = item.item.name
+				newItem.userID = newItem.uid
+				newItem.conversationID = 'single_'+newItem.uid
+				this.$u.vuex('vuex_conversation', newItem)
+				this.$u.vuex('vuex_conversation_user', newItem.uid)
 				uni.navigateTo({
 					url: "/pages/conversation/chatWin",
 				});
@@ -98,7 +147,7 @@
 				this.showOperationsMenu = !this.showOperationsMenu
 			},
 			pageClick() {
-				console.log("pageClick");
+				console.log("pageClick1");
 				if(this.showOperationsMenu) this.showOperationsMenu = false
 			},
 			goSearch() {
@@ -108,13 +157,23 @@
 			},
 			goAddFriend() {
 				uni.navigateTo({
-					url: '/pages/mailList/addFriend'
+					url: '/pages/mailList/addFriend?from=single'
 				});
 				this.showOperationsMenu = false
 			},
 			goNewFriends() {
 				uni.navigateTo({
 					url: '/pages/mailList/newFriends?list=' + JSON.stringify(this.applicationList)
+				});
+			},
+			goNewGroup(){
+				uni.navigateTo({
+					url: '/pages/mailList/groupNotification?list=' + JSON.stringify(this.groupApplicationList)
+				});
+			},
+			goGroupList(){
+				uni.navigateTo({
+					url: '/pages/mailList/groupList'
 				});
 			},
 			friendsListener() {
@@ -127,6 +186,7 @@
 				this.$globalEvent.addEventListener(
 					"onFriendInfoChanged",
 					(params) => {
+						console.log('onFriendInfoChanged```````````````');
 						this.getMailList()
 					}
 				);
@@ -138,18 +198,73 @@
 					console.log(params);
 					this.getMailList()
 				});
+				
+			},
+			groupListner(){
+				// this.$globalEvent.addEventListener("onGroupInfoChanged", (params) => {
+				// 	console.log('onGroupInfoChanged-------------------');
+				// 	const tmpData = JSON.parse(params.msg)
+				// 	console.log(tmpData);
+				// 	const tmpInfo = JSON.parse(tmpData.groupInfo)
+				// 	for(let i=0;i<this.groupList.length;i++){
+				// 		console.log(this.groupList[i].groupID);
+				// 		console.log(tmpData.groupId);
+				// 		if(this.groupList[i].groupID===tmpData.groupId){
+				// 			this.groupList[i] = {...this.groupList[i],...tmpInfo}
+				// 			console.log(this.groupList);
+				// 			this.initMailList();
+				// 		}
+				// 	}
+				// });
+				// this.$globalEvent.addEventListener("onApplicationProcessed", (params) => {
+				// 	console.log('onApplicationProcessed----------');
+				// 	console.log(params);
+				// 	this.getGroupList()
+				// });
+				// this.$globalEvent.addEventListener("onMemberEnter", (params) => {
+				// 	console.log('onMemberEnter----------');
+				// 	console.log(params);
+				// 	this.getGroupList()
+				// });
+				this.$globalEvent.addEventListener("onReceiveJoinApplication", (params) => {
+					console.log('onReceiveJoinApplication----------');
+					console.log(params);
+					this.getGroupApplicationList()
+				});
+				// this.$globalEvent.addEventListener("onGroupCreated", (params) => {
+				// 	console.log('onGroupCreated----------');
+				// 	console.log(params);
+				// 	this.getGroupList()
+				// });
+				// this.$globalEvent.addEventListener("onMemberKicked", (params) => {
+				// 	console.log('onMemberKicked----------');
+				// 	console.log(params);
+				// 	this.getGroupList()
+				// });
+				// uni.$on('quitGroup',()=>{
+				// 	this.getGroupList()
+				// })
 			}
 		},
 		onHide() {
 			if(this.showOperationsMenu) this.showOperationsMenu = false
 		},
+		onPullDownRefresh(){
+			this.getMailList()
+			// this.getGroupList()
+			this.getFriendApplicationList()
+			this.getGroupApplicationList()
+		},
 		beforeMount() {
 			this.friendsListener()
+			this.groupListner()
 			this.getMailList()
+			// this.getGroupList()
 		},
 		onShow() {
 			// this.getMailList()
 			this.getFriendApplicationList()
+			this.getGroupApplicationList()
 		}
 	}
 </script>
@@ -202,7 +317,7 @@
 						background-color: #1B72EC;
 						box-shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.5);
 						border-radius: 18rpx;
-						padding: 24rpx;
+						padding: 32rpx;
 
 						.operationsMenu-item {
 							display: flex;
@@ -210,11 +325,14 @@
 							font-size: 30rpx;
 							font-weight: 600;
 							color: #FFFFFF;
+							&:nth-child(2){
+								padding: 24rpx 0;
+							}
 
 							.itemImg {
-								width: 44rpx;
-								height: 44rpx;
-								margin-right: 28rpx;
+								width: 36rpx;
+								height: 36rpx;
+								margin-right: 24rpx;
 							}
 						}
 					}
@@ -225,9 +343,8 @@
 		}
 
 		.newFriend {
-			// padding-top: 90rpx;
-			height: 90rpx;
-			line-height: 90rpx;
+			height: 100rpx;
+			line-height: 100rpx;
 			background-color: #fff;
 			margin-top: 6rpx;
 			display: flex;
@@ -264,6 +381,12 @@
 				color: #FFFFFF;
 				margin-right: 24rpx;
 			}
+		}
+		.uni-indexed-list{
+			top: 402rpx; 
+		}
+		.empty{
+			padding-top: 120rpx;
 		}
 	}
 </style>
