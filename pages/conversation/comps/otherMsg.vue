@@ -57,21 +57,17 @@
 				this.errorVideo = true
 			},
 			atOther(){
-				console.log(111111);
 				this.$emit('atOne',this.msg)
 			},
 			playVoice(item) {
 				if (!this.innerAudioContext.paused && this.uuid == item.uuid) {
-					console.log(111);
 					this.innerAudioContext.pause()
 				} else if (this.innerAudioContext.paused && this.uuid == item.uuid && !this.endStatus) {
-					console.log(222);
 					this.innerAudioContext.play()
 				} else {
 					const localUrl = item.soundPath
 					const netUrl = item.sourceUrl
 					this.uuid = item.uuid
-					console.log(this.uuid);
 					plus.io.resolveLocalFileSystemURL(localUrl,
 						(file) => {
 							console.log(file);

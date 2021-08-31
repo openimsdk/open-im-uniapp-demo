@@ -15,7 +15,7 @@
 	export default {
 		data() {
 			return {
-				nickname: "xxx",
+				nickname: "",
 				title: "",
 				fromMy: true,
 				where: "",
@@ -33,17 +33,19 @@
 			},
 			submit() {
 				if (this.where == "my") {
-					let parameter = {}
-					parameter.name = this.nickname
+					let reqData = {}
+					reqData.name = this.nickname
 					let _this = this
-					this.$openSdk.setSelfInfo(parameter, data => {
+					this.$openSdk.setSelfInfo(JSON.stringify(reqData), data => {
+						console.log(data);
 						if (data.err) {
-							_this.$u.toast('change fail：' + data.err)
+							_this.$u.toast('change failed')
 						} else {
-							const reqData = [_this.vuex_user_info[0].uid]
+							const reqData = [_this.vuex_user_info.uid]
 							_this.$openSdk.getUsersInfo(JSON.stringify(reqData), async data => {
 								let userInfoRes = JSON.parse(data.msg)
-								_this.$u.vuex('vuex_user_info',userInfoRes)
+								console.log(userInfoRes);
+								_this.$u.vuex('vuex_user_info',userInfoRes[0])
 								uni.switchTab({
 									url: '/pages/profile/my'
 								});
@@ -51,10 +53,10 @@
 						}
 					})
 				} else if (this.where == "setFriend") {
-					let parameter = {}
-					parameter.uid = this.friendInfo.uid
-					parameter.comment = this.nickname
-					this.$openSdk.setFriendInfo(parameter, data => {
+					let reqData = {}
+					reqData.uid = this.friendInfo.uid
+					reqData.comment = this.nickname
+					this.$openSdk.setFriendInfo(JSON.stringify(reqData), data => {
 						if (data.err) {
 							_this.$u.toast('change fail：' + data.err)
 						} else {
@@ -69,7 +71,7 @@
 			this.where = options.where
 			if (options.where == "my") {
 				this.title = "Change nickname"
-				this.nickname = this.vuex_user_info[0].name
+				this.nickname = this.vuex_user_info.name
 			} else if (options.where == "setFriend") {
 				this.title = "Set notes"
 				this.friendInfo = JSON.parse(options.friendData)

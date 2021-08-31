@@ -2,11 +2,11 @@
 	<view id="blockList">
 		<uni-nav-bar left-icon="back" title="Address book blacklist" @clickLeft="goBack"></uni-nav-bar>
 		<view class="list">
-			<view class="list-item" v-for="item in list">
+			<view class="list-item" v-for="item in vuex_black_list">
 				<image src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png"
 					mode="" class="portrait"></image>
 				<view class="listItemMain">
-					<text class="name">{{item.uid.length>10?item.uid.slice(0,10):item.uid}}</text>
+					<text class="name">{{item.name}}</text>
 					<button type="primary" class="remove" @click="remove(item.uid)">remove</button>
 				</view>
 			</view>
@@ -38,9 +38,6 @@
 		},
 		mounted() {
 			this.getList()
-			this.$globalEvent.addEventListener("onBlackListDeleted",(data)=>{
-				this.getList()
-			})
 		}
 	}
 </script>

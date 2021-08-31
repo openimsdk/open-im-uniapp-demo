@@ -86,7 +86,7 @@
 				}
 			},
 			modifyGroup() {
-				if (this.vuex_user_info[0].uid === this.info.ownerId) {
+				if (this.vuex_user_info.uid === this.info.ownerId) {
 					uni.navigateTo({
 						url: "/pages/conversation/Group/modifyGroup"
 					})
@@ -95,7 +95,6 @@
 				}
 			},
 			checkShip() {
-				console.log(this.vuex_group_list);
 				const idx = this.vuex_group_list.findIndex(g => g.groupID === this.info.groupID)
 				if (idx > -1) {
 					this.groupShip = true

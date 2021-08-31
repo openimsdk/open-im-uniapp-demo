@@ -37,7 +37,7 @@
 			search(val){
 				if(val===""){
 					this.showIndex = true
-					this.friendList[0].data = this.vuex_mail_list
+					this.friendList[0].data = this.vuex_original_mail_list
 				}else{
 					this.showIndex = false
 					const newArr = []
@@ -49,12 +49,10 @@
 				}
 			},
 			clearSearch(){
-				console.log(111);
 				this.showIndex = true
-				this.friendList[0].data = this.vuex_mail_list
+				this.friendList[0].data = this.vuex_original_mail_list
 			},
 			clickItem(data){
-				console.log(data);
 				this.selectList = data.select
 				this.selectLenght = data.select.length
 			},
@@ -69,9 +67,7 @@
 						faceUrl:"https://echat-1302656840.cos.ap-chengdu.myqcloud.com/1625728198419_IMG20210622085412.jpg"
 					}
 					let memberList=[]
-					console.log(this.selectList);
 					this.selectList.map(v=>memberList.push({uid:v.name.uid,setRole:0}))
-					console.log(memberList);
 					this.$openSdk.createGroup(JSON.stringify(groupInfo),JSON.stringify(memberList),(data)=>{
 						if(data.msg){
 							this.$refs.uToast.show({
@@ -103,10 +99,10 @@
 					const groupMemberList = JSON.parse(data.msg).data
 					let filterList=[];
 					groupMemberList.forEach(m=>filterList.push(m.userId))
-					this.friendList[0].data=this.vuex_mail_list.filter(u=>!filterList.includes(u.uid))
+					this.friendList[0].data=this.vuex_original_mail_list.filter(u=>!filterList.includes(u.uid))
 				})
 				}else{
-					this.friendList[0].data = this.vuex_mail_list
+					this.friendList[0].data = this.vuex_original_mail_list
 				}
 			}
 		},

@@ -3,11 +3,14 @@
 		<u-avatar :src="myAvator" mode="circle"></u-avatar>
 		<view @longpress.prevent="pressAtion" class="msg-box">
 			<view class="msg-status">
-				<text v-if="msg.isRead&&msg.status!==3&&msg.contentType==101&&msg.sessionType===1" class="readed">Readed</text>
-				<text v-if="!msg.isRead&&msg.status!==3&&msg.contentType==101&&msg.sessionType===1" class="unread">UnRead</text>
+				<text v-if="msg.isRead&&msg.status!==3&&msg.contentType==101"
+					class="readed">Readed</text>
+				<text v-if="!msg.isRead&&msg.status!==3&&msg.contentType==101"
+					class="unread">UnRead</text>
 				<u-icon @click="reSend" v-if="msg.status==3" size="32" name="error-circle" color="#f44038" />
 			</view>
-			<text v-if="msg.contentType==101||msg.contentType==106" class="msg-text">{{msg.contentType==101?msg.content:msg.atElem.text}}</text>
+			<text v-if="msg.contentType==101||msg.contentType==106"
+				class="msg-text">{{msg.contentType==101?msg.content:msg.atElem.text}}</text>
 			<view @click="playVoice(msg.soundElem)" v-if="msg.contentType==103" class="msg-text msg-voice">
 				<text>{{msg.soundElem.duration}}''</text>
 				<image class="voice-icon" src="../../../static/voice_me.png" mode=""></image>
@@ -35,11 +38,14 @@
 
 <script>
 	import MsgAction from './MsgAction.vue'
+	import {
+		isFileExist
+	} from '@/utils/tools.js'
 	let _this = null
 	export default {
 		data() {
 			return {
-				myAvator:"",
+				myAvator: "",
 				isTop: true,
 				endStatus: true,
 				errorImage: false,
@@ -52,13 +58,20 @@
 		},
 		filters: {
 			thumUrlFilter(msg) {
-				return (msg.status == 1 && msg.pictureElem.sourcePicture.url == '') ? msg.videoElem.snapshotPath : msg
+				if (msg.localFlag === 1) {
+					return msg.videoElem.snapshotPath
+				} else {
+					return (msg.status == 1 && msg.pictureElem.sourcePicture.url == '') ? msg.videoElem.snapshotPath : msg
 					.videoElem.snapshotUrl
+				}
 			},
 			imgUrlFilter(msg) {
-				const url = (msg.status == 1 && msg.pictureElem.sourcePicture.url == '') ? msg.pictureElem.sourcePath : msg
-					.pictureElem.sourcePicture.url
-				return url
+				if (msg.localFlag === 1) {
+					return msg.pictureElem.sourcePath
+				} else {
+					return (msg.status == 1 && msg.pictureElem.sourcePicture.url == '') ? msg.pictureElem.sourcePath : msg
+						.pictureElem.sourcePicture.url;
+				}
 			}
 		},
 		components: {
@@ -76,15 +89,13 @@
 				this.errorVideo = true
 			},
 			reSend() {
-				this.$u.toast("reSend developing")
-				// uni.$emit("reSend",this.msg)
+				// this.$u.toast("reSend developing")
+				uni.$emit("reSend", this.msg)
 			},
 			playVoice(item) {
 				if (!this.innerAudioContext.paused && this.uuid == item.uuid) {
-					console.log(111);
 					this.innerAudioContext.pause()
 				} else if (this.innerAudioContext.paused && this.uuid == item.uuid && !this.endStatus) {
-					console.log(222);
 					this.innerAudioContext.play()
 				} else {
 					const localUrl = item.soundPath
@@ -105,7 +116,6 @@
 				}
 			},
 			showVideo(url) {
-				console.log(url);
 				uni.navigateTo({
 					url: '/pages/conversation/playVideo?url=' + url
 				})
@@ -124,7 +134,6 @@
 				const ids = '#' + this.id
 				const query = uni.createSelectorQuery().select(ids);
 				query.boundingClientRect((val) => {
-					console.log('my-' + val.top);
 					if (val.top < 120) {
 						console.log(val.top);
 						this.isTop = false
@@ -141,7 +150,7 @@
 		},
 		mounted() {
 			_this = this
-			this.myAvator = this.vuex_user_info[0].icon
+			this.myAvator = this.vuex_user_info.icon
 			this.setListener()
 			this.innerAudioContext = uni.createInnerAudioContext()
 			this.innerAudioContext.onError(err => {

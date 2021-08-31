@@ -6,8 +6,8 @@
 					<view class="nick-title">
 						<text>{{vuex_conversation.showName||vuex_conversation.groupName||vuex_conversation.userID}}</text>
 						<view v-if="groupID==''" class="user-status">
-							<text>Mobile Online</text>
-							<u-icon name="arrow-right" size="14" />
+							<text>{{tip}}</text>
+							<!-- <u-icon name="arrow-right" size="14" /> -->
 						</view>
 					</view>
 				</view>
@@ -15,22 +15,27 @@
 					<u-icon @click="rightSet" name="more-dot-fill" size="48" />
 				</view>
 			</u-navbar>
-			<scroll-view refresher-enabled refresher-default-style="white" :refresher-triggered="refresherState" @refresherabort="refreshAbort" @refresherrestore="refreshFnish" @refresherrefresh="refreshStart" @click="clickScroll" :scroll-into-view="listItem" :style="{height:scrollHeight+'px'}"
-				class="chat-list" scroll-y>
+			<scroll-view refresher-enabled refresher-default-style="white" :refresher-triggered="refresherState"
+				@refresherabort="refreshAbort" @refresherrestore="refreshFnish" @refresherrefresh="refreshStart"
+				@click="clickScroll" :scroll-into-view="listItem" :style="{height:scrollHeight+'px'}" class="chat-list"
+				scroll-y>
 				<template v-for="msg in msgList">
-					<view :id="msg.positionId" v-if="!(contentTypeFilter(msg.contentType))" class="agree-msg">
-						<text>{{JSON.parse(msg.content).defaultTips}}</text>
+					<view :id="msg.positionId" v-if="!(contentTypeFilter(msg.contentType))&&msg.contentType!=112" class="agree-msg">
+						<text v-if="msg.contentType==111">{{msg.sendID==vuex_user_info.uid?"you revoke a message":msg.senderNickName+" revoke a message"}}</text>
+						<text v-else>{{JSON.parse(msg.content).defaultTips}}</text>
 					</view>
-					<OtherMsg v-if="msg.sendID!==vuex_user_info[0].uid&&!msg.isDelete&&contentTypeFilter(msg.contentType)" :msg="msg" :key="msg.positionId"
-						:id="msg.positionId" @atOne="atOne" />
-					<MyMsg v-if="msg.sendID==vuex_user_info[0].uid&&!msg.isDelete&&contentTypeFilter(msg.contentType)" :msg="msg" :key="msg.positionId"
-						:id="msg.positionId" />
+					<OtherMsg
+						v-if="msg.sendID!==vuex_user_info.uid&&!msg.isDelete&&contentTypeFilter(msg.contentType)"
+						:msg="msg" :key="msg.positionId" :id="msg.positionId" @atOne="atOne" />
+					<MyMsg v-if="msg.sendID==vuex_user_info.uid&&!msg.isDelete&&contentTypeFilter(msg.contentType)"
+						:msg="msg" :key="msg.positionId" :id="msg.positionId" />
 				</template>
 			</scroll-view>
 			<view class="bottom-bar">
 				<view class="bar-list">
 					<u-icon @click="voice" size="51" name="../../static/voice.png" />
-					<u-input @focus="focusInput" v-model="inputValue" height="58" placeholder="" class="bottom-input"/>
+					<u-input confirm-type="send" @confirm="sendTextMsg" @focus="focusInput" v-model="inputValue"
+						height="58" placeholder="" class="bottom-input" />
 					<u-icon @click="moreAction" size="51" name="../../static/moreOperation.png" />
 					<u-button class="bottom-btn" size="mini" @click="sendTextMsg">Send</u-button>
 				</view>
@@ -65,7 +70,8 @@
 			</view>
 		</u-mask>
 
-		<u-action-sheet cancel-text="cancel" @click="imageOrVideo" :list="actionList" v-model="actionShow"></u-action-sheet>
+		<u-action-sheet cancel-text="cancel" @click="imageOrVideo" :list="actionList" v-model="actionShow">
+		</u-action-sheet>
 	</view>
 </template>
 
@@ -80,16 +86,14 @@
 	import {
 		requestAndroidPermission
 	} from '../../utils/permission.js'
-
 	const recorderManager = uni.getRecorderManager();
 	const innerAudioContext = uni.createInnerAudioContext();
-
 	let _this = null
 	export default {
 		data() {
 			return {
 				nickname: "",
-				tmpStr:"You have successfully become friends, so start chatting",
+				tmpStr: "You have successfully become friends, so start chatting",
 				scrollHeight: 0,
 				inputValue: "",
 				operationState: false,
@@ -113,14 +117,18 @@
 				intervalTime: 0,
 				voicePath: "",
 				myList: [],
-				conversationID:"",
-				groupID:"",
-				groupInfo:{},
-				groupMemberList:[],
-				refresherState:false,
-				refreshing:false,
-				atUserId:[],
-				atStatus:false
+				conversationID: "",
+				groupID: "",
+				groupInfo: {},
+				groupMemberList: [],
+				refresherState: false,
+				refreshing: false,
+				atUserId: [],
+				atStatus: false,
+				lastState: false,
+				tip: "",
+				typingTimer:null,
+				inputTimer:null,
 			}
 		},
 		computed: {
@@ -133,39 +141,36 @@
 			MyMsg
 		},
 		methods: {
-			contentTypeFilter(type){
-				const msgTypeList = [101,102,103,104,106]
-				return msgTypeList.indexOf(type)>-1
+			contentTypeFilter(type) {
+				const msgTypeList = [101, 102, 103, 104, 106]
+				return msgTypeList.indexOf(type) > -1
 			},
-			refreshStart(){
-				console.log(this.refreshing);
-				if(this.refreshing) return false
+			refreshStart() {
+				if (this.refreshing || this.lastState) return false
 				this.refreshing = true
-				if(!this.refresherState) this.refresherState = true
+				if (!this.refresherState) this.refresherState = true
 				console.log('refreshStart');
 				this.getHistoryMessageList(this.msgList[0])
 			},
-			refreshFnish(){
+			refreshFnish() {
 				console.log('refreshFnish');
-				// this.refresherState = "restore"
-				// this.refreshing = false
 			},
-			refreshAbort(){
+			refreshAbort() {
 				console.log('refreshAbort');
 			},
 			rightSet() {
-				if(this.recvID){
+				if (this.recvID) {
 					uni.navigateTo({
 						url: '/pages/conversation/setFriend'
 					});
-				}else{
+				} else {
 					uni.navigateTo({
 						url: '/pages/conversation/Group/setsGroup'
 					});
 				}
 			},
 			focusInput() {
-				if (this.operationState){
+				if (this.operationState) {
 					this.getScreen()
 					this.operationState = false
 				}
@@ -175,38 +180,78 @@
 			},
 			getHistoryMessageList(start) {
 				let reqData = {
-					groupID: this.vuex_conversation.groupID||"",
+					groupID: this.vuex_conversation.groupID || "",
 					startMsg: start,
-					count: 12,
-					userID: this.vuex_conversation.userID||""
+					count: 10,
+					userID: this.vuex_conversation.userID || ""
 				};
-				console.log(reqData);
 				this.$openSdk.getHistoryMessageList(JSON.stringify(reqData), data => {
 					const tmpArr = JSON.parse(data.msg)
-					console.log(tmpArr);
 					// const msgTypeList = [101, 102, 103, 104,201]
-					// let newArr = tmpArr.filter(m => msgTypeList.includes(m.contentType))
-					// newArr.forEach(m => m.positionId = "msg" + randomString(19))
-					tmpArr.forEach(m => m.positionId = "msg" + randomString(19))
-					this.msgList = [...tmpArr,...this.msgList]
-					this.refresherState = false
-					this.refreshing = false
-					// this.getMemberList()
+					if(this.vuex_conversation.userID!=""){
+						let cids = []
+						tmpArr.map(m=>{
+							if(m.sendID!=this.vuex_user_info.uid&&!m.isRead) cids.push(m.clientMsgID)
+						})
+						console.log(cids);
+						if(cids.length>0){
+							this.$openSdk.markC2CMessageAsRead(this.vuex_conversation.userID, JSON.stringify(cids), (data) => {
+								// console.log(data);
+								if(data.err==undefined){
+									cids.map(cid=>{
+										tmpArr.map(t=>{
+											if(t.clientMsgID==cid) t.isRead = true
+										})
+									})
+									
+								}
+							})
+						}
+					}
+					tmpArr.forEach(msg =>{
+						msg.positionId = "msg" + randomString(19)
+						if(msg.sendID!=this.vuex_user_info.uid) msg.senderFaceUrl = this.vuex_conversation.faceUrl==""?this.vuex_conversation.icon:this.vuex_conversation.faceUrl
+					})
+					this.msgList = [...tmpArr, ...this.msgList]
+					setTimeout(() => {
+						this.refresherState = false
+						this.refreshing = false
+						if (tmpArr.length === 0) this.lastState = true
+					})
 				})
 			},
-
 			newMsgListener() {
 				this.$globalEvent.addEventListener("onRecvNewMessage", (params) => {
 					let res = JSON.parse(params.msg)
-					console.log(res);
-					if (res.recvID === this.vuex_user_info[0].uid || res.recvID === this.groupID) this.msgList.push(res);
+					if (res.contentType === 113) {
+						this.getTypingStatus()
+					} else {
+						if (res.recvID === this.vuex_user_info.uid || res.recvID === this.groupID){
+							this.msgList.push(res);
+							this.markC2CRead(this.vuex_conversation.userID, JSON.stringify([res.clientMsgID]),(params)=>console.log(params))
+						}
+					}
+				});
+				this.$globalEvent.addEventListener("onRecvC2CReadReceipt",(params)=>{
+					let res = JSON.parse(params.msg)
+					const cids = res[0].msgIDList
+					this.msgList.map(msg=>{
+						cids.map(cid=>{
+							if(msg.clientMsgID==cid) msg.isRead = true;
+						})
+					})
+				});
+				this.$globalEvent.addEventListener("onRecvMessageRevoked",(params)=>{
+					const delIndex = this.msgList.findIndex(m => m.clientMsgID == params.msg)
+					this.msgList.splice(delIndex, 1)
 				});
 			},
 			sendMessageListener() {
 				this.$globalEvent.addEventListener("sendMessageSuccess", (params) => {
 					const res = JSON.parse(params.msg);
+					console.log(res);
 					_this.myList.forEach(myMsg => {
-						if (myMsg.clientMsgID == res.clientMsgID && myMsg.contentType == 101) {
+						if (myMsg.clientMsgID === res.clientMsgID) {
 							const tmpArr = Object.assign([], _this.msgList)
 							const reversIndex = tmpArr.findIndex(t => t.clientMsgID == myMsg.clientMsgID)
 							_this.msgList[reversIndex].status = 2
@@ -215,6 +260,7 @@
 				});
 				this.$globalEvent.addEventListener("sendMessageFailed", (params) => {
 					const res = JSON.parse(params.msg);
+					console.log(res);
 					_this.myList.forEach(myMsg => {
 						if (myMsg.clientMsgID == res.clientMsgID) {
 							const tmpArr = Object.assign([], _this.msgList)
@@ -265,19 +311,17 @@
 					uni.chooseVideo({
 						sourceType: ["album"],
 						success: (res) => {
-							console.log(res.tempFilePath);
-							console.log(res.duration);
 							const thumbPath = getAndroidVideoThumb(res.tempFilePath)
-							const fileIndex = res.tempFilePath.indexOf("__UNI__C117447") + 14
-							const thumbIndex = thumbPath.indexOf("__UNI__C117447") + 14
 							const suffixIndex = res.tempFilePath.lastIndexOf(".") + 1
 							const suffix = res.tempFilePath.slice(suffixIndex)
-							let url = res.tempFilePath.slice(fileIndex)
-							url = '../..' + url
-							const snapshot = '../..' + thumbPath.slice(thumbIndex)
-							let newVideoMessage = _this.$openSdk.createVideoMessage(url, suffix, res.duration,
-								snapshot);
-								console.log(newVideoMessage);
+
+							const fullPath = plus.io.convertLocalFileSystemURL(res.tempFilePath)
+							const snapshotFullPath = plus.io.convertLocalFileSystemURL(thumbPath)
+							let newVideoMessage = _this.$openSdk.createVideoMessageFromFullPath(fullPath,
+								suffix, res.duration,
+								snapshotFullPath);
+
+
 							const clientMsgID = _this.$openSdk.sendMessage(
 								newVideoMessage,
 								_this.recvID,
@@ -285,15 +329,14 @@
 								false
 							);
 							let newVideoMessage2 = JSON.parse(newVideoMessage)
-							console.log(newVideoMessage2);
 							newVideoMessage2.clientMsgID = clientMsgID
+							newVideoMessage2.localFlag = 1
 							_this.myList.push(newVideoMessage2)
 							_this.msgList.push(newVideoMessage2)
 						},
 					});
 				}
 			},
-
 			album() {
 				uni.chooseImage({
 					count: 9,
@@ -302,9 +345,8 @@
 					success: function(res) {
 						for (let i = 0; i < res.tempFilePaths.length; i++) {
 							const tempFilePath = res.tempFilePaths[i];
-							const tmpPath = tempFilePath.slice(4);
-							const contactPath = ".." + tmpPath;
-							let newImgMessage = _this.$openSdk.createImageMessage(contactPath);
+							const fullPath = plus.io.convertLocalFileSystemURL(tempFilePath)
+							let newImgMessage = _this.$openSdk.createImageMessageFromFullPath(fullPath);
 							const clientMsgID = _this.$openSdk.sendMessage(
 								newImgMessage,
 								_this.recvID,
@@ -313,6 +355,7 @@
 							);
 							let newImgMessage2 = JSON.parse(newImgMessage)
 							newImgMessage2.clientMsgID = clientMsgID
+							newImgMessage2.localFlag = 1
 							_this.myList.push(newImgMessage2)
 							_this.msgList.push(newImgMessage2);
 						}
@@ -325,9 +368,9 @@
 					sourceType: ["camera"],
 					success: function(res) {
 						const tempFilePaths = res.tempFilePaths[0];
-						const tmpPath = tempFilePaths.slice(4);
-						const contactPath = ".." + tmpPath;
-						let newImgMessage = _this.$openSdk.createImageMessage(contactPath);
+						const fullPath = plus.io.convertLocalFileSystemURL(tempFilePaths)
+						console.log(fullPath);
+						let newImgMessage = _this.$openSdk.createImageMessageFromFullPath(fullPath);
 						const clientMsgID = _this.$openSdk.sendMessage(
 							newImgMessage,
 							_this.recvID,
@@ -336,6 +379,7 @@
 						);
 						let newImgMessage2 = JSON.parse(newImgMessage)
 						newImgMessage2.clientMsgID = clientMsgID
+						newImgMessage2.localFlag = 1
 						_this.myList.push(newImgMessage2)
 						_this.msgList.push(newImgMessage2);
 					},
@@ -348,21 +392,26 @@
 			sendTextMsg() {
 				if (this.inputValue) {
 					let newTextMessage
-					if(this.atStatus){
-						newTextMessage = this.$openSdk.createTextAtMessage(this.inputValue,JSON.stringify(this.atUserId))
-					}else{
+					if (this.atStatus && this.inputValue.indexOf('@') > -1) {
+						let atList = []
+						this.atUserId.forEach(user => {
+							if (this.inputValue.indexOf('@' + user.name) > -1) atList.push(user.id)
+						})
+						console.log(atList);
+						// newTextMessage = this.$openSdk.createTextAtMessage(this.inputValue,JSON.stringify(atList))
+					} else {
 						newTextMessage = this.$openSdk.createTextMessage(
 							this.inputValue
 						);
 					}
-					console.log(newTextMessage);
+					// console.log(newTextMessage);
 					const clientMsgID = this.$openSdk.sendMessage(
 						newTextMessage,
 						_this.recvID,
 						_this.groupID,
 						false
 					);
-					// console.log(clientMsgID);
+					console.log(clientMsgID);
 					let newTextMessage2 = JSON.parse(newTextMessage)
 					newTextMessage2.clientMsgID = clientMsgID
 					this.inputValue = "";
@@ -372,17 +421,23 @@
 					this.atUserId = []
 				}
 			},
-			atOne(item){
-				console.log(222222222);
+			atOne(item) {
+				if (this.recvID) return false
 				this.atStatus = true
-				this.atUserId.push(item.sendID)
+				this.atUserId.push({
+					id: item.sendID,
+					name: item.senderNickName
+				})
 				this.inputValue += `@${item.senderNickName} `
 			},
 			sendVoice() {
 				if (this.voicePath == "") return false
-				const tmpPath = this.voicePath.slice(4);
-				const contactPath = ".." + tmpPath;
-				let newVoiceMessage = _this.$openSdk.createSoundMessage(contactPath, this.intervalTime);
+				// const tmpPath = this.voicePath.slice(4);
+				// const contactPath = ".." + tmpPath;
+				// let newVoiceMessage = _this.$openSdk.createSoundMessage(contactPath, this.intervalTime);
+
+				const fullPath = plus.io.convertLocalFileSystemURL(this.voicePath)
+				let newVoiceMessage = _this.$openSdk.createSoundMessageFromFullPath(fullPath, this.intervalTime);
 				const clientMsgID = _this.$openSdk.sendMessage(
 					newVoiceMessage,
 					_this.recvID,
@@ -391,6 +446,7 @@
 				);
 				let newVoiceMessage2 = JSON.parse(newVoiceMessage)
 				newVoiceMessage2.clientMsgID = clientMsgID
+				newVoiceMessage2.localFlag = 1
 				newVoiceMessage2.soundElem.uuid = new Date().getTime()
 				this.myList.push(newVoiceMessage2)
 				this.msgList.push(newVoiceMessage2)
@@ -430,24 +486,45 @@
 				}
 			},
 			marAsRead() {
-				if(this.recvID){
+				if (this.recvID) {
 					this.$openSdk.markSingleMessageHasRead(this.recvID, data => {
 						console.log(data);
 					})
-				}else{
+				} else {
 					this.$openSdk.markGroupMessageHasRead(this.groupID, data => {
 						console.log(data);
 					})
 				}
 			},
+			markC2CRead(receiverID,msgIDList) {
+				this.$openSdk.markC2CMessageAsRead(receiverID, msgIDList, (data) => {
+					console.log(data);
+				})
+			},
+			setTypingStatus(receiverID,msgTip) {
+				this.$openSdk.typingStatusUpdate(receiverID, msgTip)
+			},
+			getTypingStatus() {
+				this.tip = 'typing...'
+				if(this.typingTimer!=null) clearTimeout(this.typingTimer)
+				this.typingTimer = setTimeout(() => {
+					this.tip = ''
+				},3000)
+			},
 			delMsgListen() {
 				uni.$on("deleteMsg", ({
-					id,
+					msgId,
 					isRevoke
 				}) => {
-					const delIndex = this.msgList.findIndex(m => m.positionId == id)
+					const delIndex = this.msgList.findIndex(m => m.clientMsgID == msgId)
 					this.msgList.splice(delIndex, 1)
 					if (isRevoke) {
+						const revokeItem = {
+							contentType:111,
+							sendID:this.vuex_user_info.uid,
+							positionId:"msg" + randomString(19)
+							}
+						this.msgList.push(revokeItem)
 						this.$u.toast("revoke msg")
 					} else {
 						this.$u.toast("delete success")
@@ -457,23 +534,36 @@
 			reSendListen() {
 				uni.$on("reSend", (item) => {
 					console.log(item);
+					const clientMsgID = _this.$openSdk.sendMessage(
+						JSON.stringify(item),
+						_this.recvID,
+						_this.groupID,
+						false
+					);
+					const idx = this.msgList.findIndex(msg => msg.clientMsgID === item.clientMsgID)
+					item.localFlag = 1
+					this.msgList.splice(idx, 1)
+					this.myList.push(item)
+					this.msgList.push(item)
+					console.log(clientMsgID);
+					// this.msgList.findIndex(msg=>msg.)
 				})
 			},
-			setDraft(){
-				if(this.conversationID){
-					this.$openSdk.setConversationDraft(this.conversationID,this.inputValue,(data)=>{
+			setDraft() {
+				if (this.conversationID) {
+					this.$openSdk.setConversationDraft(this.conversationID, this.inputValue, (data) => {
 						console.log(data);
 					})
 				}
 			},
 			getMemberList() {
-				if(this.groupID=="") return false
+				if (this.groupID == "") return false
 				this.$openSdk.getGroupMemberList(this.groupID, 0, 0, (data) => {
 					const tmpArr = JSON.parse(data.msg).data
 					this.groupMemberList = tmpArr
-					this.msgList.forEach(msg=>{
-						this.groupMemberList.forEach(member=>{
-							if(msg.sendID===member.userId){
+					this.msgList.forEach(msg => {
+						this.groupMemberList.forEach(member => {
+							if (msg.sendID === member.userId) {
 								msg.senderNickName = member.nickName
 								msg.senderFaceUrl = member.faceUrl
 							}
@@ -489,16 +579,23 @@
 					if (val.length === 0) return false
 					if (!val[val.length - 1].positionId) {
 						val[val.length - 1].positionId = "msg" + randomString(19)
-						console.log(val[val.length - 1]);
 					}
 					setTimeout(() => this.listItem = val[val.length - 1].positionId, 200)
 				},
 				deep: true
+			},
+			inputValue(newVal,oldVal){
+				if(this.inputTimer==null){
+					this.inputTimer = setTimeout(()=>{
+						this.setTypingStatus(this.vuex_conversation.userID,"yes")
+						this.inputTimer = null
+					},1500)
+				}
 			}
 		},
 		beforeMount() {
-			this.recvID = this.vuex_conversation.userID||""
-			this.groupID = this.vuex_conversation.groupID||""
+			this.recvID = this.vuex_conversation.userID || ""
+			this.groupID = this.vuex_conversation.groupID || ""
 			this.conversationID = this.vuex_conversation.conversationID
 			this.getScreen()
 			this.delMsgListen()
@@ -506,11 +603,11 @@
 			this.getHistoryMessageList(null);
 			this.newMsgListener();
 			this.sendMessageListener()
-			this.marAsRead()
+			// this.marAsRead()
 		},
 		onLoad: function(options) {
 			_this = this
-			if(options.draft)this.inputValue = options.draft
+			if (options.draft) this.inputValue = options.draft
 			recorderManager.onStop(function(res) {
 				_this.voicePath = res.tempFilePath;
 			});
@@ -547,25 +644,27 @@
 
 	.bottom-bar {
 		max-height: 57px;
-		.bar-list{
+
+		.bar-list {
 			display: flex;
 			align-items: center;
 			justify-content: space-around;
 			background-color: #e8f2ff;
 			padding: 16rpx 0;
+
 			.bottom-input {
 				background-color: #FFFFFF;
 				border-radius: 12rpx;
 				// height: 56rpx;
 			}
-			
+
 			.bottom-btn {
 				color: #FFFFFF;
 				background-color: #1b72ec;
 				font-size: 28rpx;
 				margin-right: 16rpx;
 			}
-			
+
 			.u-icon {
 				margin: 0 16rpx;
 			}
@@ -575,12 +674,13 @@
 	.chat-list {
 		// height: calc(100vh - 202rpx);
 		background-color: #FFFFFF;
-		.agree-msg{
-			    height: 80rpx;
-			    line-height: 80rpx;
-			    text-align: center;
-			    font-size: 24rpx;
-			    color: #e5e5e5;
+
+		.agree-msg {
+			height: 80rpx;
+			line-height: 80rpx;
+			text-align: center;
+			font-size: 24rpx;
+			color: #e5e5e5;
 		}
 	}
 
@@ -600,7 +700,6 @@
 			}
 		}
 	}
-
 
 	.mask-warp {
 		left: 0;
@@ -641,7 +740,6 @@
 		}
 
 		.btn-list {
-
 			.action-btn {
 				margin: 10vh 0 3vh 0;
 				display: flex;

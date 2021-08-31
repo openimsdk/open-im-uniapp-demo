@@ -9,8 +9,8 @@
 				<image src="../../static/newFriend.png" mode="" class="newFriendIcon"></image>
 				<text class="newFriendText">New friends</text>
 			</view>
-			<view v-if="application>0" class="newFriendNumber">
-				{{application}}
+			<view v-if="vuex_friend_application_num>0" class="newFriendNumber">
+				{{vuex_friend_application_num}}
 			</view>
 		</view>
 		<view class="newFriend" @click="goNewGroup">
@@ -18,8 +18,8 @@
 				<image src="../../static/group_notification.png" mode="" class="newFriendIcon"></image>
 				<text class="newFriendText">Group notification</text>
 			</view>
-			<view v-if="groupApplication>0" class="newFriendNumber">
-				{{groupApplication}}
+			<view v-if="vuex_group_application_num>0" class="newFriendNumber">
+				{{vuex_group_application_num}}
 			</view>
 		</view>
 		<view class="newFriend" @click="goGroupList">
@@ -28,8 +28,8 @@
 				<text class="newFriendText">Group list</text>
 			</view>
 		</view>
-		<u-empty v-if="originalList.length===0" class="empty" text="There is no contact" mode="list"/>
-		<uni-indexed-list v-else :options="friendList" :showSelect="false" @click="bindClick"></uni-indexed-list>
+		<u-empty v-if="vuex_original_mail_list.length===0" class="empty" text="There is no contact" mode="list"/>
+		<uni-indexed-list v-else :options="vuex_mail_list" :showSelect="false" @click="bindClick"></uni-indexed-list>
 	</view>
 </template>
 
@@ -43,7 +43,7 @@
 				// 	'U', 'V', 'W', 'X', 'Y', 'Z'
 				// ],
 				Initials: ['#'],
-				friendList: [],
+				// friendList: [],
 				originalList: [],
 				groupList:[],
 				applicationList: [],
@@ -71,35 +71,22 @@
 				this.$openSdk.getFriendList((data) => {
 					this.originalList = JSON.parse(data.msg)
 					console.log(this.originalList);
-					this.$u.vuex('vuex_mail_list',this.originalList)
-					this.friendList = [{
+					this.$u.vuex('vuex_original_mail_list',this.originalList)
+					const friendList = [{
 						letter: "#",
 						data: this.originalList
 					}]
+					this.$u.vuex('vuex_mail_list',friendList)
 					uni.stopPullDownRefresh()
-					// this.initMailList()
-				})
-			},
-			// initMailList(){
-			// 	this.friendList = [{
-			// 		letter: "#",
-			// 		data: [...this.originalList,...this.groupList]
-			// 	}]
-			// 	uni.stopPullDownRefresh()
-			// 	console.log(this.friendList);
-			// },
-			getGroupList(){
-				this.$openSdk.getJoinedGroupList(data=>{
-					this.groupList = JSON.parse(data.msg)
-					this.$u.vuex('vuex_group_list',this.groupList)
-					// this.initMailList()
 				})
 			},
 			getFriendApplicationList() {
 				this.$openSdk.getFriendApplicationList((data) => {
 					this.applicationList = JSON.parse(data.msg)
+					this.$u.vuex('vuex_group_application_list', this.applicationList)
 					const tmpArr = this.applicationList.filter(a => a.flag === 0)
 					this.application = tmpArr.length
+					this.$u.vuex('vuex_friend_application_num', this.application)
 					const totalNum = this.groupApplication + this.application
 					if(totalNum===0){
 						uni.removeTabBarBadge({
@@ -117,8 +104,10 @@
 				this.$openSdk.getGroupApplicationList((data) => {
 					const tmpInfo = JSON.parse(data.msg)
 					this.groupApplicationList = tmpInfo.user;
+					this.$u.vuex('vuex_group_application_list', this.groupApplicationList)
 					const tmpArr = this.groupApplicationList.filter(a => a.flag === 0)
 					this.groupApplication = tmpArr.length;
+					this.$u.vuex('vuex_group_application_num', this.groupApplication)
 					const totalNum = this.groupApplication + this.application
 					if(totalNum===0){
 						uni.removeTabBarBadge({
@@ -163,12 +152,12 @@
 			},
 			goNewFriends() {
 				uni.navigateTo({
-					url: '/pages/mailList/newFriends?list=' + JSON.stringify(this.applicationList)
+					url: '/pages/mailList/newFriends'
 				});
 			},
 			goNewGroup(){
 				uni.navigateTo({
-					url: '/pages/mailList/groupNotification?list=' + JSON.stringify(this.groupApplicationList)
+					url: '/pages/mailList/groupNotification'
 				});
 			},
 			goGroupList(){
@@ -176,93 +165,16 @@
 					url: '/pages/mailList/groupList'
 				});
 			},
-			friendsListener() {
-				this.$globalEvent.addEventListener(
-					"onFriendApplicationListAdded",
-					(params) => {
-						this.getFriendApplicationList()
-					}
-				);
-				this.$globalEvent.addEventListener(
-					"onFriendInfoChanged",
-					(params) => {
-						console.log('onFriendInfoChanged```````````````');
-						this.getMailList()
-					}
-				);
-				this.$globalEvent.addEventListener("onFriendListAdded", (params) => {
-					console.log(params);
-					this.getMailList()
-				});
-				this.$globalEvent.addEventListener("onFriendListDeleted", (params) => {
-					console.log(params);
-					this.getMailList()
-				});
-				
-			},
-			groupListner(){
-				// this.$globalEvent.addEventListener("onGroupInfoChanged", (params) => {
-				// 	console.log('onGroupInfoChanged-------------------');
-				// 	const tmpData = JSON.parse(params.msg)
-				// 	console.log(tmpData);
-				// 	const tmpInfo = JSON.parse(tmpData.groupInfo)
-				// 	for(let i=0;i<this.groupList.length;i++){
-				// 		console.log(this.groupList[i].groupID);
-				// 		console.log(tmpData.groupId);
-				// 		if(this.groupList[i].groupID===tmpData.groupId){
-				// 			this.groupList[i] = {...this.groupList[i],...tmpInfo}
-				// 			console.log(this.groupList);
-				// 			this.initMailList();
-				// 		}
-				// 	}
-				// });
-				// this.$globalEvent.addEventListener("onApplicationProcessed", (params) => {
-				// 	console.log('onApplicationProcessed----------');
-				// 	console.log(params);
-				// 	this.getGroupList()
-				// });
-				// this.$globalEvent.addEventListener("onMemberEnter", (params) => {
-				// 	console.log('onMemberEnter----------');
-				// 	console.log(params);
-				// 	this.getGroupList()
-				// });
-				this.$globalEvent.addEventListener("onReceiveJoinApplication", (params) => {
-					console.log('onReceiveJoinApplication----------');
-					console.log(params);
-					this.getGroupApplicationList()
-				});
-				// this.$globalEvent.addEventListener("onGroupCreated", (params) => {
-				// 	console.log('onGroupCreated----------');
-				// 	console.log(params);
-				// 	this.getGroupList()
-				// });
-				// this.$globalEvent.addEventListener("onMemberKicked", (params) => {
-				// 	console.log('onMemberKicked----------');
-				// 	console.log(params);
-				// 	this.getGroupList()
-				// });
-				// uni.$on('quitGroup',()=>{
-				// 	this.getGroupList()
-				// })
-			}
 		},
 		onHide() {
 			if(this.showOperationsMenu) this.showOperationsMenu = false
 		},
 		onPullDownRefresh(){
 			this.getMailList()
-			// this.getGroupList()
 			this.getFriendApplicationList()
 			this.getGroupApplicationList()
 		},
-		beforeMount() {
-			this.friendsListener()
-			this.groupListner()
-			this.getMailList()
-			// this.getGroupList()
-		},
 		onShow() {
-			// this.getMailList()
 			this.getFriendApplicationList()
 			this.getGroupApplicationList()
 		}

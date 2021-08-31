@@ -5,7 +5,7 @@
 				:src="userInfo.icon?userInfo.icon:'https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png' "
 				mode="" class="headIcon"></image>
 			<view class="headInfo">
-				<text class="nickName">{{ userInfo.name || newUser }}</text>
+				<text class="nickName">{{ userInfo.name }}</text>
 				<text class="account" @click="copyID">My Account:<text>{{ userInfo.uid }}</text></text>
 			</view>
 		</view>
@@ -68,11 +68,11 @@
 							if (data.err) {
 								_this.$u.toast('change fail：' + data.err)
 							} else {
-								const reqData = [_this.vuex_user_info[0].uid]
+								const reqData = [_this.vuex_user_info.uid]
 								_this.$openSdk.getUsersInfo(JSON.stringify(reqData), async data => {
 									let userInfoRes = JSON.parse(data.msg)
-									_this.$u.vuex('vuex_user_info',userInfoRes)
-									_this.userInfo = _this.vuex_user_info[0];
+									_this.$u.vuex('vuex_user_info',userInfoRes[0])
+									_this.userInfo = _this.vuex_user_info;
 								})
 
 							}
@@ -108,7 +108,7 @@
 			},
 		},
 		onShow() {
-			this.userInfo = this.vuex_user_info[0];
+			this.userInfo = this.vuex_user_info;
 		},
 	};
 </script>

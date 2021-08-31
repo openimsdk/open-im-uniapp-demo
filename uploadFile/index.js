@@ -8,7 +8,7 @@ var that;
 
 const tencentCloudStorageCredential = () => {
 	let parameter = {
-		operationID: that.vuex_user_info[0].uid + Date.now().toString(),
+		operationID: that.vuex_user_info.uid + Date.now().toString(),
 		token: that.vuex_token
 	}
 	return new Promise((resolve, reject) => {

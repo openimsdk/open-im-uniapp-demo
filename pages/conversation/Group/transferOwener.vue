@@ -34,7 +34,7 @@
 				if(val===""){
 					this.showIndex = true
 					this.friendList[0].letter = "#"
-					this.friendList[0].data = this.vuex_mail_list
+					this.friendList[0].data = this.vuex_original_mail_list
 				}else{
 					this.showIndex = false
 					const newArr = []
@@ -64,7 +64,6 @@
 						v.nickName = v.userId
 						if(v.userId!==this.vuex_group_info.groupID) return v
 					})
-					console.log(this.friendList[0].data);
 				})
 			},
 		},

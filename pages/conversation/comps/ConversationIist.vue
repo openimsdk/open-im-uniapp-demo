@@ -38,8 +38,8 @@
 					<text>Delete</text>
 				</view>
 				<view v-show="item.unreadCount !== 0" class="action-item action-item-mark"
-					@click="markAsRead(item.userID)">
-					<text>Mark as read</text>
+					@click="markAsRead(item)">
+					<text>Mark read</text>
 				</view>
 			</template>
 		</uni-swipe-action-item>
@@ -51,6 +51,7 @@
 		calculateDiffTime,
 		formatDate
 	} from "@/utils/tools.js";
+	let that;
 	export default {
 		data() {
 			return {
@@ -85,6 +86,8 @@
 					case 106:
 						return JSON.parse(value.latestMsg.content).text;
 						break;
+					case 111:
+						return value.latestMsg.sendID==that.vuex_user_info.uid?"you revoke a message":value.latestMsg.senderNickName+" revoke a message"
 					default:
 						const tmpMsg = JSON.parse(value.latestMsg.content)
 						return tmpMsg.isDisplay === 1 ? tmpMsg.defaultTips : "system msg"
@@ -93,7 +96,7 @@
 			dateFilter(val) {
 				if (!val) return ""
 				// const fromDay = calculateDiffTime(val);
-				const sendTimeArr = formatDate(val * 1000);
+				const sendTimeArr = formatDate(val/1000000);
 				const currentTimeArr = formatDate(new Date().getTime());
 				if (sendTimeArr[0] < currentTimeArr[0] || sendTimeArr[1] < currentTimeArr[1] || sendTimeArr[2] <
 					currentTimeArr[2]) {
@@ -129,12 +132,20 @@
 					console.log(data);
 				});
 			},
-			markAsRead(id) {
-				console.log(id);
-				this.$openSdk.markSingleMessageHasRead(id, (data) => {
-					console.log(data);
-				});
+			markAsRead(item) {
+				if (item.userID) {
+					this.$openSdk.markSingleMessageHasRead(item.userID, data => {
+						console.log(data);
+					})
+				} else {
+					this.$openSdk.markGroupMessageHasRead(item.groupID, data => {
+						console.log(data);
+					})
+				}
 			},
+		},
+		beforeCreate() {
+			that = this
 		}
 	}
 </script>

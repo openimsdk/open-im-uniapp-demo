@@ -31,7 +31,6 @@
 				uni.navigateBack()
 			},
 			search() {
-				console.log(this.searchList);
 				this.searchList = this.friendList.filter(i => i.uid.indexOf(this.searchVal) > -1)
 			}
 		},

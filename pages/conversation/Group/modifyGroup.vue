@@ -50,7 +50,6 @@
 				this.$openSdk.getGroupsInfo(JSON.stringify(groupIdList),(data)=>{
 					this.groupInfo = JSON.parse(data.msg)[0]
 					this.$u.vuex('vuex_group_info',this.groupInfo)
-					console.log(this.groupInfo);
 				})
 			},
 		},

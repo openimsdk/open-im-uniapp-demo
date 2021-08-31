@@ -4,7 +4,7 @@
 		<view class="main">
 			<u-search action-text="search" :placeholder="placeholder" class="my-search" disabled shape="square" @click="goInput" />
 			<view class="myUid">
-				<text>My Account: {{ this.vuex_user_info[0].uid}}</text>
+				<text>My Account: {{ this.vuex_user_info.uid}}</text>
 			</view>
 		</view>
 	</view>

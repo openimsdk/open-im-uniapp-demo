@@ -72,7 +72,7 @@
 								const reqData = [res.data.data.uid]
 								_this.$openSdk.getUsersInfo(JSON.stringify(reqData), data => {
 									let userInfoRes = JSON.parse(data.msg)
-									_this.$u.vuex('vuex_user_info',userInfoRes)
+									_this.$u.vuex('vuex_user_info',userInfoRes[0])
 									_this.$u.vuex('vuex_token',res.data.data.token.accessToken)
 								})
 								_this.loginLoading = false

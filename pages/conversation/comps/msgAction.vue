@@ -48,7 +48,8 @@
 				this.$openSdk.deleteMessageFromLocalStorage(JSON.stringify(this.msgItem), (data) => {
 					if (data.msg === "") {
 						const params = {
-							positionId: _this.msgItem.positionId
+							msgId: _this.msgItem.clientMsgID,
+							isRevoke:false
 						}
 						this.msgItem.isDelete = true
 						uni.$emit("deleteMsg", params)
@@ -60,16 +61,17 @@
 				// this.$openSdk.createForwardMessage()
 			},
 			withdrawMsg() {
-				// this.$openSdk.revokeMessage(JSON.stringify(this.msgItem),(data)=>{
-				// 	if(data.msg===""){
-				// 		const params = {
-				// 			positionId:_this.msgItem.positionId,
-				// 			isRevoke:true
-				// 		}
-				// 		uni.$emit("deleteMsg",{positionId:params})
-				// 	}
-				// })
-				this.$u.toast("withdrawMsg developing")
+				let _this = this
+				this.$openSdk.revokeMessage(JSON.stringify(this.msgItem),(data)=>{
+					if(data.msg===""){
+						const params = {
+							msgId:_this.msgItem.clientMsgID,
+							isRevoke:true
+						}
+						uni.$emit("deleteMsg",params)
+					}
+				})
+				// this.$u.toast("withdrawMsg developing")
 			}
 		},
 	}

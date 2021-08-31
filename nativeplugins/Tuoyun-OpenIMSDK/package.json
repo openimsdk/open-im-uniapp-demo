@@ -1,0 +1,17 @@
+{
+	"name": "OpenIMSDK",
+	"id": "Tuoyun-OpenIMSDK",
+	"version": "1.0.0",
+	"description": "IM",
+	"_dp_type": "nativeplugin",
+	"_dp_nativeplugin": {
+		"android": {
+			"plugins": [{
+				"type": "module",
+				"name": "Tuoyun-OpenIMSDK",
+				"class": "com.example.openim.OpenIMSDK"
+			}],
+			"integrateType": "aar"
+		}
+	}
+}

@@ -6,8 +6,8 @@
 		</view>
 		<view class="main">
 			<view class="chatList">
-				<u-empty v-if="sessionList.length===0" class="empty" text="There is no conversation" mode="message"/>
-				<ConversationIist v-else :sessionList="sessionList" />
+				<u-empty v-if="vuex_conversation_list.length===0" class="empty" text="There is no conversation" mode="message"/>
+				<ConversationIist v-else :sessionList="vuex_conversation_list" />
 			</view>
 		</view>
 	</view>
@@ -16,6 +16,7 @@
 <script>
 	import HeaderModal from '@/components/HeaderModal/HeaderModal.vue'
 	import ConversationIist from './comps/ConversationIist.vue'
+	import initSDKMixin from '@/utils/openIM-mixin.vue'
 	export default {
 		data() {
 			return {
@@ -28,6 +29,7 @@
 				listener: null,
 			};
 		},
+		mixins:[initSDKMixin],
 		components: {
 			HeaderModal,
 			ConversationIist
@@ -36,41 +38,6 @@
 			pageClick() {
 				console.log("pageClick");
 				if (this.showOperationsMenu) this.showOperationsMenu = false
-			},
-			setConversationListener() {
-				let _this = this;
-				_this.$globalEvent.addEventListener("onNewConversation", (params) => {
-					let res = JSON.parse(params.msg);
-					res.forEach((r) => (r.latestMsg = JSON.parse(r.latestMsg)));
-					_this.sessionList = res.concat(_this.sessionList);
-				});
-				_this.$globalEvent.addEventListener("onConversationChanged", (params) => {
-					let res = JSON.parse(params.msg);
-					console.log(res);
-					if (res) {
-						res.forEach((r) => {
-							if (r.latestMsg !== "") {
-								r.latestMsg = JSON.parse(r.latestMsg)
-							}
-						});
-						_this.sessionList = res;
-					}
-				});
-				_this.$globalEvent.addEventListener(
-					"onTotalUnreadMessageCountChanged",
-					(params) => {
-						_this.getTotalUnreadMsgCount();
-					}
-				);
-				_this.$globalEvent.addEventListener("onSyncServerStart", (params) => {
-					console.log(params.msg);
-				});
-				_this.$globalEvent.addEventListener("onSyncServerFailed", (params) => {
-					console.log(params.msg);
-				});
-				_this.$globalEvent.addEventListener("onSyncServerFinish", (params) => {
-					console.log(params.msg);
-				});
 			},
 			getAllConversationListList() {
 				this.$openSdk.getAllConversationList((data) => {
@@ -82,77 +49,13 @@
 							tmpList[i].isShow = false;
 						}
 					}
-					this.sessionList = tmpList;
+					this.$u.vuex('vuex_conversation_list',tmpList)
 					uni.stopPullDownRefresh()
-					// console.log(this.sessionList);
-				});
-			},
-			getTotalUnreadMsgCount() {
-				this.$openSdk.getTotalUnreadMsgCount((data) => {
-					if (data.msg) {
-						if (Number(data.msg) > 0) {
-							uni.setTabBarBadge({
-								index: 0,
-								text: data.msg > 99 ? "99+" : data.msg,
-							});
-						} else {
-							uni.removeTabBarBadge({
-								index: 0,
-							});
-						}
-					}
 				});
 			},
 			controlDisplay() {
 				this.showOperationsMenu = !this.showOperationsMenu;
 			},
-			
-			getGroupList(){
-				this.$openSdk.getJoinedGroupList(data=>{
-					const originalList = JSON.parse(data.msg)
-					this.$u.vuex('vuex_group_list',originalList)
-				})
-			},
-			groupListner(){
-				this.$globalEvent.addEventListener("onGroupInfoChanged", (params) => {
-					console.log('onGroupInfoChanged-------------------');
-					const tmpData = JSON.parse(params.msg)
-					console.log(tmpData);
-					this.getGroupList()
-					// const tmpInfo = JSON.parse(tmpData.groupInfo)
-					// for(let i=0;i<this.originalList.length;i++){
-					// 	console.log(this.originalList[i].groupID);
-					// 	console.log(tmpData.groupId);
-					// 	if(this.originalList[i].groupID===tmpData.groupId){
-					// 		this.originalList[i] = {...this.originalList[i],...tmpInfo}
-					// 		this.groupList[0].data = this.originalList
-					// 	}
-					// }
-				});
-				this.$globalEvent.addEventListener("onApplicationProcessed", (params) => {
-					console.log('onApplicationProcessed----------');
-					console.log(params);
-					this.getGroupList()
-				});
-				this.$globalEvent.addEventListener("onMemberEnter", (params) => {
-					console.log('onMemberEnter----------');
-					console.log(params);
-					this.getGroupList()
-				});
-				this.$globalEvent.addEventListener("onGroupCreated", (params) => {
-					console.log('onGroupCreated----------');
-					console.log(params);
-					this.getGroupList()
-				});
-				this.$globalEvent.addEventListener("onMemberKicked", (params) => {
-					console.log('onMemberKicked----------');
-					console.log(params);
-					// this.getGroupList()
-				});
-				uni.$on('quitGroup',()=>{
-					this.getGroupList()
-				})
-			}
 		},
 		onHide() {
 			if (this.showOperationsMenu) this.showOperationsMenu = false
@@ -161,10 +64,7 @@
 			this.getAllConversationListList()
 		},
 		beforeMount() {
-			this.setConversationListener();
 			this.getAllConversationListList();
-			this.getTotalUnreadMsgCount();
-			this.getGroupList()
 		},
 	};
 </script>

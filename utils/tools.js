@@ -99,3 +99,15 @@ export const getAndroidVideoThumb = (path) => {
         plus.android.invoke(outputStream,"close");  
         return "file://"+plus.io.convertAbsoluteFileSystem(imgpath);  
 }
+
+export const isFileExist = (path) => {
+	return new Promise((resolve,reject)=>{
+		plus.io.resolveLocalFileSystemURL(path,
+		(res)=>{
+			resolve(res)
+		},
+		(err)=>{
+			reject(err)
+		})
+	})
+}

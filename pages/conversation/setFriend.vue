@@ -17,7 +17,7 @@
 				</view>
 				<view class="operationSetItem">
 					<text>Top contact</text>
-					<u-switch @change="topContact" v-model="val" />
+					<u-switch @change="topContact" v-model="topCheck" />
 				</view>
 				<view class="operationSetItem">
 					<text>Join the blacklist</text>
@@ -78,7 +78,7 @@
 		data() {
 			return {
 				friendData: {},
-				val: false,
+				topCheck: false,
 			};
 		},
 		methods: {
@@ -87,9 +87,11 @@
 					url: "/pages/profile/editNickname?where=setFriend&friendData="+JSON.stringify(this.friendData),
 				});
 			},
-			topContact(e) {
-				this.$u.toast("developing")
-				// console.log(e);
+			topContact(state) {
+				this.$openSdk.pinConversation(this.vuex_conversation.conversationID, state, (data) => {
+					console.log(data);
+				});
+				// this.$u.toast("developing")
 			},
 
 			//blackList
@@ -163,6 +165,7 @@
 		},
 		beforeMount() {
 			this.initData()
+			this.topCheck=this.vuex_conversation.isPinned===0?false:true
 		},
 		onShow() {
 			this.initData()

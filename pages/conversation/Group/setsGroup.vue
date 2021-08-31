@@ -103,7 +103,6 @@
 				this.showQuitGroup = true
 			},
 			comfirmQuit() {
-				console.log(this.groupInfo.groupID);
 				this.loading = true
 				this.$openSdk.quitGroup(this.groupInfo.groupID, (data) => {
 					console.log(data);
@@ -138,7 +137,7 @@
 				this.breakPopState = false
 			},
 			checkPremisson() {
-				this.hasPremisson = this.vuex_user_info[0].uid === this.groupInfo.ownerId
+				this.hasPremisson = this.vuex_user_info.uid === this.groupInfo.ownerId
 			},
 			checkIsInGroup() {
 				this.isInGroup = this.vuex_group_list.findIndex(g => g.groupID === this.groupInfo.groupID) > -1
@@ -172,13 +171,6 @@
 				uni.navigateTo({
 						url: "/pages/conversation/Group/groupInfo?type=showInfo&groupInfo="+this.groupInfoJson
 					})
-				// if (this.hasPremisson) {
-				// 	uni.navigateTo({
-				// 		url: "/pages/conversation/Group/modifyGroup"
-				// 	})
-				// } else {
-				// 	this.showNoPremission = true
-				// }
 			},
 			showAll() {
 				uni.navigateTo({
@@ -211,7 +203,6 @@
 					this.$u.vuex('vuex_group_info', this.groupInfo)
 					this.checkIsInGroup()
 					this.checkPremisson()
-					console.log(this.groupInfo);
 				})
 			},
 			getGroupMemberList() {
@@ -222,7 +213,6 @@
 					} else {
 						this.groupMemberList = tmpArr.splice(0, 4)
 					}
-					console.log(this.groupMemberList);
 				})
 			},
 			

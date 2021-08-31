@@ -56,10 +56,7 @@
 			comfirmAction(){
 				if(this.selectList.length===0) return false
 				const userList = this.selectList.map(u=>u.name.userId)
-				console.log(userList);
-				console.log(this.vuex_conversation.groupID);
 				this.$openSdk.kickGroupMember(this.vuex_conversation.groupID,'',JSON.stringify(userList),(data)=>{
-					console.log(data);
 					if(data.msg&&JSON.parse(data.msg)[0].uid===userList[0]){
 						this.$refs.uToast.show({
 											title: 'kicked success',

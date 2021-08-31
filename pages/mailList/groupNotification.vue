@@ -2,7 +2,7 @@
 	<view class="">
 		<uni-nav-bar left-icon="back" title="Group notification" @clickLeft="goBack"></uni-nav-bar>
 		<scroll-view scroll-y class="scroll-box">
-			<view v-for="(item,index) in detailList" :key="item.createTime" class="notice-item">
+			<view v-for="(item,index) in vuex_group_application_list" :key="item.createTime" class="notice-item">
 				<u-avatar :src="item.fromUserFaceURL"/>
 				<view class="info-area">
 					<text class="nick">{{item.fromUserNickName}}</text>
@@ -32,12 +32,6 @@
 			goBack() {
 				uni.navigateBack()
 			},
-			getList() {
-				this.$openSdk.getGroupApplicationList((data) => {
-					console.log(JSON.parse(data.msg));
-					this.requestList = JSON.parse(data.msg)
-				})
-			},
 			addConfirm(item) {
 				const applicationJson = JSON.stringify(item)
 				const acceptReason = ""
@@ -58,25 +52,6 @@
 				})
 			},
 		},
-		// beforeMount() {
-		// 	this.getList()
-		// }
-		onLoad:function(options){
-			if(options.list){
-				const tmpList = JSON.parse(options.list)
-				this.requestList = tmpList
-				tmpList.forEach(req=>{
-					this.vuex_group_list.forEach(g=>{
-						if(g.groupID===req.groupID){
-							req.groupName = g.groupName
-							this.detailList.push(req)
-						}
-					})
-				})
-				console.log(this.detailList);
-			}
-			
-		}
 	}
 </script>
 
