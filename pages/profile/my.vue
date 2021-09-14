@@ -69,12 +69,11 @@
 								_this.$u.toast('change fail：' + data.err)
 							} else {
 								const reqData = [_this.vuex_user_info.uid]
-								_this.$openSdk.getUsersInfo(JSON.stringify(reqData), async data => {
+								_this.$openSdk.getUsersInfo(reqData, async data => {
 									let userInfoRes = JSON.parse(data.msg)
 									_this.$u.vuex('vuex_user_info',userInfoRes[0])
 									_this.userInfo = _this.vuex_user_info;
 								})
-
 							}
 						});
 					},

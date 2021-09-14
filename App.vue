@@ -34,7 +34,7 @@
 					ipWs: "wss://open-im.rentsoft.cn/wss", //websocket地址
 					dbDir, //SDK数据存放目录
 				};
-				this.flag = this.$openSdk.initSDK(JSON.stringify(obj));
+				this.flag = this.$openSdk.initSDK(obj);
 			},
 			//初始化监听
 			initOpenIMSDKListener() {

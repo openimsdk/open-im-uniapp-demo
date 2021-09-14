@@ -30,10 +30,11 @@
 			getList() {
 				this.$openSdk.getBlackList((data) => {
 					this.list = JSON.parse(data.msg)
+					console.log(this.list);
 				})
 			},
 			remove(uid) {
-				this.$openSdk.deleteFromBlackList(JSON.stringify(uid), (data) => {})
+				this.$openSdk.deleteFromBlackList(uid, (data) => {})
 			},
 		},
 		mounted() {

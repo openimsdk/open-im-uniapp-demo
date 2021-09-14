@@ -68,7 +68,7 @@
 					}
 					let memberList=[]
 					this.selectList.map(v=>memberList.push({uid:v.name.uid,setRole:0}))
-					this.$openSdk.createGroup(JSON.stringify(groupInfo),JSON.stringify(memberList),(data)=>{
+					this.$openSdk.createGroup(groupInfo,memberList,(data)=>{
 						if(data.msg){
 							this.$refs.uToast.show({
 												title: 'create success',
@@ -80,7 +80,7 @@
 					})
 				}else{
 					const userList = this.selectList.map(u=>u.name.uid)
-					this.$openSdk.inviteUserToGroup(this.vuex_conversation.groupID,'',JSON.stringify(userList),(data)=>{
+					this.$openSdk.inviteUserToGroup(this.vuex_conversation.groupID,'',userList,(data)=>{
 						console.log(data);
 						if(data.msg){
 							this.$refs.uToast.show({

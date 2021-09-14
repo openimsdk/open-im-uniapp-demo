@@ -47,7 +47,7 @@
 			},
 			getGroupInfo(){
 				const groupIdList = [this.vuex_conversation.groupID]
-				this.$openSdk.getGroupsInfo(JSON.stringify(groupIdList),(data)=>{
+				this.$openSdk.getGroupsInfo(groupIdList,(data)=>{
 					this.groupInfo = JSON.parse(data.msg)[0]
 					this.$u.vuex('vuex_group_info',this.groupInfo)
 				})

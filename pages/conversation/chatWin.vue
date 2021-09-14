@@ -185,17 +185,18 @@
 					count: 10,
 					userID: this.vuex_conversation.userID || ""
 				};
-				this.$openSdk.getHistoryMessageList(JSON.stringify(reqData), data => {
+				this.$openSdk.getHistoryMessageList(reqData, data => {
 					const tmpArr = JSON.parse(data.msg)
+					console.log(tmpArr);
 					// const msgTypeList = [101, 102, 103, 104,201]
 					if(this.vuex_conversation.userID!=""){
 						let cids = []
 						tmpArr.map(m=>{
 							if(m.sendID!=this.vuex_user_info.uid&&!m.isRead) cids.push(m.clientMsgID)
 						})
-						console.log(cids);
+						// console.log(cids);
 						if(cids.length>0){
-							this.$openSdk.markC2CMessageAsRead(this.vuex_conversation.userID, JSON.stringify(cids), (data) => {
+							this.$openSdk.markC2CMessageAsRead(this.vuex_conversation.userID, cids, (data) => {
 								// console.log(data);
 								if(data.err==undefined){
 									cids.map(cid=>{
@@ -226,9 +227,9 @@
 					if (res.contentType === 113) {
 						this.getTypingStatus()
 					} else {
-						if (res.recvID === this.vuex_user_info.uid || res.recvID === this.groupID){
+						if (res.recvID === this.vuex_user_info.uid){
 							this.msgList.push(res);
-							this.markC2CRead(this.vuex_conversation.userID, JSON.stringify([res.clientMsgID]),(params)=>console.log(params))
+							this.markC2CRead(this.vuex_conversation.userID, [res.clientMsgID],(params)=>console.log(params))
 						}
 					}
 				});
@@ -242,13 +243,14 @@
 					})
 				});
 				this.$globalEvent.addEventListener("onRecvMessageRevoked",(params)=>{
+					console.log(params);
 					const delIndex = this.msgList.findIndex(m => m.clientMsgID == params.msg)
 					this.msgList.splice(delIndex, 1)
 				});
 			},
 			sendMessageListener() {
 				this.$globalEvent.addEventListener("sendMessageSuccess", (params) => {
-					const res = JSON.parse(params.msg);
+					const res = JSON.parse(params.sucMsg);
 					console.log(res);
 					_this.myList.forEach(myMsg => {
 						if (myMsg.clientMsgID === res.clientMsgID) {
@@ -259,7 +261,7 @@
 					})
 				});
 				this.$globalEvent.addEventListener("sendMessageFailed", (params) => {
-					const res = JSON.parse(params.msg);
+					const res = JSON.parse(params.errMsg);
 					console.log(res);
 					_this.myList.forEach(myMsg => {
 						if (myMsg.clientMsgID == res.clientMsgID) {
@@ -270,7 +272,7 @@
 					})
 				});
 				this.$globalEvent.addEventListener("sendMessageProgress", (params) => {
-					const res = JSON.parse(params.msg)
+					const res = JSON.parse(params.progressMsg)
 					// _this.myList.forEach(myMsg=>{
 					// 	if(myMsg.clientMsgID==res.clientMsgID){
 					// 		const tmpArr = Object.assign([],_this.msgList)
@@ -398,7 +400,7 @@
 							if (this.inputValue.indexOf('@' + user.name) > -1) atList.push(user.id)
 						})
 						console.log(atList);
-						// newTextMessage = this.$openSdk.createTextAtMessage(this.inputValue,JSON.stringify(atList))
+						// newTextMessage = this.$openSdk.createTextAtMessage(this.inputValue,atList)
 					} else {
 						newTextMessage = this.$openSdk.createTextMessage(
 							this.inputValue

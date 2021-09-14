@@ -197,9 +197,10 @@
 			},
 			getGroupInfo() {
 				const groupIdList = [this.vuex_conversation.groupID]
-				this.$openSdk.getGroupsInfo(JSON.stringify(groupIdList), (data) => {
+				this.$openSdk.getGroupsInfo(groupIdList, (data) => {
 					this.groupInfoJson = data.msg
 					this.groupInfo = JSON.parse(data.msg)[0]
+					console.log(this.groupInfo);
 					this.$u.vuex('vuex_group_info', this.groupInfo)
 					this.checkIsInGroup()
 					this.checkPremisson()

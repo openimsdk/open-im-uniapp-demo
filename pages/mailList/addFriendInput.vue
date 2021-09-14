@@ -35,7 +35,7 @@
 			searchFriend() {
 				const reqData = [this.searchValue]
 				if(this.target === "user"){
-					this.$openSdk.getUsersInfo(JSON.stringify(reqData), data => {
+					this.$openSdk.getUsersInfo(reqData, data => {
 						if (data.msg === '[]') {
 							this.noUser = true
 						} else {
@@ -46,7 +46,7 @@
 						}
 					})
 				}else{
-					this.$openSdk.getGroupsInfo(JSON.stringify(reqData), data => {
+					this.$openSdk.getGroupsInfo(reqData, data => {
 						if (data.msg === '[]') {
 							this.noUser = true
 						} else {

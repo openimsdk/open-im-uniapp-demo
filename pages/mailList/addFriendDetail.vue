@@ -80,7 +80,7 @@
 			},
 			checkShip(uid) {
 				const reqData = [uid];
-				this.$openSdk.checkFriend(JSON.stringify(reqData), (data) => {
+				this.$openSdk.checkFriend(reqData, (data) => {
 					const shipArr = JSON.parse(data.msg);
 					if (shipArr[0].flag === 1) {
 						this.isFriend = true;

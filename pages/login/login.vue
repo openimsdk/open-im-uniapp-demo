@@ -70,8 +70,9 @@
 							if (!val.err) {
 								setMnemonic(_this.account)
 								const reqData = [res.data.data.uid]
-								_this.$openSdk.getUsersInfo(JSON.stringify(reqData), data => {
+								_this.$openSdk.getUsersInfo(reqData, data => {
 									let userInfoRes = JSON.parse(data.msg)
+									console.log(userInfoRes[0]);
 									_this.$u.vuex('vuex_user_info',userInfoRes[0])
 									_this.$u.vuex('vuex_token',res.data.data.token.accessToken)
 								})

@@ -99,11 +99,11 @@
 				if (val === 1) {
 					this.$refs.blockConfirm.open();
 				} else {
-					this.$openSdk.deleteFromBlackList(JSON.stringify(this.friendData.uid), () => {});
+					this.$openSdk.deleteFromBlackList(this.friendData.uid, () => {});
 				}
 			},
 			addBlackConfirm() {
-				this.$openSdk.addToBlackList(JSON.stringify(this.friendData.uid), (data) => {
+				this.$openSdk.addToBlackList(this.friendData.uid, (data) => {
 					console.log(data);
 					if (data.msg === "") {
 						this.$u.toast("add black list success！");
@@ -135,7 +135,7 @@
 				this.$refs.deleteConfirm.open();
 			},
 			deleteConfirm() {
-				this.$openSdk.deleteFromFriendList(JSON.stringify(this.friendData.uid), (data) => {
+				this.$openSdk.deleteFromFriendList(this.friendData.uid, (data) => {
 					console.log(data);
 					if (data.msg === "") {
 						this.$u.toast("delete success！");
@@ -155,7 +155,7 @@
 			},
 			initData() {
 				const reqData = [this.vuex_conversation_user]
-				this.$openSdk.getFriendsInfo(JSON.stringify(reqData), (data) => {
+				this.$openSdk.getFriendsInfo(reqData, (data) => {
 					if (data.msg) {
 						const tmpArr = JSON.parse(data.msg)
 						this.friendData = tmpArr[0]

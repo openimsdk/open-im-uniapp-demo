@@ -36,13 +36,13 @@
 					let reqData = {}
 					reqData.name = this.nickname
 					let _this = this
-					this.$openSdk.setSelfInfo(JSON.stringify(reqData), data => {
+					this.$openSdk.setSelfInfo(reqData, data => {
 						console.log(data);
 						if (data.err) {
 							_this.$u.toast('change failed')
 						} else {
 							const reqData = [_this.vuex_user_info.uid]
-							_this.$openSdk.getUsersInfo(JSON.stringify(reqData), async data => {
+							_this.$openSdk.getUsersInfo(reqData, async data => {
 								let userInfoRes = JSON.parse(data.msg)
 								console.log(userInfoRes);
 								_this.$u.vuex('vuex_user_info',userInfoRes[0])
@@ -56,7 +56,7 @@
 					let reqData = {}
 					reqData.uid = this.friendInfo.uid
 					reqData.comment = this.nickname
-					this.$openSdk.setFriendInfo(JSON.stringify(reqData), data => {
+					this.$openSdk.setFriendInfo(reqData, data => {
 						if (data.err) {
 							_this.$u.toast('change fail：' + data.err)
 						} else {
