@@ -20,7 +20,7 @@
 		methods:{
 			changeGroupInfo(){
 				this.loadding = true
-				this.$openSdk.setGroupInfo(JSON.stringify(this.groupInfo),(data)=>{
+				this.$openSdk.setGroupInfo(this.groupInfo,(data)=>{
 					console.log(data);
 					if(data.msg){
 						this.$u.toast('update success!')

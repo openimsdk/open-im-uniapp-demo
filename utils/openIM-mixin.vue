@@ -164,7 +164,7 @@
 					this.$u.vuex('vuex_friend_application_list', applicationList)
 					const tmpArr = applicationList.filter(a => a.flag === 0)
 					this.application = tmpArr.length
-					this.$u.vuex('vuex_group_application_num', this.application)
+					this.$u.vuex('vuex_friend_application_num', this.application)
 					const totalNum = this.groupApplication + this.application
 					if (totalNum === 0) {
 						uni.removeTabBarBadge({

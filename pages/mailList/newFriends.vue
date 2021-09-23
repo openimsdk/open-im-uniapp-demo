@@ -36,10 +36,10 @@
 				uni.navigateBack()
 			},
 			addConfirm(uid) {
-				this.$openSdk.acceptFriendApplication(JSON.stringify(uid), (data) => {})
+				this.$openSdk.acceptFriendApplication(uid, (data) => {})
 			},
 			refuseAdd(uid) {
-				this.$openSdk.refuseFriendApplication(JSON.stringify(uid), (data) => {})
+				this.$openSdk.refuseFriendApplication(uid, (data) => {})
 			},
 		},
 	}

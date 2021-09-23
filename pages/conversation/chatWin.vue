@@ -224,6 +224,7 @@
 			newMsgListener() {
 				this.$globalEvent.addEventListener("onRecvNewMessage", (params) => {
 					let res = JSON.parse(params.msg)
+					console.log(res);
 					if (res.contentType === 113) {
 						this.getTypingStatus()
 					} else {
@@ -250,6 +251,7 @@
 			},
 			sendMessageListener() {
 				this.$globalEvent.addEventListener("sendMessageSuccess", (params) => {
+					console.log(params);
 					const res = JSON.parse(params.sucMsg);
 					console.log(res);
 					_this.myList.forEach(myMsg => {
@@ -273,13 +275,6 @@
 				});
 				this.$globalEvent.addEventListener("sendMessageProgress", (params) => {
 					const res = JSON.parse(params.progressMsg)
-					// _this.myList.forEach(myMsg=>{
-					// 	if(myMsg.clientMsgID==res.clientMsgID){
-					// 		const tmpArr = Object.assign([],_this.msgList)
-					// 		const reversIndex = tmpArr.findIndex(t=>t.clientMsgID==myMsg.clientMsgID)
-					// 		_this.msgList[reversIndex].percent = params.percent
-					// 	}
-					// })
 				});
 			},
 			clickPage() {

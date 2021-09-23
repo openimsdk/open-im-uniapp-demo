@@ -37,7 +37,7 @@
 						const tempFilePaths = res.tempFilePaths;
 						let upLoadImgUrl = await uploadFile(tempFilePaths[0], _this);
 						_this.groupInfo.faceUrl = upLoadImgUrl
-						_this.$openSdk.setGroupInfo(JSON.stringify(_this.groupInfo),(data)=>{
+						_this.$openSdk.setGroupInfo(_this.groupInfo,(data)=>{
 							if(data.msg){
 								_this.$u.toast('update success!')
 							}
