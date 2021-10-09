@@ -7,6 +7,7 @@
     "bip39": "^3.0.4",
     "ethereumjs-util": "^7.0.10",
     "ethereumjs-wallet": "^1.0.1",
+    "md5": "^2.3.0",
     "qs": "^6.10.1",
     "uview-ui": "^1.8.4"
   },

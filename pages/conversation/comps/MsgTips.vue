@@ -1,6 +1,6 @@
 <template>
 	<view :id="msg.positionId" v-if="!(contentTypeFilter(msg.contentType))&&msg.contentType!=112" class="agree-msg">
-		<text v-if="ms.contentType==111">{{msg.sendID==vuex_user_info.uid?"you revoke a message":msg.senderNickName+" revoke a message"}}</text>
+		<text v-if="ms.contentType==111">{{msg.sendID==vuex_user_info.uid?"你撤回了一条消息":msg.senderNickName+" 撤回了一条消息"}}</text>
 		<text>{{JSON.parse(msg.content).defaultTips}}</text>
 	</view>
 </template>

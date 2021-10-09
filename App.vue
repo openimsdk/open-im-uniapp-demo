@@ -72,8 +72,8 @@
 		height: 100% !important;
 	}
 
-	.uni-navbar,
-	.u-navbar {
-		box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
-	}
+	// .uni-navbar,
+	// .u-navbar {
+	// 	box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
+	// }
 </style>

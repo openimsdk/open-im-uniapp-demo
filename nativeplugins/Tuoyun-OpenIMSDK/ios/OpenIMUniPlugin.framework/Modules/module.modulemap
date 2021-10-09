@@ -1,0 +1,6 @@
+framework module OpenIMUniPlugin {
+  umbrella header "OpenIMUniPlugin-umbrella.h"
+
+  export *
+  module * { export * }
+}

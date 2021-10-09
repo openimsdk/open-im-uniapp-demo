@@ -4,10 +4,9 @@
 			<u-navbar>
 				<view class="slot-wrap">
 					<view class="nick-title">
-						<text>{{vuex_conversation.showName||vuex_conversation.groupName||vuex_conversation.userID}}</text>
+						<text>{{vuex_conversation.name||vuex_conversation.showName||vuex_conversation.userID}}</text>
 						<view v-if="groupID==''" class="user-status">
 							<text>{{tip}}</text>
-							<!-- <u-icon name="arrow-right" size="14" /> -->
 						</view>
 					</view>
 				</view>
@@ -23,6 +22,7 @@
 					<view :id="msg.positionId" v-if="!(contentTypeFilter(msg.contentType))&&msg.contentType!=112" class="agree-msg">
 						<text v-if="msg.contentType==111">{{msg.sendID==vuex_user_info.uid?"you revoke a message":msg.senderNickName+" revoke a message"}}</text>
 						<text v-else>{{JSON.parse(msg.content).defaultTips}}</text>
+						<!-- <text>you revoke a message you revoke a message you revoke a message you revoke a message you revoke a message</text> -->
 					</view>
 					<OtherMsg
 						v-if="msg.sendID!==vuex_user_info.uid&&!msg.isDelete&&contentTypeFilter(msg.contentType)"
@@ -31,26 +31,22 @@
 						:msg="msg" :key="msg.positionId" :id="msg.positionId" />
 				</template>
 			</scroll-view>
+			
+			
 			<view class="bottom-bar">
+				<view :style="{visibility:replyStatus?'visible':'hidden'}" class="reply-msg">
+					<text>{{replyMsg}}</text>
+				</view>
 				<view class="bar-list">
 					<u-icon @click="voice" size="51" name="../../static/voice.png" />
 					<u-input confirm-type="send" @confirm="sendTextMsg" @focus="focusInput" v-model="inputValue"
 						height="58" placeholder="" class="bottom-input" />
 					<u-icon @click="moreAction" size="51" name="../../static/moreOperation.png" />
-					<u-button class="bottom-btn" size="mini" @click="sendTextMsg">Send</u-button>
+					<u-button class="bottom-btn" size="mini" @click="sendTextMsg">发送</u-button>
 				</view>
 			</view>
-			<view v-show="operationState" class="more-operation">
-				<view @click="clickShot" class="operation-item">
-					<u-icon size="51" name="../../static/camera.png" />
-					<text>shot</text>
-				</view>
-				<view @click="clickAlbum" class="operation-item">
-					<u-icon size="51" name="../../static/album.png" />
-					<text>album</text>
-				</view>
-			</view>
-
+			
+			<ActionsBar v-show="operationState" @clickShot="clickShot" @clickAlbum="clickAlbum" @clickVoice="clickVoice" @clickVideo="clickVideo" @clickFile="clickFile" @clickIDcard="clickIDcard" @clickLocation="clickLocation" />
 		</view>
 		<u-mask :mask-click-able="false" :show="showMask">
 			<view class="mask-warp">
@@ -64,20 +60,23 @@
 						<u-button @click="cancelVoice" type="default" size="mini">cancel</u-button>
 						<u-button @click="sendVoice" size="mini" type="default">send</u-button>
 					</view>
-					<view class="press-btn" @touchstart="startSpeack" @touchend="stopSpeack">long press when speacking
+					<view class="press-btn" @touchstart="startSpeack" @touchend="stopSpeack">长按讲话
 					</view>
 				</view>
 			</view>
 		</u-mask>
 
-		<u-action-sheet cancel-text="cancel" @click="imageOrVideo" :list="actionList" v-model="actionShow">
+		<u-action-sheet cancel-text="取消" @click="imageOrVideo" :list="actionList" v-model="actionShow">
 		</u-action-sheet>
+		<SelectFile v-model="showSelectFile" @confirm="getFilePath"></SelectFile>
 	</view>
 </template>
 
 <script>
 	import OtherMsg from "./comps/OtherMsg.vue"
 	import MyMsg from "./comps/MyMsg.vue"
+	import SelectFile from "../../components/SelectFile/SelectFile.vue"
+	import ActionsBar from "./comps/ActionsBar/ActionsBar.vue"
 	import {
 		asyncGetImgInfo,
 		randomString,
@@ -105,10 +104,10 @@
 				recorderManager: null,
 				msgList: [],
 				actionList: [{
-						text: "picture",
+						text: "图片",
 					},
 					{
-						text: "video",
+						text: "视频",
 					},
 				],
 				percent: 0,
@@ -129,6 +128,9 @@
 				tip: "",
 				typingTimer:null,
 				inputTimer:null,
+				showSelectFile:false,
+				replyStatus:false,
+				replyMsg:""
 			}
 		},
 		computed: {
@@ -138,9 +140,15 @@
 		},
 		components: {
 			OtherMsg,
-			MyMsg
+			MyMsg,
+			SelectFile,
+			ActionsBar
 		},
 		methods: {
+			getFilePath(e){
+				console.log(e);
+				console.log(plus.io.convertAbsoluteFileSystem(e[0].url));
+			},
 			contentTypeFilter(type) {
 				const msgTypeList = [101, 102, 103, 104, 106]
 				return msgTypeList.indexOf(type) > -1
@@ -178,6 +186,22 @@
 			clickAlbum() {
 				this.actionShow = true
 			},
+			clickVoice(){
+				this.$u.toast("developing")
+			},
+			clickVideo(){
+				this.$u.toast("developing")
+			},
+			clickFile(){
+				this.$u.toast("developing")
+				// this.showSelectFile = true
+			},
+			clickIDcard(){
+				this.$u.toast("developing")
+			},
+			clickLocation(){
+				this.$u.toast("developing")
+			},
 			getHistoryMessageList(start) {
 				let reqData = {
 					groupID: this.vuex_conversation.groupID || "",
@@ -189,6 +213,14 @@
 					const tmpArr = JSON.parse(data.msg)
 					console.log(tmpArr);
 					// const msgTypeList = [101, 102, 103, 104,201]
+					if(tmpArr.length==0){
+						setTimeout(() => {
+							this.refresherState = false
+							this.refreshing = false
+							this.lastState = true
+						},0)
+						return false
+					}
 					if(this.vuex_conversation.userID!=""){
 						let cids = []
 						tmpArr.map(m=>{
@@ -209,15 +241,18 @@
 							})
 						}
 					}
+
 					tmpArr.forEach(msg =>{
 						msg.positionId = "msg" + randomString(19)
-						if(msg.sendID!=this.vuex_user_info.uid) msg.senderFaceUrl = this.vuex_conversation.faceUrl==""?this.vuex_conversation.icon:this.vuex_conversation.faceUrl
+						if(msg.sendID!=this.vuex_user_info.uid&&msg.sessionType==1){
+							msg.senderFaceUrl = this.vuex_conversation.icon || this.vuex_conversation.faceUrl
+						}
 					})
+					
 					this.msgList = [...tmpArr, ...this.msgList]
 					setTimeout(() => {
 						this.refresherState = false
 						this.refreshing = false
-						if (tmpArr.length === 0) this.lastState = true
 					})
 				})
 			},
@@ -228,7 +263,8 @@
 					if (res.contentType === 113) {
 						this.getTypingStatus()
 					} else {
-						if (res.recvID === this.vuex_user_info.uid){
+						console.log(this.vuex_user_info);
+						if (res.recvID === this.vuex_user_info.uid || res.recvID === this.groupID){
 							this.msgList.push(res);
 							this.markC2CRead(this.vuex_conversation.userID, [res.clientMsgID],(params)=>console.log(params))
 						}
@@ -287,14 +323,21 @@
 				}
 			},
 			getScreen() {
-				this.scrollHeight = uni.getSystemInfoSync().safeArea.height - 109
+				this.scrollHeight = uni.getSystemInfoSync().safeArea.height - 139;
+			},
+			getEle(){
+				// console.log(plus.navigator.getStatusbarHeight());
+				uni.createSelectorQuery().select(".reply-msg").boundingClientRect((val) => {
+					// this.bottomBarHeight = val.height
+					console.log(val.height);
+				}).exec();
 			},
 			moreAction() {
 				if (this.operationState) {
 					this.getScreen()
 					this.operationState = false
 				} else {
-					this.scrollHeight = uni.getSystemInfoSync().safeArea.height - 209
+					this.scrollHeight = uni.getSystemInfoSync().safeArea.height - 289
 					this.operationState = true
 					this.listItem = null
 					if (this.msgList.length === 0) return false
@@ -395,11 +438,16 @@
 							if (this.inputValue.indexOf('@' + user.name) > -1) atList.push(user.id)
 						})
 						console.log(atList);
-						// newTextMessage = this.$openSdk.createTextAtMessage(this.inputValue,atList)
+						newTextMessage = this.$openSdk.createTextAtMessage(this.inputValue,atList)
 					} else {
-						newTextMessage = this.$openSdk.createTextMessage(
-							this.inputValue
-						);
+						if(this.replyStatus){
+							newTextMessage = this.$openSdk.createQuoteMessage(this.inputValue,JSON.stringify(this.replyMsg))
+						}else{
+							newTextMessage = this.$openSdk.createTextMessage(
+								this.inputValue
+							);
+						}
+						
 					}
 					// console.log(newTextMessage);
 					const clientMsgID = this.$openSdk.sendMessage(
@@ -546,6 +594,12 @@
 					// this.msgList.findIndex(msg=>msg.)
 				})
 			},
+			replayListen(){
+				uni.$on('replyMsg',msgContent => {
+					this.replyMsg = msgContent.content
+					this.replyStatus = true;
+				})
+			},
 			setDraft() {
 				if (this.conversationID) {
 					this.$openSdk.setConversationDraft(this.conversationID, this.inputValue, (data) => {
@@ -555,19 +609,11 @@
 			},
 			getMemberList() {
 				if (this.groupID == "") return false
-				this.$openSdk.getGroupMemberList(this.groupID, 0, 0, (data) => {
-					const tmpArr = JSON.parse(data.msg).data
-					this.groupMemberList = tmpArr
-					this.msgList.forEach(msg => {
-						this.groupMemberList.forEach(member => {
-							if (msg.sendID === member.userId) {
-								msg.senderNickName = member.nickName
-								msg.senderFaceUrl = member.faceUrl
-							}
-						})
+					this.$openSdk.getGroupMemberList(this.groupID, 0, 0, (data) => {
+						if(data.err==undefined){
+							this.groupMemberList = JSON.parse(data.msg).data
+						}
 					})
-					console.log(this.msgList);
-				})
 			},
 		},
 		watch: {
@@ -594,9 +640,11 @@
 			this.recvID = this.vuex_conversation.userID || ""
 			this.groupID = this.vuex_conversation.groupID || ""
 			this.conversationID = this.vuex_conversation.conversationID
+			this.getMemberList()
 			this.getScreen()
 			this.delMsgListen()
 			this.reSendListen()
+			this.replayListen()
 			this.getHistoryMessageList(null);
 			this.newMsgListener();
 			this.sendMessageListener()
@@ -640,14 +688,24 @@
 	}
 
 	.bottom-bar {
-		max-height: 57px;
+		height: 67px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		
+		
+		.reply-msg{
+			padding-left: 24rpx;
+			height: 20px;
+			background-color: #e8f2ff;
+		}
 
 		.bar-list {
 			display: flex;
 			align-items: center;
 			justify-content: space-around;
-			background-color: #e8f2ff;
 			padding: 16rpx 0;
+			background-color: #e8f2ff;
 
 			.bottom-input {
 				background-color: #FFFFFF;
@@ -674,27 +732,11 @@
 
 		.agree-msg {
 			height: 80rpx;
-			line-height: 80rpx;
+			padding: 24rpx;
+			// line-height: 80rpx;
 			text-align: center;
 			font-size: 24rpx;
 			color: #e5e5e5;
-		}
-	}
-
-	.more-operation {
-		height: 100px;
-		display: flex;
-		align-items: center;
-		justify-content: space-around;
-
-		.operation-item {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-
-			.u-icon {
-				margin-bottom: 12rpx;
-			}
 		}
 	}
 

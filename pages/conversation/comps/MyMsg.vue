@@ -4,9 +4,9 @@
 		<view @longpress.prevent="pressAtion" class="msg-box">
 			<view class="msg-status">
 				<text v-if="msg.isRead&&msg.status!==3&&msg.contentType==101"
-					class="readed">Readed</text>
+					class="readed">已读</text>
 				<text v-if="!msg.isRead&&msg.status!==3&&msg.contentType==101"
-					class="unread">UnRead</text>
+					class="unread">未读</text>
 				<u-icon @click="reSend" v-if="msg.status==3" size="32" name="error-circle" color="#f44038" />
 			</view>
 			<text v-if="msg.contentType==101||msg.contentType==106"

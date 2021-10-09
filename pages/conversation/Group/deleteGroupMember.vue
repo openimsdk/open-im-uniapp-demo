@@ -1,15 +1,15 @@
 <template>
 	<view class="container">
-		<u-navbar title="Chat members">
+		<u-navbar title="群成员">
 			<view class="right-title" slot="right">
-				<u-button type="primary" size="mini" @click="deleteMember">delete</u-button>
+				<u-button type="primary" size="mini" @click="deleteMember">删除</u-button>
 			</view>
 		</u-navbar>
 		<u-search shape="square" :show-action="false" bg-color="#e9f2ff" class="searchInput" @change="search" @clear="clearSearch"
-			placeholder="search" v-model="searchVal"/>
+			placeholder="搜索" v-model="searchVal"/>
 		<uni-indexed-list :showIndex="false" @click="clickItem" :showSelect="true" :options="friendList"/>
 		
-		<u-modal v-model="showModal" @confirm="comfirmAction" :show-title="false" confirm-text="determine" show-cancel-button cancel-text="cancel" content="Are you sure you want to delete?"></u-modal>
+		<u-modal v-model="showModal" @confirm="comfirmAction" :show-title="false" confirm-text="确定" show-cancel-button cancel-text="取消" content="确定踢出成员吗?"></u-modal>
 		<u-toast ref="uToast" />
 	</view>
 </template>
@@ -23,7 +23,7 @@
 				searchVal:"",
 				friendList:[
 					{
-						letter: "Group members",
+						letter: "群成员",
 						data: []
 					}
 				],

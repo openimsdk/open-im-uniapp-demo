@@ -5,7 +5,7 @@
 			<input type="text" v-model="nickname" class="input" />
 			<button :type=" nickname.length==0? 'defailt':'primary' "
 				:style="nickname.length==0? 'color=#333333':'color=#000000'" class="saveButton"
-				@click="submit">preservation</button>
+				@click="submit">保存</button>
 		</view>
 
 	</view>
@@ -27,9 +27,10 @@
 		},
 		methods: {
 			goBack() {
-				uni.switchTab({
-					url: '/pages/profile/my'
-				});
+				uni.navigateBack()
+				// uni.switchTab({
+				// 	url: '/pages/profile/my'
+				// });
 			},
 			submit() {
 				if (this.where == "my") {
@@ -70,10 +71,10 @@
 			console.log(options);
 			this.where = options.where
 			if (options.where == "my") {
-				this.title = "Change nickname"
+				this.title = "修改昵称"
 				this.nickname = this.vuex_user_info.name
 			} else if (options.where == "setFriend") {
-				this.title = "Set notes"
+				this.title = "设置备注"
 				this.friendInfo = JSON.parse(options.friendData)
 				this.nickname=this.friendInfo.comment||""
 				console.log(this.nickname);

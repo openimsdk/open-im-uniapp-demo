@@ -1,15 +1,15 @@
 <template>
 	<view id="addFriendInput">
 		<view class="head">
-			<u-search bg-color="#fff" action-text="cancel" @custom="goBack" class="my-search" v-model="searchValue" focus clearabled :placeholder="`Please enter the ${target} number`" shape="square" @change="noUser = false"/>
+			<u-search bg-color="#fff" action-text="取消" @custom="goBack" class="my-search" v-model="searchValue" focus clearabled :placeholder="`请输入${target=='user'?'用户':'群组'}ID`" shape="square" @change="noUser = false"/>
 		</view>
 		<view class="searchResult" @click="searchFriend" v-show="searchValue.length>0 && !noUser">
 			<image src="../../static/searchFriend.png" mode="" class="searchFriend"></image>
-			<text class="searchFriendTitle">search:</text>
+			<text class="searchFriendTitle">搜索:</text>
 			<text class="searchFriendValue">{{searchValue}}</text>
 		</view>
 		<view class="searchResult2" v-show="noUser">
-			<text class="noUserTitle">{{`The ${target} does not exist`}}</text>
+			<text class="noUserTitle">{{`${target=='user'?'用户':'群组'}不存在`}}</text>
 		</view>
 	</view>
 </template>

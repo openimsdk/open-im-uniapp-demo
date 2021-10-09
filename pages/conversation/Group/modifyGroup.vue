@@ -1,10 +1,10 @@
 <template>
 	<view class="container">
-		<u-navbar title-width="400" title="Modify group data" />
+		<u-navbar title-width="400" title="修改群资料" />
 		<view class="group-menber">
-			<AccessItem @click="modifyGroupNameOrIntroduction('name')" title="Group chat name" />
-			<AccessItem @click="modifyGroupPortrait" title="Group portrait" />
-			<AccessItem @click="modifyGroupNameOrIntroduction('introduction')" title="Group introduction" />
+			<AccessItem @click="modifyGroupNameOrIntroduction('name')" title="群组名" />
+			<AccessItem @click="modifyGroupPortrait" title="群头像" />
+			<AccessItem @click="modifyGroupNameOrIntroduction('introduction')" title="群介绍" />
 		</view>
 	</view>
 </template>

@@ -1,110 +1,117 @@
 <template>
 	<view id="login">
 		<image src="../../static/logo.png" mode="" class="logo"></image>
-		<text class="title">EEchat</text>
-		<text class="childTitle">Digital currency address chat</text>
+		<text class="title">Open IM</text>
 		<view class="tipsArea">
-			<view class="tipsAreaItem">
+			<text>开源OpenIM体验Demo</text>
+			<text class="tipsArea-item">体验群组聊天，音视频通话等IM功能</text>
+			<!-- <view class="tipsAreaItem">
 				<view class="blackDot"></view>
-				<text>Mnemonic login, anonymous identity</text>
+				<text>开源Demo，高效体验</text>
 			</view>
 			<view class="tipsAreaItem">
 				<view class="blackDot"></view>
-				<text>End to end encryption, message security</text>
+				<text>体验群组聊天，在线沟通</text>
 			</view>
+			<view class="tipsAreaItem">
+				<view class="blackDot"></view>
+				<text>音视频会议，一键通话</text>
+			</view> -->
 		</view>
 
-		<input type="text" value="" class="inputArea" placeholder="Enter your mnemonics, separated by spaces"
+		<input type="text" value="" class="inputArea" placeholder="请输入账号"
 			v-model="account" />
-		<button :loading="loginLoading" type="primary" class="loginButton" @click="login">Sign in</button>
-		<text class="register" @click="goRegiester">Sign up for a new account</text>
+		<button :loading="loginLoading" type="primary" class="loginButton" @click="login">登录</button>
 	</view>
 </template>
 
 <script>
-	const bip39 = require("bip39");
-	const {
-		hdkey
-	} = require("ethereumjs-wallet");
-	const util = require("ethereumjs-util");
-	import {setMnemonic,getMnemonic} from "../../utils/storage.js"
+let _this;
+import { SECRET,appServerLogin,appServerRegiester,importRelationShip } from '../../utils/appServerApi.js'
+import md5 from 'md5'
 
 	export default {
 		data() {
 			return {
 				account: "",
-				loginInfo: {
-					mnemonic: "",
-					publicKey: "",
-					address: "",
-				},
-				loginLoading: false
+				loginLoading: false,
 			};
 		},
 		methods: {
-			async login() {
+			login(){
+				this.loginLoading = true
 				if (this.account === "") {
 					this.$u.toast("please input your account")
 					return false
 				}
-				this.loginLoading = true
-				let seed = await bip39.mnemonicToSeed(this.account);
-				let hdWallet = await hdkey.fromMasterSeed(seed);
-				let key = await hdWallet.derivePath("m/44'/60'/0'/0/0");
-				this.loginInfo.publicKey = util.bufferToHex(key._hdkey._publicKey);
-				let address = await util.pubToAddress(key._hdkey._publicKey, true);
-				this.loginInfo.address = address.toString("hex");
-				let accountInfo = {};
-				accountInfo.account = this.account.replace(/\s*/g, "");
-				accountInfo.password = this.loginInfo.address.slice(0, 18);
-				accountInfo.platform = 2
-				accountInfo.operationID = this.loginInfo.address + Date.now().toString()
-				let _this = this;
-				uni.request({
-					url: "https://open-im.rentsoft.cn/eechat/user/login",
-					method: "POST",
-					data: accountInfo,
-					success(res) {
-						console.log(res);
-						_this.$openSdk.login(res.data.data.uid, res.data.data.openImToken.token, (val) => {
-							if (!val.err) {
-								setMnemonic(_this.account)
-								const reqData = [res.data.data.uid]
-								_this.$openSdk.getUsersInfo(reqData, data => {
-									let userInfoRes = JSON.parse(data.msg)
-									console.log(userInfoRes[0]);
-									_this.$u.vuex('vuex_user_info',userInfoRes[0])
-									_this.$u.vuex('vuex_token',res.data.data.token.accessToken)
-								})
-								_this.loginLoading = false
-								uni.switchTab({
-									url: '/pages/conversation/home'
-								})
-							} else {
-								_this.loginLoading = false
-								_this.$u.toast('login fail：' + val.err)
-							}
-						});
-					},
-					fail(err) {
-						console.log(err);
-						_this.loginLoading = false
-						_this.$u.toast('login fail：' + err)
+				let registerInfo = {
+					secret: SECRET, 
+					platform: 2, 
+					uid: this.account, 
+					name: "0x"+this.account.slice(0,4), 
+					icon: "https://api.prodless.com/avatar.png?size=60", 
+					gender: 1, 
+					mobile: "", 
+					birth: "", 
+					email: "", 
+					ex: ""
+				};
+				appServerRegiester(registerInfo).then(res=>{
+					this.sdkLogin(res.data.uid,res.data.token,"register")
+				}).catch(err=>{
+					if(err.errMsg==`rpc error: code = Unknown desc = Error 1062: Duplicate entry '${this.account}' for key 'PRIMARY'`){
+						let loginInfo = {
+							secret:SECRET,
+							platform:2,
+							uid:this.account
+						};
+						appServerLogin(loginInfo).then(res=>{
+							this.sdkLogin(res.data.uid,res.data.token,"login")
+						}).catch(err=>{
+							_this.loginLoading = false
+							_this.$u.toast('login fail：' + err)
+						})
 					}
-				});
+				})
 			},
-			goRegiester() {
-				uni.navigateTo({
-					url: "/pages/login/register",
-				});
+			
+			sdkLogin(uid,token,type){
+				console.log("login type:"+type);
+					_this.$openSdk.login(uid, token, async val => {
+						if (val.err==undefined) {
+							_this.$u.vuex('vuex_last_user',uid)
+							const reqData = [uid]
+							_this.$openSdk.getUsersInfo(reqData, data => {
+								let userInfoRes = JSON.parse(data.msg)
+								console.log(userInfoRes[0]);
+								_this.$u.vuex('vuex_user_info',userInfoRes[0])
+							})
+							if(type === "register") await importRelationShip(this.account)
+							_this.loginLoading = false
+							uni.switchTab({
+								url: '/pages/conversation/home'
+							})
+						} else {
+							_this.loginLoading = false
+							_this.$u.toast('login fail：' + val.err)
+						}
+					});
 			},
-			getLastAccount() {
-				const lastWord = getMnemonic()
-				if (lastWord) this.account = lastWord
-			}
+			initAccount() {
+				const lastWord = this.vuex_last_user
+				if (lastWord){
+					this.account = lastWord
+				}else{
+					const accountStr = md5(new Date().getTime())
+					this.account = accountStr.slice(0,10)
+				}
+			},
 		},
 		beforeMount() {
-			this.getLastAccount()
+			this.initAccount()
+		},
+		onLoad() {
+			_this = this
 		}
 	};
 </script>
@@ -122,7 +129,7 @@
 			height: 220rpx;
 			min-height: 220rpx;
 			width: 220rpx;
-			margin-top: 260rpx;
+			margin-top: 220rpx;
 		}
 
 		.title {
@@ -142,32 +149,34 @@
 		.tipsArea {
 			display: flex;
 			flex-direction: column;
-			margin-top: 20rpx;
-			margin-left: 30rpx;
-
-			.tipsAreaItem {
-				display: flex;
-				align-items: center;
-				margin-bottom: 10rpx;
-				font-size: 28rpx;
-				font-weight: 400;
-				color: #333330;
-
-				.blackDot {
-					width: 10rpx;
-					height: 10rpx;
-					border-radius: 10rpx;
-					background-color: #666;
-					margin-right: 24rpx;
-				}
+			align-items: center;
+			margin-top: 32rpx;
+			.tipsArea-item{
+				margin-top: 24rpx;
 			}
+			// .tipsAreaItem {
+			// 	display: flex;
+			// 	align-items: center;
+			// 	margin-bottom: 10rpx;
+			// 	font-size: 28rpx;
+			// 	font-weight: 400;
+			// 	color: #333330;
+
+			// 	.blackDot {
+			// 		width: 10rpx;
+			// 		height: 10rpx;
+			// 		border-radius: 10rpx;
+			// 		background-color: #666;
+			// 		margin-right: 24rpx;
+			// 	}
+			// }
 		}
 
 		.inputArea {
 			width: 500rpx;
 			font-weight: 500;
 			color: #999999;
-			padding: 0 50rpx 12rpx 50rpx;
+			padding-bottom: 12rpx;
 			border-bottom: 1px solid #979797;
 			margin-top: 120rpx;
 		}

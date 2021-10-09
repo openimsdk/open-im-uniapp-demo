@@ -1,6 +1,6 @@
 <template>
 	<view class="">
-		<uni-nav-bar left-icon="back" title="Group notification" @clickLeft="goBack"></uni-nav-bar>
+		<uni-nav-bar left-icon="back" title="群通知" @clickLeft="goBack"></uni-nav-bar>
 		<scroll-view scroll-y class="scroll-box">
 			<view v-for="(item,index) in vuex_group_application_list" :key="item.createTime" class="notice-item">
 				<u-avatar :src="item.fromUserFaceURL"/>
@@ -9,11 +9,11 @@
 					<text class="info u-line-3">{{`Apply to join ${item.groupName} Invitation from group member`}}</text>
 				</view>
 				<view v-if="item.flag===0" class="btns-area">
-					<u-button @click="addConfirm(item)" :hair-line="false" type="primary" size="mini">agree</u-button>
-					<u-button @click="refuseAdd(item)" :hair-line="false" type="info" size="mini">refuse</u-button>
+					<u-button @click="addConfirm(item)" :hair-line="false" type="primary" size="mini">同意</u-button>
+					<u-button @click="refuseAdd(item)" :hair-line="false" type="info" size="mini">拒绝</u-button>
 				</view>
 				<view v-else class="status-area">
-					<text>{{item.flag===1?"agreed":"refused"}}</text>
+					<text>{{item.flag===1?"已同意":"已拒绝"}}</text>
 				</view>
 			</view>
 		</scroll-view>

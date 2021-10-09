@@ -1,8 +1,8 @@
 <template>
 	<view class="container">
-		<u-navbar title="Transfer of group management"/>
+		<u-navbar title="转让群"/>
 		<u-search shape="square" :show-action="false" bg-color="#e9f2ff" class="searchInput" @change="search" @clear="clearSearch"
-			placeholder="search" v-model="searchVal"/>
+			placeholder="搜索" v-model="searchVal"/>
 		<uni-indexed-list :showIndex="false" @click="clickItem" :showSelect="false" :isShowSection="false" :options="friendList"/>
 		
 		<u-modal v-model="showModal" @confirm="comfirmAction" :show-title="false" confirm-text="determine" show-cancel-button cancel-text="cancel" content="Are you sure you want to delete?"></u-modal>

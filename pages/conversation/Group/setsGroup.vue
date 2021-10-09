@@ -24,49 +24,48 @@
 			</view>
 		</view>
 		<view class="group-access">
-			<AccessItem @click="announcementGroup" title="Group announcement" />
-			<AccessItem @click="transferManagement" title="Transfer of management rights" />
-			<AccessItem @click="editNick" title="My nickname in the group" />
+			<AccessItem @click="announcementGroup" title="群公告" />
+			<AccessItem @click="transferManagement" title="转让群" />
+			<AccessItem @click="editNick" title="我在群里的昵称" />
 		</view>
 
 		<view class="group-access">
-			<AccessItem @click="breakUpGroup" style="margin-top: 24rpx;" title="Break up group chat" />
+			<AccessItem @click="breakUpGroup" style="margin-top: 24rpx;" title="解散群" />
 		</view>
 
 		<view class="group-access">
-			<AccessItem @click="delRecords" title="Empty chat record" />
-			<AccessItem isSwitch title="No hint news" />
+			<AccessItem @click="delRecords" title="清空聊天记录" />
+			<AccessItem isSwitch title="消息免打扰" />
 		</view>
 
 		<view class="group-access">
-			<AccessItem @click="changeTop" :isChecked="vuex_conversation.isPinned===0?false:true" style="margin-top: 24rpx;" isSwitch title="Top chat" />
+			<AccessItem @click="changeTop" :isChecked="vuex_conversation.isPinned===0?false:true" style="margin-top: 24rpx;" isSwitch title="置顶聊天" />
 		</view>
 
 		<u-button :disabled="!isInGroup" :loading="loading" style="margin-top: 48rpx;border-radius: 0;" type="primary"
-			@click="quitGroup">sign out</u-button>
+			@click="quitGroup">退出</u-button>
 
 		<u-popup v-model="breakPopState" mode="bottom">
 			<view class="">
 				<view class="break-title">
-					You will lose contact with group friends after disbanding the group. Are you sure you want to
-					disband?
+					解散群后，您将失去与群友的联系，你确定要解散吗
 				</view>
 				<view class="break-btns">
-					<u-button class="break-btns-item" @click="comfirmBreak" type="primary">confirm</u-button>
-					<u-button class="break-btns-item" @click="cancelBreak" type="primary">cancel</u-button>
+					<u-button class="break-btns-item" @click="comfirmBreak" type="primary">确定</u-button>
+					<u-button class="break-btns-item" @click="cancelBreak" type="primary">取消</u-button>
 				</view>
 			</view>
 		</u-popup>
 
-		<u-modal v-model="showDelRecords" @confirm="comfirmDelRed" :show-title="false" show-cancel-button confirm-text="determine"
-			cancel-text="cancel" content="Are you sure you want to delete the chat records of this chat group?">
+		<u-modal v-model="showDelRecords" @confirm="comfirmDelRed" :show-title="false" show-cancel-button confirm-text="确定"
+			cancel-text="取消" content="确定删除群的聊天记录吗?">
 		</u-modal>
 		<u-modal v-model="showQuitGroup" @confirm="comfirmQuit" :show-title="false" show-cancel-button
-			confirm-text="determine" cancel-text="cancel"
-			content="You are the group leader. If you want to quit the group chat, please transfer the management right first.">
+			confirm-text="确定" cancel-text="取消"
+			content="退出后,将不再接收该群信息">
 		</u-modal>
-		<u-modal v-model="showNoPremission" :show-title="false" show-cancel-button confirm-text="determine"
-			cancel-text="cancel" content="You are a member of a group and do not have this permission."></u-modal>
+		<u-modal v-model="showNoPremission" :show-title="false" confirm-text="确定"
+			 content="您没有权限进行该操作"></u-modal>
 		<u-toast ref="uToast" />
 	</view>
 </template>

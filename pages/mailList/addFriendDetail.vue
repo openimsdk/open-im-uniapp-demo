@@ -5,19 +5,18 @@
 			<view class="infoCard">
 				<image :src="searchFriendData.icon||iconUrl" mode="" class="headIcon"></image>
 				<text class="name">{{ searchFriendData.name }}</text>
-				<view class="uidCon">account number:<text class="uid">{{ searchFriendData.uid }}</text>
-				</view>
+				<text class="uidCon">用户账号:{{ searchFriendData.uid }}</text>
 				<button :loading="isLoading" type="primary" class="button" @click="addFriend">
 					<image src="../../static/addFriend2.png" mode="" class="buttonIcon"></image>
-					<text>{{ isFriend ? "Send Message" : "Add friend" }}</text>
+					<text>{{ isFriend ? "发送消息" : "添加好友" }}</text>
 				</button>
 			</view>
-			<text class="infoText" v-show="isSend&&!isFriend">Friend request sent</text>
+			<text class="infoText" v-show="isSend&&!isFriend">好友请求已发送</text>
 		</view>
-		<u-modal title="notice" v-model="show" @confirm="confirmAdd" show-cancel-button confirm-text="confirm"
-			cancel-text="cancel">
+		<u-modal title="提示" v-model="show" @confirm="confirmAdd" show-cancel-button confirm-text="确定"
+			cancel-text="取消">
 			<view class="slot-content">
-				<u-input placeholder="please input introduce" :custom-style="customStyle" v-model="addMsg" />
+				<u-input placeholder="请输入验证消息" :custom-style="customStyle" v-model="addMsg" />
 			</view>
 		</u-modal>
 	</view>
@@ -27,7 +26,7 @@
 	export default {
 		data() {
 			return {
-				iconUrl: "https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png",
+				iconUrl: "https://echat-1302656840.cos.ap-chengdu.myqcloud.com/1632447310193.png",
 				searchFriendData: {},
 				alreadyAdd: false,
 				isSend: false,
@@ -142,14 +141,14 @@
 					font-weight: 400;
 					color: #666666;
 					margin-top: 8rpx;
-					width: 80%;
-					display: flex;
+					// width: 80%;
+					// display: flex;
 
-					.uid {
-						word-wrap: break-word;
-						flex: 1;
-						width: 0;
-					}
+					// .uid {
+					// 	word-wrap: break-word;
+					// 	flex: 1;
+					// 	width: 0;
+					// }
 				}
 
 				.button {

@@ -6,7 +6,7 @@
 			
 		<view class="group-members">
 				<view v-for="item in groupMemberList" class="menber-item">
-					<u-avatar size="84" :src="item.faceUrl||'../../../static/user.png'"/>
+					<u-avatar size="84" :src="item.faceUrl||'https://echat-1302656840.cos.ap-chengdu.myqcloud.com/1632447310193.png'"/>
 					<view class="nick">{{item.nickName||'nick'}}</view>
 				</view>
 				<view class="menber-item access-icon">

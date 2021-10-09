@@ -1,13 +1,13 @@
 <template>
 	<view @click="pageClick" id="mailList">
 		<view class="head">
-			<text class="title">mail list</text>
+			<text class="title">通讯录</text>
 			<HeaderModal :showOperationsMenu="showOperationsMenu" @controlDisplay="controlDisplay"/>
 		</view>
 		<view class="newFriend" @click="goNewFriends">
 			<view class="newFriendMain">
 				<image src="../../static/newFriend.png" mode="" class="newFriendIcon"></image>
-				<text class="newFriendText">New friends</text>
+				<text class="newFriendText">新朋友</text>
 			</view>
 			<view v-if="vuex_friend_application_num>0" class="newFriendNumber">
 				{{vuex_friend_application_num}}
@@ -16,7 +16,7 @@
 		<view class="newFriend" @click="goNewGroup">
 			<view class="newFriendMain">
 				<image src="../../static/group_notification.png" mode="" class="newFriendIcon"></image>
-				<text class="newFriendText">Group notification</text>
+				<text class="newFriendText">群通知</text>
 			</view>
 			<view v-if="vuex_group_application_num>0" class="newFriendNumber">
 				{{vuex_group_application_num}}
@@ -25,7 +25,7 @@
 		<view class="newFriend" @click="goGroupList">
 			<view class="newFriendMain">
 				<image src="../../static/group_list.png" mode="" class="newFriendIcon"></image>
-				<text class="newFriendText">Group list</text>
+				<text class="newFriendText">群列表</text>
 			</view>
 		</view>
 		<u-empty v-if="vuex_original_mail_list.length===0" class="empty" text="There is no contact" mode="list"/>
@@ -152,7 +152,7 @@
 			},
 			goNewFriends() {
 				uni.navigateTo({
-					url: '/pages/mailList/newFriends'
+					url: '/pages/mailList/friendNotification'
 				});
 			},
 			goNewGroup(){
@@ -191,7 +191,7 @@
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
-			box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.15);
+			// box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.15);
 
 			.title {
 				font-size: 44rpx;

@@ -7,14 +7,6 @@
 
 		},
 		{
-			"path": "pages/login/register"
-
-		},
-		{
-			"path": "pages/login/confirm"
-
-		},
-		{
 			"path": "pages/conversation/home",
 			"style": {
 				"enablePullDownRefresh": true
@@ -53,7 +45,7 @@
 
 		},
 		{
-			"path": "pages/mailList/newFriends"
+			"path": "pages/mailList/friendNotification"
 
 		},
 		{
@@ -106,31 +98,36 @@
 		},
 		{
 			"path": "pages/conversation/Group/transferOwener"
+		},
+		{
+			"path": "pages/conversation/forwardMsg"
 		}
 
 	],
 	"globalStyle": {
 		"app-plus": {
 			"titleNView": false
-		}
+		},
+		"navigationBarBackgroundColor":"#FFFFFF",
+		"navigationBarTextStyle":"black"
 	},
 	"tabBar": {
 		"color": "#1B72EC",
 		"selectedColor": "#1B72EC",
 		"list": [{
-				"text": "EEchat",
+				"text": "OpenIM",
 				"pagePath": "pages/conversation/home",
 				"iconPath": "static/tab-home.png",
 				"selectedIconPath": "static/tab-home-selected.png"
 			},
 			{
-				"text": "mail list",
+				"text": "通讯录",
 				"pagePath": "pages/mailList/mailList",
 				"iconPath": "static/tab-mailList.png",
 				"selectedIconPath": "static/tab-mailList-selected.png"
 			},
 			{
-				"text": "my",
+				"text": "我的",
 				"pagePath": "pages/profile/my",
 				"iconPath": "static/tab-my.png",
 				"selectedIconPath": "static/tab-my-selected.png"

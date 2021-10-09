@@ -5,7 +5,7 @@
 				<view @click="clickConversation(item)" :style="{'backgroundColor':item.isPinned===0?'#fff':'#f0f5ff'}"
 					class="chatItem">
 					<image
-						:src="item.faceUrl||'https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png'"
+						:src="item.faceUrl||'https://echat-1302656840.cos.ap-chengdu.myqcloud.com/1632447310193.png'"
 						mode="" class="portrait"></image>
 					<view class="chatItemMain">
 						<view class="mainHead">
@@ -115,6 +115,7 @@
 			clickConversation(item) {
 				this.$u.vuex('vuex_conversation_user', item.userID)
 				this.$u.vuex('vuex_conversation', item)
+				console.log(item)
 				uni.navigateTo({
 					url: "/pages/conversation/chatWin?conversationID=" + item.conversationID + "&draft=" + item
 						.draftText,

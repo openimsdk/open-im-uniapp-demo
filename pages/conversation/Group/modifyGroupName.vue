@@ -1,12 +1,12 @@
 <template>
 	<view class="container">
-		<u-navbar title-width="400" :title="`Edit group ${type}`">
+		<u-navbar title-width="400" :title="`修改群${type=='name'?'名称':'介绍'}`">
 			<view class="right-title" slot="right">
-				<u-button size="mini" :hair-line="false" @click="changeGroupInfo">Submit</u-button>
+				<u-button size="mini" :hair-line="false" @click="changeGroupInfo">提交</u-button>
 			</view>
 		</u-navbar>
-		<u-input v-if="type==='name'" v-model="groupInfo.groupName" class="input-group-name" placeholder="please input group name" height="88"/>
-		<u-input v-else v-model="groupInfo.introduction" class="input-group-introduction" type="textarea" placeholder="please input group introduction"/>
+		<u-input v-if="type==='name'" v-model="groupInfo.groupName" class="input-group-name" placeholder="请输入群名称" height="88"/>
+		<u-input v-else v-model="groupInfo.introduction" class="input-group-introduction" type="textarea" placeholder="请输入群介绍"/>
 	</view>
 </template>
 

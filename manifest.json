@@ -22,7 +22,8 @@
             "delay" : 0
         },
         "modules" : {
-            "VideoPlayer" : {}
+            "VideoPlayer" : {},
+            "Maps" : {}
         },
         /* 模块配置 */
         "distribute" : {
@@ -53,7 +54,13 @@
             "ios" : {},
             /* ios打包配置 */
             "sdkConfigs" : {
-                "ad" : {}
+                "ad" : {},
+                "maps" : {
+                    "amap" : {
+                        "appkey_ios" : "",
+                        "appkey_android" : "d7d4fede7d37b6dabf597824395cd1db"
+                    }
+                }
             },
             "icons" : {
                 "android" : {
@@ -93,7 +100,7 @@
                 "__plugin_info__" : {
                     "name" : "OpenIMSDK",
                     "description" : "IM",
-                    "platforms" : "Android",
+                    "platforms" : "Android,iOS",
                     "url" : "",
                     "android_package_name" : "",
                     "ios_bundle_id" : "",

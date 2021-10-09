@@ -1,7 +1,7 @@
 <template>
 	<view @click="pageClick" id="home">
 		<view class="head">
-			<text class="title">EEchat</text>
+			<text class="title">Open IM</text>
 			<HeaderModal :showOperationsMenu="showOperationsMenu" @controlDisplay="controlDisplay" />
 		</view>
 		<view class="main">
@@ -82,7 +82,7 @@
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
-			box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.15);
+			// box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.15);
 
 			.title {
 				font-size: 44rpx;

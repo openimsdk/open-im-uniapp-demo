@@ -1,6 +1,6 @@
 <template>
 	<view class="container">
-		<u-navbar title="GroupInfo"/>
+		<u-navbar title="群信息"/>
 		<GroupCard :type="type" :info="groupInfo"/>
 	</view>
 </template>

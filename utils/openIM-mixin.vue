@@ -69,7 +69,7 @@
 				});
 				this.$globalEvent.addEventListener("onConversationChanged", (params) => {
 					let res = JSON.parse(params.msg);
-					console.log(res);
+					// console.log(res);
 					if (res) {
 						res.forEach((r) => {
 							if (r.latestMsg !== "") {

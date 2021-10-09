@@ -6,15 +6,15 @@
 			<view class="operationsMenu">
 				<view class="operationsMenu-item" @click="goAddFriend">
 					<image src="../../static/addFriend.png" mode="" class="itemImg"></image>
-					<text>Add friends</text>
+					<text>添加朋友</text>
 				</view>
 				<view class="operationsMenu-item" @click="launchGroup">
 					<image src="../../static/launch_group.png" mode="" class="itemImg"></image>
-					<text>Launch group chat</text>
+					<text>发起群聊</text>
 				</view>
 				<view class="operationsMenu-item" @click="addNewGroup">
 					<image src="../../static/add_new_group.png" mode="" class="itemImg"></image>
-					<text>Add group chat</text>
+					<text>添加群聊</text>
 				</view>
 			</view>
 		</view>

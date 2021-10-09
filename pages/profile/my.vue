@@ -2,31 +2,31 @@
 	<view id="my">
 		<view class="head">
 			<image
-				:src="userInfo.icon?userInfo.icon:'https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png' "
+				:src="userInfo.icon?userInfo.icon:'https://echat-1302656840.cos.ap-chengdu.myqcloud.com/1632447310193.png' "
 				mode="" class="headIcon"></image>
 			<view class="headInfo">
 				<text class="nickName">{{ userInfo.name }}</text>
-				<text class="account" @click="copyID">My Account:<text>{{ userInfo.uid }}</text></text>
+				<text class="account" @click="copyID">我的账号:<text>{{ userInfo.uid }}</text></text>
 			</view>
 		</view>
 		<view class="funtionArea">
 			<uni-list>
-				<uni-list-item thumb="../../static/changeAvatar.png" title="Change your Avatar" clickable
+				<uni-list-item thumb="../../static/changeAvatar.png" title="修改头像" clickable
 					@click="changeAvatar"></uni-list-item>
-				<uni-list-item thumb="../../static/edit.png" title="Change nickname" clickable @click="goEditNickname">
+				<uni-list-item thumb="../../static/edit.png" title="修改昵称" clickable @click="goEditNickname">
 				</uni-list-item>
-				<uni-list-item thumb="../../static/blockList.png" title="Address book blacklist" clickable
+				<uni-list-item thumb="../../static/blockList.png" title="通讯录黑名单" clickable
 					@click="goBlockList"></uni-list-item>
 			</uni-list>
 
 			<view class="logOutArea" @click="logout">
 				<image src="../../static/logOut.png" mode="" class="logOutIcon"></image>
-				<text class="logOutText">Log out</text>
+				<text class="logOutText">退出登录</text>
 			</view>
 		</view>
 
-		<u-modal confirm-text="confirm" cancel-text="cancel" title="notice" v-model="show" show-cancel-button @confirm="logoutConfirm" @cancel="logoutCancel"
-			content="Are you sure you want to log out?"></u-modal>
+		<u-modal confirm-text="确定" cancel-text="取消" title="提示" v-model="show" show-cancel-button @confirm="logoutConfirm" @cancel="logoutCancel"
+			content="确定要退出登录吗?"></u-modal>
 	</view>
 </template>
 
@@ -48,7 +48,7 @@
 					data: this.userInfo.uid,
 					success: () => {
 						uni.hideToast()
-						this.$u.toast("copy uerID success")
+						this.$u.toast("已复制")
 					}
 				});
 			},

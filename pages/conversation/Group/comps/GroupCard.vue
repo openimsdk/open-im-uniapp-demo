@@ -8,11 +8,11 @@
 					<view @longpress="showCopy" class="grouo-num">
 						<view class="num-title">
 							<image class="group-icon" src="../../../../static/group_icon.png" mode=""></image>
-							<text>Group number:</text>
+							<text>群号:</text>
 						</view>
 						<text>{{info.groupID}}</text>
 						<view @click="copy" v-show="isShowCopy" class="copy-area">
-							<text>copy</text>
+							<text>复制</text>
 						</view>
 					</view>
 
@@ -25,10 +25,10 @@
 			</text>
 		</view>
 		<u-button v-if="type!=='showInfo'" :loading="loading" class="add-group-btn" type="primary" @click="addGroup">
-			{{groupShip?'Chat with group':'Add group chat'}}</u-button>
-		<u-button v-else class="add-group-btn" type="primary" @click="modifyGroup">Modify group data</u-button>
-		<u-modal v-model="showNoPremission" :show-title="false" show-cancel-button confirm-text="determine"
-			cancel-text="cancel" content="You are a member of a group and do not have this permission."></u-modal>
+			{{groupShip?'进群聊天':'添加群组'}}</u-button>
+		<u-button v-else class="add-group-btn" type="primary" @click="modifyGroup">修改群资料</u-button>
+		<u-modal v-model="showNoPremission" :show-title="false" show-cancel-button confirm-text="确定"
+			cancel-text="取消" content="只有群主或管理员能进行该操作"></u-modal>
 	</view>
 </template>
 
@@ -61,7 +61,7 @@
 					success: () => {
 						uni.hideToast()
 						this.isShowCopy = false
-						this.$u.toast("copy")
+						this.$u.toast("已复制")
 					}
 				});
 			},
@@ -190,6 +190,7 @@
 			background-color: #f2f2f2;
 			padding: 24rpx;
 			border-radius: 12rpx;
+			min-height: 240rpx;
 
 			text {
 				line-height: 42rpx;

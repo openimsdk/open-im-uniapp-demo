@@ -2,13 +2,13 @@
 	<view class="">
 		<u-navbar title-width="400" :title="title"/>
 		<u-search :show-action="false" bg-color="#e9f2ff" class="searchInput" @change="search" @clear="clearSearch"
-			placeholder="search" v-model="searchVal"/>
+			placeholder="搜索" v-model="searchVal"/>
 	<!-- 	<view class="no-results">
 			<text>No "C" results ware found.</text>
 		</view> -->
 		<uni-indexed-list :showIndex="showIndex" @click="clickItem" :showSelect="true" :options="friendList"/>
 		<view class="bottom-bar">
-			<u-button :loading="loading" @click="comfrimAction" class="bottom-btn" type="primary" size="mini">complete{{selectLenght>0?'('+selectLenght+')':''}}</u-button>
+			<u-button :loading="loading" @click="comfrimAction" class="bottom-btn" type="primary" size="mini">完成{{selectLenght>0?'('+selectLenght+')':''}}</u-button>
 		</view>
 		<u-toast ref="uToast" />
 	</view>
@@ -19,7 +19,7 @@
 		data(){
 			return{
 				searchVal:"",
-				title:"Launch group chat",
+				title:"发起群聊",
 				Initials: ['#'],
 				selectList:[],
 				selectLenght:0,
@@ -59,19 +59,19 @@
 			comfrimAction(){
 				if(this.selectLenght===0) return false
 				this.loading = true
-				if(this.title==="Launch group chat"){
+				if(this.title==="发起群聊"){
 					const groupInfo = {
-						groupName:"My group aaa",
+						groupName:"My group",
 						introduction:"My group introduction",
 						notification:"hello,come on",
-						faceUrl:"https://echat-1302656840.cos.ap-chengdu.myqcloud.com/1625728198419_IMG20210622085412.jpg"
+						faceUrl:"https://echat-1302656840.cos.ap-chengdu.myqcloud.com/1632447310193.png"
 					}
 					let memberList=[]
 					this.selectList.map(v=>memberList.push({uid:v.name.uid,setRole:0}))
 					this.$openSdk.createGroup(groupInfo,memberList,(data)=>{
 						if(data.msg){
 							this.$refs.uToast.show({
-												title: 'create success',
+												title: '创建成功',
 												type: 'success',
 												back: true
 											})
@@ -84,7 +84,7 @@
 						console.log(data);
 						if(data.msg){
 							this.$refs.uToast.show({
-												title: 'invite success',
+												title: '邀请成功',
 												type: 'success',
 												back: true
 											})
@@ -94,7 +94,7 @@
 				}
 			},
 			filtterData(){
-				if(this.title === "Select contact"){
+				if(this.title === "选择成员"){
 					this.$openSdk.getGroupMemberList(this.vuex_conversation.groupID,0,0,(data)=>{
 					const groupMemberList = JSON.parse(data.msg).data
 					let filterList=[];
@@ -111,7 +111,7 @@
 		},
 		onLoad:function(options){
 			if(options.type==="add"){
-				this.title = "Select contact"
+				this.title = "选择成员"
 			}
 		}
 	}

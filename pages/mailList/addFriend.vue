@@ -2,9 +2,9 @@
 	<view id="addFriend">
 		<uni-nav-bar left-icon="back" :title="title" @clickLeft="goBack"></uni-nav-bar>
 		<view class="main">
-			<u-search action-text="search" :placeholder="placeholder" class="my-search" disabled shape="square" @click="goInput" />
+			<u-search action-text="搜索" :placeholder="placeholder" class="my-search" disabled shape="square" @click="goInput" />
 			<view class="myUid">
-				<text>My Account: {{ this.vuex_user_info.uid}}</text>
+				<text>我的账号: {{ this.vuex_user_info.uid}}</text>
 			</view>
 		</view>
 	</view>
@@ -15,8 +15,8 @@
 		data() {
 			return {
 				noUser: false,
-				title:"Add friends",
-				placeholder:"Please enter the account number"
+				title:"添加好友",
+				placeholder:"请输入用户ID"
 			}
 		},
 		methods: {
@@ -25,7 +25,7 @@
 			},
 			goInput() {
 				let from = "single"
-				if(this.title === "Add group chat") from = "group"
+				if(this.title === "添加群组") from = "group"
 				uni.navigateTo({
 					url: '/pages/mailList/addFriendInput?from='+from
 				});
@@ -34,8 +34,8 @@
 		},
 		onLoad:function(options){
 			if(options.from==="group"){
-				this.title = "Add group chat"
-				this.placeholder = "Please enter group number"
+				this.title = "添加群组"
+				this.placeholder = "请输入群ID"
 				
 			}
 		}

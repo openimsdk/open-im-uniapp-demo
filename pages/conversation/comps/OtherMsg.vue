@@ -39,7 +39,6 @@
 				showAcition: false,
 				innerAudioContext: null,
 				uuid: "",
-				imgSrc: "https://echat-1302656840.cos.ap-chengdu.myqcloud.com/1624349039476259720-1721070109.jpg?imageView2/2/w/200/h/200"
 			}
 		},
 		components: {
@@ -116,6 +115,7 @@
 		},
 		mounted() {
 			_this = this
+			console.log(this.msg);
 			this.setListener()
 			this.innerAudioContext = uni.createInnerAudioContext()
 			this.innerAudioContext.onError(err => {
@@ -152,6 +152,10 @@
 				top: -24rpx;
 				left: 0px;
 				font-size: 20rpx;
+				max-width: 240px;
+				white-space:nowrap;
+				overflow:hidden;
+				text-overflow:ellipsis;
 			}
 
 			.msg-image {

@@ -1,57 +1,57 @@
 <template>
 	<view id="setFriend">
-		<uni-nav-bar left-icon="back" title="Friends settings" @clickLeft="goBack"></uni-nav-bar>
+		<uni-nav-bar left-icon="back" title="好友设置" @clickLeft="goBack"></uni-nav-bar>
 		<view class="main">
 			<view class="mainHead">
 				<view class="imageCon">
 					<image
-						src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png"
+						src="https://echat-1302656840.cos.ap-chengdu.myqcloud.com/1632447310193.png"
 						mode="" class="headIcon"></image>
 				</view>
 				<text>{{ friendData.comment||friendData.name || friendData.uid }}</text>
 			</view>
 			<view class="operationSet">
 				<view class="operationSetItem" @click="goEditNickname">
-					<text>Set notes</text>
+					<text>设置备注</text>
 					<image src="../../static/arrow.png" mode="" class="arrow"></image>
 				</view>
 				<view class="operationSetItem">
-					<text>Top contact</text>
+					<text>置顶联系人</text>
 					<u-switch @change="topContact" v-model="topCheck" />
 				</view>
 				<view class="operationSetItem">
-					<text>Join the blacklist</text>
+					<text>加入黑名单</text>
 					<u-switch @change="changeBlackStatus" v-model="friendData.blackStatus" :active-value="1"
 						:inactive-value="0" />
 				</view>
 				<view class="operationSetItem" @click="deleteRecord">
-					<text>Empty chat record</text>
+					<text>清空聊天记录</text>
 					<image src="../../static/arrow.png" mode="" class="arrow"></image>
 				</view>
 			</view>
 		</view>
 
-		<view class="deleteBtn" @click="deleteFriend"> Delete friend </view>
+		<view class="deleteBtn" @click="deleteFriend"> 删除好友 </view>
 
 		<uni-popup ref="deleteConfirm">
 			<view class="confirm">
 				<view class="titleArea">
-					<text class="titleInfo">Are you sure to delete "{{ friendData.name }}"?</text>
+					<text class="titleInfo">确定要删除 "{{ friendData.name }}"?</text>
 				</view>
 				<view class="footerArea">
-					<view type="primary" @click="confirmCancel" class="confirmCancel">cancel</view>
-					<view type="primary" @click="deleteConfirm" class="deleteConfirm">delete</view>
+					<view type="primary" @click="confirmCancel" class="confirmCancel">取消</view>
+					<view type="primary" @click="deleteConfirm" class="deleteConfirm">删除</view>
 				</view>
 			</view>
 		</uni-popup>
 		<uni-popup ref="blockConfirm">
 			<view class="confirm">
 				<view class="titleArea">
-					<text class="titleInfo">Are you sure to blacklist "{{ friendData.name }}"?</text>
+					<text class="titleInfo">确定要加入黑名单 "{{ friendData.name }}"?</text>
 				</view>
 				<view class="footerArea">
-					<view type="primary" @click="addBlackCancel" class="confirmCancel">cancel</view>
-					<view type="primary" @click="addBlackConfirm" class="deleteConfirm">determine</view>
+					<view type="primary" @click="addBlackCancel" class="confirmCancel">取消</view>
+					<view type="primary" @click="addBlackConfirm" class="deleteConfirm">确定</view>
 				</view>
 			</view>
 		</uni-popup>
@@ -59,14 +59,14 @@
 		<uni-popup ref="deleteRecordConfirm">
 			<view class="confirm">
 				<view class="titleArea">
-					<text class="titleInfo">Are you sure you want to delete the record with "{{
+					<text class="titleInfo">确定要清空与 "{{
               friendData.name
-            }}"?</text>
+            }}"的聊天记录吗?</text>
 				</view>
 
 				<view class="footerArea">
-					<view type="primary" @click="deleteRecordCancel" class="confirmCancel">cancel</view>
-					<view type="primary" @click="deleteRecordConfir" class="deleteConfirm">empty</view>
+					<view type="primary" @click="deleteRecordCancel" class="confirmCancel">取消</view>
+					<view type="primary" @click="deleteRecordConfir" class="deleteConfirm">清空</view>
 				</view>
 			</view>
 		</uni-popup>

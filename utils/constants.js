@@ -1,38 +1,35 @@
-export default class MessageType {
-  ///
-  static const text = 101;
-  static const picture = 102;
-  static const voice = 103;
-  static const video = 104;
-  static const file = 105;
-  static const at_text = 106;
-  static const merger = 107;
-  static const forward = 108;
-  static const location = 109;
-  static const custom = 110;
-  static const revoke = 111;
-  static const has_read_receipt = 112;
-  static const typing = 113;
+  export const TEXTMESSAGE = 101;
+  export const PICTUREMESSAGE = 102;
+  export const VOICEMESSAGE = 103;
+  export const VIDEOMESSAGE = 104;
+  export const FILEMESSAGE = 105;
+  export const ATTEXTMESSAGE = 106;
+  export const MERGERMESSAGE = 107;
+  export const FORWARDMESSAGE = 108;
+  export const LOCATIONMESSAGE = 109;
+  export const CUSTOMMESSAGE = 110;
+  export const REVOKEMESSAGE = 111;
+  export const HASREADRECEIPTMESSAGE = 112;
+  export const TYPINGMESSAGE = 113;
 
   ///
-  static const accept_friend = 201;
-  static const add_friend = 202;
-  static const refuse_friend_application = 203;
-  static const set_self_info = 204;
-  static const revoke_message = 205;
-  static const c2c_message_as_read = 206;
+  export const ACCEPTFRIENDNOTICE = 201;
+  export const ADDFRIENDNOTICE = 202;
+  export const REFUSEFRIENDAPPLICATIONNOTICE = 203;
+  export const SETSELFINFONOTICE = 204;
+  export const REVOKEMESSAGENOTICE = 205;
+  export const C2CMESSAGEASREADNOTICE = 206;
 
-  static const kick_online = 303;
+  export const KICKONLIENNOTICE = 303;
 
   ///
-  static const transfer_group_owner = 501;
-  static const create_group = 502;
-  // static const create_group = 503;
-  static const join_group = 504;
-  static const quit_group = 505;
-  static const set_group_info = 506;
-  static const accept_group_application = 507;
-  static const refuse_group_application = 508;
-  static const kick_group_member = 509;
-  static const invited_user_to_group = 510;
-}
+  export const TRANSFERGROUPOWNERNOTICE = 501;
+  export const CREATEGROUPNOTICE = 502;
+  // export const create_group = 503;
+  export const JOINGROUPNOTICE = 504;
+  export const QUITGROUPNOTICE = 505;
+  export const SETGROUPINFONOTICE = 506;
+  export const ACCEPTGROUPAPPLICATIONNOTICE = 507;
+  export const REFUSEGROUPAPPLICATIONNOTICE = 508;
+  export const KICKGROUPMEMBERNOTICE = 509;
+  export const INVITETOGROUPNOTICE = 510;

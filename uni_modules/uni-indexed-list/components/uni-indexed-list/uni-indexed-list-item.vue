@@ -32,7 +32,7 @@
 		name: 'UniIndexedList',
 		data(){
 			return{
-				constUrl:"https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png"
+				constUrl:"https://echat-1302656840.cos.ap-chengdu.myqcloud.com/1632447310193.png"
 			}
 		},
 		props: {

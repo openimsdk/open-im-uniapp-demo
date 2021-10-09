@@ -22,13 +22,13 @@
 
 ```html
 <!-- 一般用法 -->
-<uni-card title="标题文字" thumbnail="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png" extra="额外信息" note="Tips">
+<uni-card title="标题文字" thumbnail="https://echat-1302656840.cos.ap-chengdu.myqcloud.com/1632447310193.png" extra="额外信息" note="Tips">
     内容主体，可自定义内容及样式
 </uni-card>
 
 <!-- 内容通栏 -->
-<uni-card is-full="true" title="DCloud" thumbnail="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png" extra="2018.12.12" >
-    <image src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png" style="width: 100%;"></image>
+<uni-card is-full="true" title="DCloud" thumbnail="https://echat-1302656840.cos.ap-chengdu.myqcloud.com/1632447310193.png" extra="2018.12.12" >
+    <image src="https://echat-1302656840.cos.ap-chengdu.myqcloud.com/1632447310193.png" style="width: 100%;"></image>
 </uni-card>
 
 <!-- 图文卡片模式 -->
@@ -36,7 +36,7 @@
 	title="标题文字"
 	mode="style"
 	:is-shadow="true"
-	thumbnail="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png"
+	thumbnail="https://echat-1302656840.cos.ap-chengdu.myqcloud.com/1632447310193.png"
 	extra="Dcloud 2019-05-20 12:32:19"
 	note="Tips"
 >
@@ -48,7 +48,7 @@
 	title="Dcloud" 
 	mode="title" 
 	:is-shadow="true" 
-	thumbnail="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png" 
+	thumbnail="https://echat-1302656840.cos.ap-chengdu.myqcloud.com/1632447310193.png" 
 	extra="技术没有上限" 
 	note="Tips"
 >

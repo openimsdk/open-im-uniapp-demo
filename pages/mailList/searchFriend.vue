@@ -7,7 +7,7 @@
 		</view>
 		<view class="friendList">
 			<view class="friendListItem" v-for="item in searchList">
-				<image src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png"
+				<image src="https://echat-1302656840.cos.ap-chengdu.myqcloud.com/1632447310193.png"
 					mode="" class="portrait"></image>
 				<view class="ItemMain">
 					<text>{{item.name}}</text>

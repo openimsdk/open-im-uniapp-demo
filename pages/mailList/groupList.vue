@@ -1,9 +1,9 @@
 <template>
 	<view class="">
-		<u-navbar title-width="400" title="Group list"/>
+		<u-navbar title-width="400" title="群列表"/>
 		<u-search  shape="square" :show-action="false" bg-color="#e9f2ff" class="searchInput" @change="search" @clear="clearSearch"
-			placeholder="search" v-model="searchVal"/>
-		<u-empty v-if="vuex_group_list.length===0" class="empty" text="There is no group" mode="list"/>
+			placeholder="搜索" v-model="searchVal"/>
+		<u-empty v-if="vuex_group_list.length===0" class="empty" text="暂无群聊" mode="list"/>
 		<uni-indexed-list :showIndex="false" :isShowSection="false" @click="clickItem" :showSelect="false" :options="groupList"/>
 		<u-toast ref="uToast" />
 	</view>
