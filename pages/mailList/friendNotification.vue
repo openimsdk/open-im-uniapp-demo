@@ -35,7 +35,9 @@
 				uni.navigateBack()
 			},
 			addConfirm(uid) {
-				this.$openSdk.acceptFriendApplication(uid, (data) => {})
+				this.$openSdk.acceptFriendApplication(uid, (data) => {
+					console.log(data);
+				})
 			},
 			refuseAdd(uid) {
 				this.$openSdk.refuseFriendApplication(uid, (data) => {})

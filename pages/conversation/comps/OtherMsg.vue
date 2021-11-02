@@ -115,7 +115,6 @@
 		},
 		mounted() {
 			_this = this
-			console.log(this.msg);
 			this.setListener()
 			this.innerAudioContext = uni.createInnerAudioContext()
 			this.innerAudioContext.onError(err => {

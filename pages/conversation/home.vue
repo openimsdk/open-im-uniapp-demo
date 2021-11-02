@@ -42,7 +42,7 @@
 			getAllConversationListList() {
 				this.$openSdk.getAllConversationList((data) => {
 					let tmpList = JSON.parse(data.msg);
-					console.log(tmpList);
+					// console.log(tmpList);
 					for (let i = 0; i < tmpList.length; i++) {
 						if (tmpList[i].latestMsg !== '') {
 							tmpList[i].latestMsg = JSON.parse(tmpList[i].latestMsg);

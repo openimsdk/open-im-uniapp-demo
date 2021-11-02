@@ -28,13 +28,35 @@
 			},
 			//初始化sdk
 			initOpenIMSDK(dbDir) {
+				const platformID = uni.getSystemInfoSync().platform == 'ios'?1:2
 				const obj = {
-					platform: 1, //平台类型
-					ipApi: "https://open-im.rentsoft.cn", //api域名地址
-					ipWs: "wss://open-im.rentsoft.cn/wss", //websocket地址
+					platform: platformID, //平台类型
+					ipApi: "http://47.112.160.66:10000", //api域名地址
+					ipWs: "ws://47.112.160.66:17778", //websocket地址
 					dbDir, //SDK数据存放目录
 				};
 				this.flag = this.$openSdk.initSDK(obj);
+				if(this.flag&&this.vuex_last_user&&this.vuex_token) this.login()
+			},
+			
+			login(){
+				this.$openSdk.login(this.vuex_last_user, this.vuex_token, async val => {
+					if (val.err==undefined) {
+						const reqData = [this.vuex_last_user]
+						this.$openSdk.getUsersInfo(reqData, data => {
+							let userInfoRes = JSON.parse(data.msg)
+							this.$u.vuex('vuex_user_info',userInfoRes[0])
+						})
+						uni.switchTab({
+							url: '/pages/conversation/home'
+						})
+					} else {
+						this.$u.toast('登录失效，请重新登录!')
+						uni.navigateTo({
+							url:"pages/login/login"
+						})
+					}
+				});
 			},
 			//初始化监听
 			initOpenIMSDKListener() {
@@ -51,12 +73,6 @@
 		},
 		onHide() {
 			this.hideState = true
-		},
-		onShow() {
-			if (this.hideState) {
-				this.$openSdk.forceReConn()
-				this.hideState = false
-			}
 		},
 		onLaunch: function() {
 			this.initOpenIMSDKListener();

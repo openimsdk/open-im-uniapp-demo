@@ -6,7 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "DCUni/DCUniModule.h"
+#import "DCUniModule.h"
 #import "OpenIMModule.h"
 @import OpenIMCore;
 

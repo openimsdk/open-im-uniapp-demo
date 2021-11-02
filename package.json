@@ -1,14 +1,10 @@
 {
-  "name": "EEchat-uniapp",
+  "name": "Open-IM-Uniapp-Demo",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
   "dependencies": {
-    "bip39": "^3.0.4",
-    "ethereumjs-util": "^7.0.10",
-    "ethereumjs-wallet": "^1.0.1",
     "md5": "^2.3.0",
-    "qs": "^6.10.1",
     "uview-ui": "^1.8.4"
   },
   "devDependencies": {},
@@ -17,13 +13,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/EEchatGroup/EEchat-uniapp.git"
+    "url": "git+https://github.com/OpenIMSDK/Open-IM-Uniapp-Demo.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/EEchatGroup/EEchat-uniapp/issues"
+    "url": "https://github.com/OpenIMSDK/Open-IM-Uniapp-Demo/issues"
   },
-  "homepage": "https://github.com/EEchatGroup/EEchat-uniapp#readme"
+  "homepage": "https://github.com/OpenIMSDK/Open-IM-Uniapp-Demo#readme"
 }

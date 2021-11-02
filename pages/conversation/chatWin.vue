@@ -4,7 +4,7 @@
 			<u-navbar>
 				<view class="slot-wrap">
 					<view class="nick-title">
-						<text>{{vuex_conversation.name||vuex_conversation.showName||vuex_conversation.userID}}</text>
+						<text>{{vuex_conversation.name||vuex_conversation.showName||vuex_conversation.groupName||vuex_conversation.userID}}</text>
 						<view v-if="groupID==''" class="user-status">
 							<text>{{tip}}</text>
 						</view>
@@ -14,13 +14,14 @@
 					<u-icon @click="rightSet" name="more-dot-fill" size="48" />
 				</view>
 			</u-navbar>
+
 			<scroll-view refresher-enabled refresher-default-style="white" :refresher-triggered="refresherState"
 				@refresherabort="refreshAbort" @refresherrestore="refreshFnish" @refresherrefresh="refreshStart"
 				@click="clickScroll" :scroll-into-view="listItem" :style="{height:scrollHeight+'px'}" class="chat-list"
 				scroll-y>
 				<template v-for="msg in msgList">
 					<view :id="msg.positionId" v-if="!(contentTypeFilter(msg.contentType))&&msg.contentType!=112" class="agree-msg">
-						<text v-if="msg.contentType==111">{{msg.sendID==vuex_user_info.uid?"you revoke a message":msg.senderNickName+" revoke a message"}}</text>
+						<text v-if="msg.contentType==111">{{msg.sendID==vuex_user_info.uid?"你撤回了一条消息":msg.senderNickName+" 撤回了一条消息"}}</text>
 						<text v-else>{{JSON.parse(msg.content).defaultTips}}</text>
 						<!-- <text>you revoke a message you revoke a message you revoke a message you revoke a message you revoke a message</text> -->
 					</view>
@@ -31,7 +32,6 @@
 						:msg="msg" :key="msg.positionId" :id="msg.positionId" />
 				</template>
 			</scroll-view>
-			
 			
 			<view class="bottom-bar">
 				<view :style="{visibility:replyStatus?'visible':'hidden'}" class="reply-msg">
@@ -130,7 +130,8 @@
 				inputTimer:null,
 				showSelectFile:false,
 				replyStatus:false,
-				replyMsg:""
+				replyMsg:"",
+				screenHeight:0
 			}
 		},
 		computed: {
@@ -224,9 +225,9 @@
 					if(this.vuex_conversation.userID!=""){
 						let cids = []
 						tmpArr.map(m=>{
-							if(m.sendID!=this.vuex_user_info.uid&&!m.isRead) cids.push(m.clientMsgID)
+							if(m.sendID!=this.vuex_user_info.uid) cids.push(m.clientMsgID)
 						})
-						// console.log(cids);
+						console.log(cids);
 						if(cids.length>0){
 							this.$openSdk.markC2CMessageAsRead(this.vuex_conversation.userID, cids, (data) => {
 								// console.log(data);
@@ -258,11 +259,14 @@
 			},
 			newMsgListener() {
 				this.$globalEvent.addEventListener("onRecvNewMessage", (params) => {
+					console.log(params);
 					let res = JSON.parse(params.msg)
 					console.log(res);
 					if (res.contentType === 113) {
 						this.getTypingStatus()
 					} else {
+						console.log(res.recvID);
+						console.log(this.groupID);
 						console.log(this.vuex_user_info);
 						if (res.recvID === this.vuex_user_info.uid || res.recvID === this.groupID){
 							this.msgList.push(res);
@@ -271,6 +275,7 @@
 					}
 				});
 				this.$globalEvent.addEventListener("onRecvC2CReadReceipt",(params)=>{
+					console.log(params);
 					let res = JSON.parse(params.msg)
 					const cids = res[0].msgIDList
 					this.msgList.map(msg=>{
@@ -300,7 +305,7 @@
 				});
 				this.$globalEvent.addEventListener("sendMessageFailed", (params) => {
 					const res = JSON.parse(params.errMsg);
-					console.log(res);
+					console.log(params);
 					_this.myList.forEach(myMsg => {
 						if (myMsg.clientMsgID == res.clientMsgID) {
 							const tmpArr = Object.assign([], _this.msgList)
@@ -323,7 +328,7 @@
 				}
 			},
 			getScreen() {
-				this.scrollHeight = uni.getSystemInfoSync().safeArea.height - 139;
+				this.scrollHeight = this.screenHeight - 111;
 			},
 			getEle(){
 				// console.log(plus.navigator.getStatusbarHeight());
@@ -337,7 +342,7 @@
 					this.getScreen()
 					this.operationState = false
 				} else {
-					this.scrollHeight = uni.getSystemInfoSync().safeArea.height - 289
+					this.scrollHeight = this.screenHeight - 271
 					this.operationState = true
 					this.listItem = null
 					if (this.msgList.length === 0) return false
@@ -542,6 +547,7 @@
 				}
 			},
 			markC2CRead(receiverID,msgIDList) {
+				if(receiverID === "") return
 				this.$openSdk.markC2CMessageAsRead(receiverID, msgIDList, (data) => {
 					console.log(data);
 				})
@@ -637,6 +643,7 @@
 			}
 		},
 		beforeMount() {
+			this.screenHeight = uni.getSystemInfoSync().safeArea.height
 			this.recvID = this.vuex_conversation.userID || ""
 			this.groupID = this.vuex_conversation.groupID || ""
 			this.conversationID = this.vuex_conversation.conversationID
@@ -665,6 +672,9 @@
 </script>
 
 <style lang="scss">
+	page{
+		overflow-y: hidden;
+	}
 	/deep/.u-slot-content {
 		justify-content: center;
 	}
@@ -780,7 +790,9 @@
 
 		.btn-list {
 			.action-btn {
-				margin: 10vh 0 3vh 0;
+				// margin: 10vh 0 3vh 0;
+				margin-top: 10vh;
+				width: 80vw;
 				display: flex;
 				justify-content: space-between;
 
@@ -788,13 +800,16 @@
 					margin: 0;
 				}
 			}
-		}
-
-		.press-btn {
-			background-color: #1B72EC;
-			color: #FFFFFF;
-			padding: 8px 14px;
-			border-radius: 4px;
+			
+			.press-btn {
+				margin-top: 5vh;
+				text-align: center;
+				background-color: #1B72EC;
+				color: #FFFFFF;
+				padding-top: 8px;
+				padding-bottom: 8px;
+				border-radius: 4px;
+			}
 		}
 	}
 </style>

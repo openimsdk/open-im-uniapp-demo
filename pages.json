@@ -7,6 +7,21 @@
 
 		},
 		{
+				"path": "pages/login/register"
+		
+		},
+		{
+				"path": "pages/login/vercode"
+		
+		},
+		{
+				"path": "pages/login/setpsd"
+		
+		},
+		{
+				"path": "pages/login/setInfo"
+		},
+		{
 			"path": "pages/conversation/home",
 			"style": {
 				"enablePullDownRefresh": true

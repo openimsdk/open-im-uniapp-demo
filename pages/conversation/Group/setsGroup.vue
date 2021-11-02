@@ -1,6 +1,6 @@
 <template>
 	<view class="container">
-		<u-navbar title-width="400" title="Group chat settings" />
+		<u-navbar title-width="400" title="群组设置" />
 		<view @click="modifyGroup" class="group-head">
 			<u-avatar :src="groupInfo.faceUrl" />
 			<view class="group-info">
@@ -191,7 +191,7 @@
 						url: "/pages/conversation/Group/launchGroup?type=add"
 					})
 				} else {
-					this.$u.toast('you are not a member of the group')
+					this.$u.toast('你已经不是该群成员')
 				}
 			},
 			getGroupInfo() {

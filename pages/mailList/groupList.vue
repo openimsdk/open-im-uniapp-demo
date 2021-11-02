@@ -55,6 +55,7 @@
 			},
 		},
 		beforeMount() {
+			console.log(this.vuex_group_list);
 			this.groupList[0].data = this.vuex_group_list
 		}
 	}

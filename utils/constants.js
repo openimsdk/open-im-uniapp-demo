@@ -12,7 +12,7 @@
   export const HASREADRECEIPTMESSAGE = 112;
   export const TYPINGMESSAGE = 113;
 
-  ///
+  //
   export const ACCEPTFRIENDNOTICE = 201;
   export const ADDFRIENDNOTICE = 202;
   export const REFUSEFRIENDAPPLICATIONNOTICE = 203;
@@ -22,10 +22,9 @@
 
   export const KICKONLIENNOTICE = 303;
 
-  ///
+  //
   export const TRANSFERGROUPOWNERNOTICE = 501;
   export const CREATEGROUPNOTICE = 502;
-  // export const create_group = 503;
   export const JOINGROUPNOTICE = 504;
   export const QUITGROUPNOTICE = 505;
   export const SETGROUPINFONOTICE = 506;

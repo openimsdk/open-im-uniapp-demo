@@ -106,10 +106,10 @@
 				this.$openSdk.addToBlackList(this.friendData.uid, (data) => {
 					console.log(data);
 					if (data.msg === "") {
-						this.$u.toast("add black list success！");
+						this.$u.toast("添加到黑名单成功！");
 						this.$refs.blockConfirm.close();
 					}else{
-						this.$u.toast("add black list failed！");
+						this.$u.toast("添加到黑名单失败！");
 						this.$refs.blockConfirm.close();
 					}
 				});
@@ -138,7 +138,7 @@
 				this.$openSdk.deleteFromFriendList(this.friendData.uid, (data) => {
 					console.log(data);
 					if (data.msg === "") {
-						this.$u.toast("delete success！");
+						this.$u.toast("删除成功！");
 						this.$refs.deleteConfirm.close();
 						uni.switchTab({
 							url:"/pages/conversation/home"
@@ -165,7 +165,7 @@
 		},
 		beforeMount() {
 			this.initData()
-			this.topCheck=this.vuex_conversation.isPinned===0?false:true
+			this.topCheck=this.vuex_conversation.isPinned==0?false:true
 		},
 		onShow() {
 			this.initData()

@@ -1,38 +1,82 @@
 export const SECRET = "tuoyun"
 const IMPORTFRIENDLIST = ["18349115126", "13918588195", "17396220460", "18666662412"]
-const IMPORTGROUPID = "b6d1f6d16481547c26b744fa701c6f0f"
+const IMPORTGROUPID = "082cad15fd27a2b6b875370e053ccd79"
 
 export const appServerLogin = (loginInfo) => {
 	return new Promise((resolve, reject) => {
 		uni.request({
-			url: "http://1.14.194.38:10000/auth/user_token",
+			url: "http://47.112.160.66:42233/auth/login",
 			method: "POST",
 			data: JSON.stringify(loginInfo),
 			success(res) {
-				resolve(res.data)
+				if(res.data.errCode===0){
+					resolve(res.data.data)
+				}else{
+					reject(res.data)
+				}
 			},
 			fail(err) {
-				reject(err)
+				reject(err.data)
 			}
 		});
 	})
 }
 
-export const appServerRegiester = (registerInfo) => {
+export const appServerSendMsg = (phoneNumber) => {
 	return new Promise((resolve, reject) => {
 		uni.request({
-			url: "http://1.14.194.38:10000/auth/user_register",
+			url: "http://47.112.160.66:42233/auth/code",
 			method: 'POST',
-			data: JSON.stringify(registerInfo),
+			data: JSON.stringify({phoneNumber}),
 			success(res) {
-				if (res.data.errCode) {
+				if(res.data.errCode===0&&res.data.data.SendCode!==0){
+					resolve(res.data.data)
+				}else{
 					reject(res.data)
-				} else {
-					resolve(res.data)
 				}
 			},
 			fail(err) {
-				reject(err)
+				reject(err.data)
+			}
+		})
+	})
+}
+
+export const appServerVerifyCode = (phoneNumber,verificationCode) => {
+	return new Promise((resolve, reject) => {
+		uni.request({
+			url: "http://47.112.160.66:42233/auth/verify",
+			method: 'POST',
+			data: JSON.stringify({phoneNumber,verificationCode}),
+			success(res) {
+				if(res.data.errCode===0){
+					resolve(res.data.data)
+				}else{
+					reject(res.data)
+				}
+			},
+			fail(err) {
+				reject(err.data)
+			}
+		})
+	})
+}
+
+export const appServerSetPwd = (phoneNumber,password,verificationCode) => {
+	return new Promise((resolve, reject) => {
+		uni.request({
+			url: "http://47.112.160.66:42233/auth/password",
+			method: 'POST',
+			data: JSON.stringify({phoneNumber,password,verificationCode}),
+			success(res) {
+				if(res.data.errCode===0){
+					resolve(res.data.data)
+				}else{
+					reject(res.data)
+				}
+			},
+			fail(err) {
+				reject(err.data)
 			}
 		})
 	})
@@ -41,7 +85,7 @@ export const appServerRegiester = (registerInfo) => {
 export const importFriend = (uid, token) => {
 	return new Promise((resolve, reject) => {
 		uni.request({
-			url: "http://1.14.194.38:10000/friend/import_friend",
+			url: "http://47.112.160.66:10000/friend/import_friend",
 			method: "POST",
 			header: {
 				"token":token
@@ -64,7 +108,7 @@ export const importFriend = (uid, token) => {
 export const importGroup = (uid, token) => {
 	return new Promise((resolve, reject) => {
 		uni.request({
-			url: "http://1.14.194.38:10000/group/invite_user_to_group",
+			url: "http://47.112.160.66:10000/group/invite_user_to_group",
 			method: "POST",
 			header: {
 				token
@@ -76,6 +120,7 @@ export const importGroup = (uid, token) => {
 				operationID: "import_group_op",
 			},
 			success(res) {
+				console.log(res);
 				resolve(res.data)
 			},
 			fail(err) {
@@ -95,7 +140,7 @@ export const importRelationShip = (currentUid) => {
 	return new Promise((reslove,reject)=>{
 		appServerLogin(adminInfo).then(async res => {
 			const adminToken = res.data.token
-			await importFriend(currentUid,adminToken)
+			// await importFriend(currentUid,adminToken)
 			await importGroup(currentUid,adminToken)
 			reslove()
 		}).catch(err => reject(err))

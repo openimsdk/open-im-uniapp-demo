@@ -3,9 +3,9 @@
 		<u-avatar :src="myAvator" mode="circle"></u-avatar>
 		<view @longpress.prevent="pressAtion" class="msg-box">
 			<view class="msg-status">
-				<text v-if="msg.isRead&&msg.status!==3&&msg.contentType==101"
+				<text v-if="msg.isRead&&msg.status!==3&&vuex_conversation.userID!==''"
 					class="readed">已读</text>
-				<text v-if="!msg.isRead&&msg.status!==3&&msg.contentType==101"
+				<text v-if="!msg.isRead&&msg.status!==3&&vuex_conversation.userID!==''"
 					class="unread">未读</text>
 				<u-icon @click="reSend" v-if="msg.status==3" size="32" name="error-circle" color="#f44038" />
 			</view>
@@ -149,6 +149,7 @@
 			},
 		},
 		mounted() {
+			// console.log(this.msg);
 			_this = this
 			this.myAvator = this.vuex_user_info.icon
 			this.setListener()

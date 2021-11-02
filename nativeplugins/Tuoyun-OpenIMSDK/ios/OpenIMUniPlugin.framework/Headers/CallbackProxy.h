@@ -6,7 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "DCUni/DCUniModule.h"
+#import "DCUniModule.h"
 @import OpenIMCore;
 
 NS_ASSUME_NONNULL_BEGIN

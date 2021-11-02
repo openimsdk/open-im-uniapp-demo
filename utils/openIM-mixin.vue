@@ -69,6 +69,7 @@
 				});
 				this.$globalEvent.addEventListener("onConversationChanged", (params) => {
 					let res = JSON.parse(params.msg);
+					console.log("onConversationChanged:::::::");
 					// console.log(res);
 					if (res) {
 						res.forEach((r) => {
@@ -105,7 +106,6 @@
 				this.$globalEvent.addEventListener(
 					"onFriendInfoChanged",
 					(params) => {
-						console.log('onFriendInfoChanged```````````````');
 						this.getMailList()
 					}
 				);

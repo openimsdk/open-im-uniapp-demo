@@ -1,203 +1,192 @@
 <template>
-	<view id="login">
-		<image src="../../static/logo.png" mode="" class="logo"></image>
-		<text class="title">Open IM</text>
-		<view class="tipsArea">
-			<text>开源OpenIM体验Demo</text>
-			<text class="tipsArea-item">体验群组聊天，音视频通话等IM功能</text>
-			<!-- <view class="tipsAreaItem">
-				<view class="blackDot"></view>
-				<text>开源Demo，高效体验</text>
+	<view>
+		<view class="container">
+			<text class="header">欢迎使用OpenIM</text>
+			<view class="form-container">
+				<view class="form-item">
+					<text class="form-title">手机号码</text>
+					<view class="form-input">
+						<text>+86</text>
+						<u-icon name="arrow-down" />
+						<view class="divider"></view>
+						<u-input placeholder="请输入手机号码" v-model="phoneNumber" type="number" :border="false" />
+					</view>
+				</view>
+				<view class="form-item password-item">
+					<text class="form-title">密码</text>
+					<view class="form-input">
+						<u-input placeholder="请输入密码" v-model="password" type="password" :border="false" />
+					</view>
+				</view>
+				<view class="bottom-action">
+					<text @click="missPwd">忘记密码</text>
+					<text @click="newUser" class="new-user">新用户注册</text>
+				</view>
 			</view>
-			<view class="tipsAreaItem">
-				<view class="blackDot"></view>
-				<text>体验群组聊天，在线沟通</text>
-			</view>
-			<view class="tipsAreaItem">
-				<view class="blackDot"></view>
-				<text>音视频会议，一键通话</text>
-			</view> -->
-		</view>
 
-		<input type="text" value="" class="inputArea" placeholder="请输入账号"
-			v-model="account" />
-		<button :loading="loginLoading" type="primary" class="loginButton" @click="login">登录</button>
+			<u-button :loading ="loginLoading"  @click="login" :class="{'start-login':password!=''}" class="login-btn" :hair-line="false">登录</u-button>
+
+			<view>
+				<u-checkbox shape="circle" v-model="checked">我已阅读并同意：<text>《服务协议》</text>，<text>《隐私政策》</text></u-checkbox>
+			</view>
+		</view>
 	</view>
 </template>
 
 <script>
-let _this;
-import { SECRET,appServerLogin,appServerRegiester,importRelationShip } from '../../utils/appServerApi.js'
-import md5 from 'md5'
-
+	import { appServerLogin } from "../../utils/appServerApi.js"
+	import md5 from 'md5'
 	export default {
 		data() {
 			return {
-				account: "",
-				loginLoading: false,
-			};
+				phoneNumber: "",
+				password: "",
+				checked: true,
+				loginLoading:false
+			}
+		},
+		onLoad() {
+
 		},
 		methods: {
 			login(){
-				this.loginLoading = true
-				if (this.account === "") {
-					this.$u.toast("please input your account")
-					return false
+				if(this.phoneNumber.length!==11||this.password==""||!this.checked){
+					this.$u.toast("请先正确填写信息并勾选协议")
+					return
 				}
-				let registerInfo = {
-					secret: SECRET, 
-					platform: 2, 
-					uid: this.account, 
-					name: "0x"+this.account.slice(0,4), 
-					icon: "https://api.prodless.com/avatar.png?size=60", 
-					gender: 1, 
-					mobile: "", 
-					birth: "", 
-					email: "", 
-					ex: ""
-				};
-				appServerRegiester(registerInfo).then(res=>{
-					this.sdkLogin(res.data.uid,res.data.token,"register")
+				this.loginLoading = true
+				const loginInfo = {
+					phoneNumber:this.phoneNumber,
+					password:md5(this.password),
+					// password:this.password,
+					platform:uni.getSystemInfoSync().platform == 'ios' ? 1 : 2
+				}
+				appServerLogin(loginInfo).then(res=>{
+					this.sdkLogin(res.uid,res.token)
 				}).catch(err=>{
-					if(err.errMsg==`rpc error: code = Unknown desc = Error 1062: Duplicate entry '${this.account}' for key 'PRIMARY'`){
-						let loginInfo = {
-							secret:SECRET,
-							platform:2,
-							uid:this.account
-						};
-						appServerLogin(loginInfo).then(res=>{
-							this.sdkLogin(res.data.uid,res.data.token,"login")
-						}).catch(err=>{
-							_this.loginLoading = false
-							_this.$u.toast('login fail：' + err)
-						})
-					}
+					this.loginLoading = false
+					this.$u.toast('login fail：' + err.errMsg)
 				})
 			},
-			
-			sdkLogin(uid,token,type){
-				console.log("login type:"+type);
-					_this.$openSdk.login(uid, token, async val => {
+			sdkLogin(uid,token){
+					this.$openSdk.login(uid, token, async val => {
 						if (val.err==undefined) {
-							_this.$u.vuex('vuex_last_user',uid)
+							this.$u.vuex('vuex_last_user',uid)
+							this.$u.vuex('vuex_token',token)
 							const reqData = [uid]
-							_this.$openSdk.getUsersInfo(reqData, data => {
+							this.$openSdk.getUsersInfo(reqData, data => {
 								let userInfoRes = JSON.parse(data.msg)
-								console.log(userInfoRes[0]);
-								_this.$u.vuex('vuex_user_info',userInfoRes[0])
+								this.$u.vuex('vuex_user_info',userInfoRes[0])
 							})
-							if(type === "register") await importRelationShip(this.account)
-							_this.loginLoading = false
+							this.loginLoading = false
 							uni.switchTab({
 								url: '/pages/conversation/home'
 							})
 						} else {
-							_this.loginLoading = false
-							_this.$u.toast('login fail：' + val.err)
+							this.loginLoading = false
+							this.$u.toast('login fail：' + val.err)
 						}
 					});
 			},
-			initAccount() {
-				const lastWord = this.vuex_last_user
-				if (lastWord){
-					this.account = lastWord
-				}else{
-					const accountStr = md5(new Date().getTime())
-					this.account = accountStr.slice(0,10)
-				}
+			missPwd(){
+				// uni.na
 			},
-		},
-		beforeMount() {
-			this.initAccount()
-		},
-		onLoad() {
-			_this = this
+			newUser(){
+				uni.navigateTo({
+					url:'./register'
+				})
+			}
 		}
-	};
+	}
 </script>
 
-<style lang="scss" scoped>
-	#login {
-		background-image: url(../../static/loginBackground.png);
-		background-size: 100% 100vh;
-		height: 100vh !important;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
+<style lang="scss">
+	// page{
+	// 	overflow-y:hidden;
+	// }
+	.container {
+		padding: 204rpx 80rpx 0 80rpx;
 
-		.logo {
-			height: 220rpx;
-			min-height: 220rpx;
-			width: 220rpx;
-			margin-top: 220rpx;
-		}
-
-		.title {
-			font-size: 52rpx;
-			font-weight: 600;
+		.header {
 			color: #333333;
-			margin-top: 10rpx;
+			font-size: 64rpx;
+			height: 90rpx;
+			line-height: 90rpx;
 		}
 
-		.childTitle {
-			font-size: 38rpx;
-			font-weight: 500;
-			color: #333333;
-			margin-top: 18rpx;
-		}
+		.form-container {
+			margin-top: 84rpx;
+			margin-bottom: 168rpx;
 
-		.tipsArea {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			margin-top: 32rpx;
-			.tipsArea-item{
-				margin-top: 24rpx;
+			.form-item {
+				.form-title {
+					font-size: 28rpx;
+					height: 40rpx;
+					line-height: 40rpx;
+					color: #333333;
+				}
+
+				.form-input {
+					display: flex;
+					flex-direction: row;
+					align-items: center;
+					border-bottom: 1px solid #D8D8D8;
+					margin-top: 6rpx;
+
+					.u-icon {
+						padding: 0 40rpx 0 20rpx
+					}
+
+					.uni-input-placeholder {
+						font-size: 32rpx;
+						font-weight: 400;
+					}
+
+					.divider {
+						border: 1px dashed #D8D8D8;
+						height: 32rpx;
+						margin-right: 56rpx;
+					}
+				}
 			}
-			// .tipsAreaItem {
-			// 	display: flex;
-			// 	align-items: center;
-			// 	margin-bottom: 10rpx;
-			// 	font-size: 28rpx;
-			// 	font-weight: 400;
-			// 	color: #333330;
 
-			// 	.blackDot {
-			// 		width: 10rpx;
-			// 		height: 10rpx;
-			// 		border-radius: 10rpx;
-			// 		background-color: #666;
-			// 		margin-right: 24rpx;
-			// 	}
-			// }
+			.password-item {
+				margin-top: 56rpx;
+				margin-bottom: 28rpx;
+			}
+
+			.bottom-action {
+				display: flex;
+				justify-content: space-between;
+				font-size: 24rpx;
+
+				.new-user {
+					color: #1D6BED;
+				}
+			}
 		}
 
-		.inputArea {
-			width: 500rpx;
-			font-weight: 500;
-			color: #999999;
-			padding-bottom: 12rpx;
-			border-bottom: 1px solid #979797;
-			margin-top: 120rpx;
+		.login-btn {
+			background-color: rgba($color: #D8D8D8, $alpha: 0.4);
+			color: #898989;
+			margin-bottom: 36rpx;
+			border-radius: 8rpx;
+		}
+		
+		.start-login {
+			background-color: #1D6BED;
+			color: #FFFFFF;
 		}
 
-		.loginButton {
-			width: 290rpx;
-			// height: 66rpx;
-			min-height: 66rpx;
-			font-size: 32rpx;
-			font-weight: 600;
-			color: #ffffff;
-			line-height: 66rpx;
-			box-shadow: 0 8rpx 26rpx rgba(0, 76, 203, 0.7);
-			margin-top: 120rpx;
+		.u-btn--bold-border {
+			border: none;
 		}
 
-		.register {
-			font-size: 28rpx;
-			font-weight: 600;
-			color: #1d6bed;
-			margin-top: 32rpx;
+		/deep/.u-checkbox__label {
+			font-size: 24rpx;
+			text{
+				color: #1D6BED;
+			}
 		}
 	}
 </style>

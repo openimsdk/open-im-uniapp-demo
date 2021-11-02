@@ -65,13 +65,19 @@
 				};
 				this.$openSdk.addFriend(reqData, (data) => {
 					let _this = this;
+					console.log(data);
 					if (data.msg === "") {
 						uni.showToast({
-							title: "send success",
+							title: "发送成功",
 							icon: "success",
 							success() {
 								_this.isSend = true;
 							},
+						});
+					}else{
+						uni.showToast({
+							title: "发送失败",
+							icon: "error",
 						});
 					}
 					this.isLoading = false

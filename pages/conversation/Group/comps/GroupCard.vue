@@ -79,7 +79,7 @@
 					this.$openSdk.joinGroup(this.info.groupID, 'hi', (data) => {
 						console.log(data);
 						if (data.msg) {
-							this.$u.toast('send success')
+							this.$u.toast('发送成功')
 						}
 						this.loading = false
 					})

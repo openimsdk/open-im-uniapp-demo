@@ -98,6 +98,7 @@
 			},
 			logoutConfirm() {
 				this.$openSdk.logout((data) => {
+					console.log(data);
 					if (data.msg === "") {
 						uni.reLaunch({
 							url: "/pages/login/login",

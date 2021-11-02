@@ -31,11 +31,11 @@
 				<view class="action-item action-item-top" @click="pinConversation(item.conversationID, item.isPinned)">
 					<text>
 						{{
-		  item.isPinned === 0 ? "Top" : "Cancel Top"
+		  item.isPinned === 0 ? "置顶" : "取消置顶"
 		}}</text>
 				</view>
 				<view class="action-item action-item-del" @click="deleteConversation(item.conversationID)">
-					<text>Delete</text>
+					<text>移除</text>
 				</view>
 				<view v-show="item.unreadCount !== 0" class="action-item action-item-mark"
 					@click="markAsRead(item)">
@@ -75,22 +75,22 @@
 						return value.latestMsg.content;
 						break;
 					case 102:
-						return "[picture]";
+						return "[图片]";
 						break;
 					case 103:
-						return "[voice]";
+						return "[语音]";
 						break;
 					case 104:
-						return "[video]";
+						return "[视频]";
 						break;
 					case 106:
 						return JSON.parse(value.latestMsg.content).text;
 						break;
 					case 111:
-						return value.latestMsg.sendID==that.vuex_user_info.uid?"you revoke a message":value.latestMsg.senderNickName+" revoke a message"
+						return value.latestMsg.sendID==that.vuex_user_info.uid?"你撤回了一条消息":value.latestMsg.senderNickName+" 撤回了一条消息"
 					default:
 						const tmpMsg = JSON.parse(value.latestMsg.content)
-						return tmpMsg.isDisplay === 1 ? tmpMsg.defaultTips : "system msg"
+						return tmpMsg.isDisplay === 1 ? tmpMsg.defaultTips : "系统消息"
 				}
 			},
 			dateFilter(val) {
