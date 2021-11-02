@@ -1,4 +1,4 @@
-# OpenIM SDK for uni-app(android&ios app)
+# OpenIM Demo for uni-app(android&ios app)
 
 ## About us
 
@@ -13,7 +13,7 @@ Open im includes instant messaging and real-time audio and video server and clie
 - git clone to local
 
   ```
-  git clone https://github.com/OpenIMSDK/Open-IM-SDK-Uniapp.git
+  git clone https://github.com/OpenIMSDK/Open-IM-Uniapp-Demo.git
   ```
 
 - get dependencies from npm
