@@ -1,0 +1,39 @@
+@mixin colBox($isBtw) {
+    display: flex;
+    flex-direction: column;
+    @if $isBtw {
+        justify-content: space-between;
+    }
+}
+
+@mixin centerBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@mixin vCenterBox {
+    display: flex;
+    align-items: center;
+}
+
+@mixin btwBox {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@mixin nomalEllipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-all;
+    white-space: nowrap;
+}
+
+@mixin ellipsisWithLine($line) {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: $line;
+    overflow: hidden;
+    word-break: break-all;
+}
