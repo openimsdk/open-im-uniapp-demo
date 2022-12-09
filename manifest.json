@@ -19,7 +19,8 @@
         "modules" : {
             "Geolocation" : {},
             "Maps" : {},
-            "VideoPlayer" : {}
+            "VideoPlayer" : {},
+            "Push" : {}
         },
         "distribute" : {
             "android" : {
@@ -69,12 +70,7 @@
                         "appkey_android" : "d7d4fede7d37b6dabf597824395cd1db"
                     }
                 },
-                "push" : {
-                    "unipush" : {
-                        "version" : "2",
-                        "offline" : false
-                    }
-                },
+                "push" : {},
                 "share" : {},
                 "statics" : {},
                 "speech" : {}
