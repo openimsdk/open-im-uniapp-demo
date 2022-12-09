@@ -128,7 +128,7 @@
             }
         },
         "uniStatistics" : {
-            "enable" : true
+            "enable" : false
         }
     },
     /* 快应用特有相关 */
