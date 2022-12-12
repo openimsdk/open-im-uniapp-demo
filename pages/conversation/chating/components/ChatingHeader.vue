@@ -59,6 +59,9 @@
 				return `(${this.storeCurrentGroup?.memberCount??0})`
 			},
 		},
+		  mounted() {
+		    this.getOnlineState();
+		},
 		methods: {
 			click(e) {
 				this.$emit('click', e)
