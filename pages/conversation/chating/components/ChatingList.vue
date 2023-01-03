@@ -51,6 +51,26 @@
 				return this.messageLoadState.loading ? 'loading' : 'loadmore'
 			},
 		},
+		 watch: {
+		    storeHistoryMessageList: {
+		      immediate: true,
+		      handler(newValue, oldValue) {
+			if (newValue.length === 0) return;
+			if (newValue.length > oldValue.length) {
+			  setTimeout(() => {
+			    this.$nextTick(() => {
+			      this.scrollToAnchor(
+				`auchor${newValue[newValue.length - 1].clientMsgID}`,
+				false,
+				true
+			      );
+			    });
+			  }, 200);
+			}
+			console.log("监听到消息列表变化", newValue, oldValue);
+		      },
+		    },
+		},
 		mounted() {
 			this.loadMessageList()
 		},
