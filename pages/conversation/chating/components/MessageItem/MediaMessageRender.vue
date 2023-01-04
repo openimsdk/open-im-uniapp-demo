@@ -1,12 +1,37 @@
 <template>
 	<view @click="clickMediaItem" class="media_message_container">
 		<!-- <view :style="{height:wrapperHeight}" class="media_message_container"> -->
-		<u--image @load="onLoaded" :showLoading="true" :width="loadingWidth" height="240" mode="heightFix"
-			:src="getImgUrl">
-			<template v-slot:loading>
-				<u-loading-icon color="red"></u-loading-icon>
-			</template>
-		</u--image>
+		    <u--image
+		      @load="onLoaded"
+		      :showLoading="true"
+		      :width="loadingWidth"
+		      height="180px"
+		      mode="heightFix"
+		      v-if="isVideo"
+		      :src="getImgUrl"
+		      :customStyle="customStyle"
+		    >
+		      <template v-slot:loading>
+			<u-loading-icon color="red"></u-loading-icon>
+		      </template>
+		    </u--image>
+		    <u--image
+		      @load="onLoaded"
+		      :showLoading="true"
+		      mode="heightFix"
+		      width="auto"
+		      heihgt="180px"
+		      v-else
+		      :src="getImgUrl"
+		      :customStyle="{
+			'max-width': '350rpx',
+			'max-height': '180px',
+		      }"
+		    >
+		      <template v-slot:loading>
+			<u-loading-icon color="red"></u-loading-icon>
+		      </template>
+		    </u--image>
 		<image v-if="isVideo" class="play_icon" src="@/static/images/chating_message_video_play.png" alt="" srcset="">
 		<text v-if="isVideo" class="video_duration">{{getDuration}}</text>
 	</view>
