@@ -487,31 +487,50 @@
 				})
 			},
 			getVideoSnshot(item) {
-				return new Promise((reslove, reject) => {
-					var video = document.createElement("VIDEO");
-					video.setAttribute('crossOrigin', 'anonymous');
-					video.setAttribute("autoplay", "autoplay");
-					video.setAttribute("muted", "muted");
-					video.innerHTML = "<source src=" + item + ' type="audio/mp4">';
-					var canvas = document.createElement("canvas");
-					var ctx = canvas.getContext("2d");
-					video.addEventListener("canplay", function() {
-						var anw = document.createAttribute("width");
-
-						anw.nodeValue = 500;
-						var anh = document.createAttribute("height");
-
-						anh.nodeValue = 300;
-						canvas.setAttributeNode(anw);
-						canvas.setAttributeNode(anh);
-
-						ctx.drawImage(video, 0, 0, 500, 300);
-						var base64 = canvas.toDataURL("image/png");
-						video.pause();
-						reslove(base64);
-					});
-				});
+			      return this.getVideoBasicInfo(item).then(videoInfo => {
+				// const { video, duration,width,height } = videoInfo
+				// video.currentTime = targetTime
+				return this.getVideoPosterInfo(videoInfo)
+			      })
 			},
+		     getVideoBasicInfo(videoSrc) {
+			return new Promise((resolve, reject) => {
+			    const video = document.createElement('video')
+			    video.src = videoSrc
+			    // 视频一定要添加预加载
+			    video.preload = 'auto'
+			    // 视频一定要同源或者必须允许跨域
+			    video.crossOrigin = 'Anonymous'
+			    // 监听：异常
+			    video.addEventListener('error', error => {
+				reject(error)
+			    })
+			    // 监听：加载完成基本信息,设置要播放的时常
+			    video.addEventListener('loadedmetadata', () => {
+				const videoInfo = {
+				    video,
+				    width: video.videoWidth,
+				    height: video.videoHeight,
+				    duration: video.duration
+				}
+				resolve(videoInfo)
+			    })
+			})
+		      },
+		      getVideoPosterInfo(videoInfo) {
+			  return new Promise(resolve => {
+			      const { video, width, height } = videoInfo
+			      video.addEventListener('canplay', () => {
+				  const canvas = document.createElement('canvas')
+				  canvas.width = width
+				  canvas.height = height
+				  const ctx = canvas.getContext('2d')
+				  ctx.drawImage(video, 0, 0, width, height)
+				  const posterUrl = canvas.toDataURL('image/png')
+				  resolve(posterUrl);
+			      })
+			  })
+		      }
 		},
 	}
 </script>
