@@ -1,3 +1,5 @@
+## 仅供学习使用，非授权请勿商业用途，违者必究
+![avatar](https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg)
 ## 安装依赖
 
 项目根目录命令行执行:
