@@ -53,7 +53,7 @@ yarn
 - 高德地图web api key  用于根据经纬度生成快照  需要自行申请替换
 
   ```javascript
-  AmapWebKey: '835638634b8f9b4bba386eeec94aa7df'
+  AmapWebKey: ''
   ```
 
 - 图片、视频等资源文件存储方式  支持minio cos oss  推荐minio、cos
