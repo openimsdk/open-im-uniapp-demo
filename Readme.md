@@ -10,6 +10,10 @@
   <a href="https://doc.rentsoft.cn/">OpenIM Docs</a>
   •
   <a href="https://github.com/openimsdk/open-im-server">OpenIM Server</a>
+  •
+  <a href="https://github.com/openimsdk/open-im-sdk-uniapp">open-im-sdk-uniapp</a>
+  •
+  <a href="https://github.com/openimsdk/openim-sdk-core">openim-sdk-core</a>
 </p>
 
 <br>
@@ -103,7 +107,7 @@ OpenIM Uniapp Demo 是一个基于本地插件、OpenIM Server 和 Uniapp 的开
 
 ## 谁在使用OpenIM :eyes:
 
-查看我们的 [用户案例研究](https://github.com/OpenIMSDK/community/blob/main/ADOPTERS.md) 页面以获取项目用户列表。 不要犹豫，留下 [评论](https://github.com/openimsdk/open-im-server/issues/379) 并分享您的用例。
+查看我们的 [用户案例](https://github.com/OpenIMSDK/community/blob/main/ADOPTERS.md) 以获取用户列表。 不要犹豫，留下 [评论](https://github.com/openimsdk/open-im-server/issues/379) 并分享您的用例。
 
 ## 授权许可 :page_facing_up:
 
