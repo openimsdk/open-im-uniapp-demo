@@ -1,0 +1,49 @@
+.content_with_back {
+  padding: 0 64rpx;
+
+  .back_icon {
+    padding-top: 50rpx;
+    padding-bottom: 100rpx;
+  }
+
+  .title {
+    font-size: 48rpx;
+    padding-bottom: 90rpx;
+  }
+
+  .sub_title {
+    color: $u-primary;
+    padding-bottom: 48rpx;
+  }
+}
+
+.phoneNumber_areacode {
+  display: flex;
+  align-items: center;
+  font-size: 36rpx;
+  border-right: 2rpx solid #d8d8d8;
+  margin-right: 48rpx;
+
+  .areacode_content {
+    font-weight: 400;
+    font-size: 28rpx;
+    margin-right: 12rpx;
+  }
+
+  .arrow_down {
+    margin-right: 12rpx;
+  }
+}
+
+.agreement {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin: 36rpx 24rpx;
+
+  .detail {
+    font-size: 24rpx;
+    font-weight: 400;
+    color: $u-primary;
+  }
+}

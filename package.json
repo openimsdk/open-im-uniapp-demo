@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "date-fns": "^2.30.0",
+    "dayjs": "^1.11.6",
+    "image-tools": "^1.4.0",
+    "md5": "^2.3.0",
+    "openim-uniapp-polyfill": "^1.0.5",
+    "uuid": "^9.0.0"
+  }
+}
