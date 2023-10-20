@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://www.openim.online">
+    <a href="https://www.openim.io">
         <img src="./doc/openim-logo.gif" width="60%" height="30%"/>
     </a>
 </p>
