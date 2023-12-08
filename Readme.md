@@ -19,6 +19,9 @@
 <br>
 
 OpenIM Uniapp Demo 是一个基于本地插件、OpenIM Server 和 Uniapp 的开源即时通讯应用程序。它演示了如何使用 OpenIM 将即时消息功能快速集成到任何单一应用程序中。
+您可以通过以下两种方式之一，获得使用源代码创建非由OpenIM生成的编译版本的许可：
+1. 根据自由软件基金会的GPL v.3.0许可，受此政策概述的例外情况的限制；或
+2. 通过与OpenIM联系（contact@openim.io）获取商业许可。
 
 ## 技术栈 🛠️
 
