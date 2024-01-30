@@ -9,24 +9,19 @@ import IMSDK, {
 import config from "./common/config";
 import { getDbDir, toastWithCallback } from "@/util/common.js";
 import { conversationSort } from "@/util/imCommon";
-import { PageEvents } from "@/constant";
+import { PageEvents, UpdateMessageTypes } from "@/constant";
 import { checkUpdateFormPgyer } from "@/api/checkUpdate";
 import NotificationUtil from "./util/notification";
-import newMessage from "@/static/audio/newMessage.wav";
 
 let cacheConversationList = [];
 let updateDownloadTask = null;
 let notificationIntance = null;
 let pausing = false;
-let innerAudioContext;
 
 export default {
   onLaunch: function () {
     console.log("App Launch");
     // Igexin.turnOnPush();
-    innerAudioContext = uni.createInnerAudioContext();
-    innerAudioContext.autoplay = false;
-    innerAudioContext.src = newMessage;
 
     this.$store.dispatch("user/getAppConfig");
     this.launchCheck();
@@ -65,6 +60,7 @@ export default {
     ...mapActions("message", [
       "pushNewMessage",
       "updateOneMessage",
+      "updateQuoteMessageRevoke",
       "updateMessageNicknameAndFaceUrl",
     ]),
     ...mapActions("conversation", ["updateCurrentMemberInGroup"]),
@@ -100,18 +96,20 @@ export default {
         });
       };
       IMSDK.subscribe(IMSDK.IMEvents.OnConnectFailed, ({ errCode }) => {
-        console.log(errCode);
+        console.log('OnConnectFailed', errCode)
       });
       IMSDK.subscribe(IMSDK.IMEvents.OnConnecting, (data) => {
-        console.log(data);
+        console.log('OnConnecting', data)
       });
       IMSDK.subscribe(IMSDK.IMEvents.OnConnectSuccess, (data) => {
-        console.log(data);
+        console.log('OnConnectSuccess', data)
       });
       IMSDK.subscribe(IMSDK.IMEvents.OnKickedOffline, (data) => {
+        console.log('OnKickedOffline', data)
         kickHander("您的账号在其他设备登录，请重新登陆！");
       });
       IMSDK.subscribe(IMSDK.IMEvents.OnUserTokenExpired, (data) => {
+        console.log('OnUserTokenExpired', data)
         kickHander("您的登录已过期，请重新登陆！");
       });
 
@@ -157,8 +155,106 @@ export default {
         }
         data.forEach(this.handleNewMessage);
       };
+      const c2cReadReceiptHandler = ({ data: receiptList }) => {
+        if (receiptList[0].userID !== this.storeCurrentConversation.userID) {
+          return;
+        }
+
+        receiptList.forEach((item) => {
+          item.msgIDList.forEach((msgID) => {
+            this.updateOneMessage({
+              message: {
+                clientMsgID: msgID,
+              },
+              type: UpdateMessageTypes.KeyWords,
+              keyWords: {
+                key: "isRead",
+                value: true,
+              },
+            });
+          });
+        });
+      };
+      const groupReadReceiptHandler = ({ data: receiptList }) => {
+        if (receiptList[0].groupID !== this.storeCurrentConversation.groupID) {
+          return;
+        }
+
+        receiptList.forEach((item) => {
+          item.msgIDList.forEach((msgID) => {
+            const inlineMessage = this.storeHistoryMessageList.find(
+              (message) => message.clientMsgID === msgID,
+            );
+            if (inlineMessage) {
+              inlineMessage.attachedInfoElem.groupHasReadInfo.hasReadUserIDList =
+                [
+                  ...(inlineMessage.attachedInfoElem.groupHasReadInfo
+                    .hasReadUserIDList ?? []),
+                  item.userID,
+                ];
+              // Members who join later in the workgroup will also send read receipts. Need filter.
+              if (
+                inlineMessage.attachedInfoElem.groupHasReadInfo
+                  .groupMemberCount -
+                  inlineMessage.attachedInfoElem.groupHasReadInfo.hasReadCount >
+                1
+              ) {
+                inlineMessage.attachedInfoElem.groupHasReadInfo.hasReadCount += 1;
+              }
+
+              console.log({
+                ...inlineMessage,
+              });
+              this.updateOneMessage({
+                message: {
+                  ...inlineMessage,
+                },
+              });
+            }
+          });
+        });
+      };
+      const newRecvMessageRevokedHandler = ({ data: revokedMessage }) => {
+        if (!this.storeCurrentConversation.conversationID) {
+          return;
+        }
+
+        this.updateOneMessage({
+          message: {
+            clientMsgID: revokedMessage.clientMsgID,
+          },
+          type: UpdateMessageTypes.KeyWords,
+          keyWords: [
+            {
+              key: "contentType",
+              value: MessageType.RevokeMessage,
+            },
+            {
+              key: "notificationElem",
+              value: {
+                detail: JSON.stringify(revokedMessage),
+              },
+            },
+          ],
+        });
+        this.updateQuoteMessageRevoke({
+          clientMsgID: revokedMessage.clientMsgID
+        })
+      };
 
       IMSDK.subscribe(IMSDK.IMEvents.OnRecvNewMessages, newMessagesHandler);
+      IMSDK.subscribe(
+        IMSDK.IMEvents.OnRecvC2CReadReceipt,
+        c2cReadReceiptHandler,
+      );
+      IMSDK.subscribe(
+        IMSDK.IMEvents.OnRecvGroupReadReceipt,
+        groupReadReceiptHandler,
+      );
+      IMSDK.subscribe(
+        IMSDK.IMEvents.OnNewRecvMessageRevoked,
+        newRecvMessageRevokedHandler,
+      );
 
       // friend
       const friendInfoChangeHandler = ({ data }) => {
@@ -393,12 +489,39 @@ export default {
           url: "/pages/conversation/conversationList/index?isRedirect=true",
         });
       };
+			// #ifdef H5 || MP-WEIXIN
+			const IMToken = uni.getStorageSync("IMToken");
+			const IMUserID = uni.getStorageSync("IMUserID");
+			 if (IMToken && IMUserID) {
+				IMSDK.asyncApi(IMSDK.IMMethods.Login, IMSDK.uuid(), {
+					userID: IMUserID,
+					token: IMToken,
+					platformID: 6,
+					wsAddr: config.getWsUrl(),
+					apiAddr: config.getApiUrl(),
+				})
+					.then((res) => {
+						initStore()
+						console.log("success", res);
+					})
+					.catch((err) => {
+						console.log("error", err);
+						uni.removeStorage({
+							key: "IMToken",
+						});
+						uni.removeStorage({
+							key: "BusinessToken",
+						});
+					});
+			}
+			// #endif
+			// #ifdef APP-PLUS
       getDbDir()
         .then(async (path) => {
           const flag = await IMSDK.asyncApi(IMMethods.InitSDK, IMSDK.uuid(), {
-            platformID: uni.$u.os() === "ios" ? 1 : 2, // 平台，参照IMPlatform类,
-            apiAddr: config.getApiUrl(), // SDK的API接口地址。如：http://xxx:10002
-            wsAddr: config.getWsUrl(), // SDK的websocket地址。如： ws://xxx:10001
+            platformID: uni.$u.os() === "ios" ? 1 : 2,
+            apiAddr: config.getApiUrl(),
+            wsAddr: config.getWsUrl(),
             dataDir: path, // 数据存储路径
             logLevel: 6,
             logFilePath: path,
@@ -442,13 +565,14 @@ export default {
           }
         })
         .catch((err) => {
-          console.log("get dir failed");
-          console.log(err);
+          console.log("get dir failed", err);
           plus.navigator.closeSplashscreen();
         });
+				// #endif
     },
 
     launchCheck() {
+      // #ifdef APP-PLUS
       plus.globalEvent.addEventListener("newintent", (e) => {
         console.log(plus.runtime.arguments);
         let launchData = {};
@@ -473,11 +597,13 @@ export default {
             break;
         }
       });
+      // #endif
     },
     checkVersion(initiative = false) {
       if (uni.$u.os() === "ios") {
         return;
       }
+      // #ifdef APP-PLUS
       plus.runtime.getProperty(plus.runtime.appid, ({ version }) => {
         checkUpdateFormPgyer(version)
           .then(
@@ -530,6 +656,7 @@ export default {
             () => initiative && uni.$emit(PageEvents.CheckForUpdateResp),
           );
       });
+      // #endif
     },
     async checkDownloadedPkg(buildVersion) {
       const versionMap = uni.getStorageSync("IMVersionMap") || {};
@@ -659,39 +786,6 @@ export default {
       // 		sourceID: newServerMsg.groupID || newServerMsg.sendID,
       // 	}
       // })
-
-      const platform = uni.getSystemInfoSync().platform;
-      if (platform == "ios") {
-        if (this.storeSelfInfo.allowVibration === 1) {
-          plus.device.vibrate();
-        }
-
-        if (this.storeSelfInfo.allowBeep === 1) {
-          innerAudioContext.play();
-          // plus.device.beep();
-        }
-      } else if (platform == "android") {
-        if (this.storeSelfInfo.allowVibration === 1) {
-          plus.device.vibrate(500);
-        }
-        if (this.storeSelfInfo.allowBeep === 1) {
-          let main = plus.android.runtimeMainActivity();
-          let RingtoneManager = plus.android.importClass(
-            "android.media.RingtoneManager",
-          );
-          let uri = RingtoneManager.getActualDefaultRingtoneUri(
-            main,
-            RingtoneManager.TYPE_NOTIFICATION,
-          );
-          let MediaPlayer = plus.android.importClass(
-            "android.media.MediaPlayer",
-          );
-          let player = MediaPlayer.create(main, uri);
-          player.setLooping(false);
-          player.prepare();
-          player.start();
-        }
-      }
     },
     handleNewMessage(newServerMsg) {
       if (this.inCurrentConversation(newServerMsg)) {

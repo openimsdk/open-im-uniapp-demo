@@ -14,7 +14,10 @@
         color="#999"
       ></u-icon>
     </view>
-    <u-loading-icon v-show="loading" class="loading_icon"></u-loading-icon>
+    <!-- <view>{{ loading }}</view> -->
+    <view class="loading_icon" v-show="loading">
+      <u-loading-icon></u-loading-icon>
+    </view>
   </view>
 </template>
 

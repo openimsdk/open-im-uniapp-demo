@@ -3,7 +3,9 @@
     <custom-nav-bar :title="getTitle">
       <view class="nav_right_action" slot="more">
         <text v-show="!updateLoading" @click="comfirmUpdate">保存</text>
-        <u-loading-icon v-show="updateLoading" />
+        <template v-if="updateLoading">
+          <u-loading-icon />
+        </template>
       </view>
     </custom-nav-bar>
 

@@ -1,69 +1,32 @@
 <template>
-  <scroll-view
-    :scroll-with-animation="withAnimation"
-    @click="click"
-    id="scroll_view"
-    :style="{
-      height: '1px',
-      backgroundSize: `100% ${bgHeight}`,
-    }"
-    @scroll="throttleScroll"
-    :scroll-top="scrollTop"
-    scroll-y
-    :scroll-into-view="scrollIntoView"
-    upper-threshold="250"
-    @scrolltoupper="scrolltoupper"
-  >
-    <view class="watermark-view">
-      <view v-for="i in 20" :key="i">
-        <view v-for="j in 20" :key="j">
-          <view
-            class="watermark"
-            :key="i + j"
-            :style="{ top: 150 * (i - 1) + 'px', left: 150 * (j - 1) + 'px' }"
-          >
-            {{ storeSelfInfo.nickname }}
-          </view>
-        </view>
-      </view>
-    </view>
+  <scroll-view :scroll-with-animation="withAnimation" @click="click" id="scroll_view" :style="{
+    backgroundSize: `100% ${bgHeight}`,
+  }" @scroll="throttleScroll" :scroll-top="scrollTop" scroll-y :scroll-into-view="scrollIntoView" upper-threshold="250"
+    @scrolltoupper="scrolltoupper">
     <view id="scroll_wrap">
-      <u-loadmore nomoreText="" :status="loadMoreStatus" />
-      <view
-        v-for="(item, index) in storeHistoryMessageList"
-        :key="item.clientMsgID"
-      >
+      <view v-if="loadMoreStatus !== 'nomore'">
+        <u-loadmore nomoreText="" :status="loadMoreStatus" />
+      </view>
+      <view v-for="(item, index) in storeHistoryMessageList" :key="item.clientMsgID">
         <view v-if="getTimeLine" class="time_gap_line">
           {{ getTimeLine(item, storeHistoryMessageList[index - 1]) }}
         </view>
-        <message-item-render
-          :mutipleCheckVisible="mutipleCheckVisible"
-          @messageItemRender="messageItemRender"
-          :source="item"
-          :isSender="item.sendID === storeCurrentUserID"
-        />
+        <message-item-render :mutipleCheckVisible="mutipleCheckVisible" @messageItemRender="messageItemRender"
+          :source="item" :isSender="item.sendID === storeCurrentUserID" />
         <view v-if="sendFailedDesc" class="time_gap_line send_failed_tip">
           {{ sendFailedDesc(item) }}
         </view>
       </view>
-      <view
-        style="visibility: hidden; height: 12px"
-        id="auchormessage_bottom_item"
-      ></view>
+      <view style="visibility: hidden; height: 12px" id="auchormessage_bottom_item"></view>
     </view>
-    <transition name="fade">
-      <view
-        @click="scrollToBottom(false)"
-        v-show="getNewMesageCount && !needScoll"
-        class="new_message_flag fade"
-      >
-        <image
-          style="height: 10px; width: 11px"
-          src="@/static/images/common_db_arrow.png"
-        />
-        <text>{{ `${getNewMesageCount}条新消息` }}</text>
-      </view>
-    </transition>
+    <view v-show="getNewMesageCount && !needScoll">
+      <transition name="fade">
+        <view @click="scrollToBottom(false)" class="new_message_flag fade">
+          <image style="height: 10px; width: 11px" src="@/static/images/common_db_arrow.png" />
+          <text>{{ `${getNewMesageCount}条新消息` }}</text>
+        </view>
+      </transition>
+    </view>
   </scroll-view>
 </template>
 
@@ -158,8 +121,8 @@ export default {
       if (
         this.initFlag &&
         clientMsgID ===
-          this.storeHistoryMessageList[this.storeHistoryMessageList.length - 1]
-            .clientMsgID
+        this.storeHistoryMessageList[this.storeHistoryMessageList.length - 1]
+          .clientMsgID
       ) {
         this.initFlag = false;
         setTimeout(() => this.scrollToBottom(true), 200);
@@ -264,20 +227,15 @@ export default {
   flex: 1;
   background-repeat: no-repeat;
   position: relative;
+  /* #ifdef  H5 || APP-PLUS */
+  height: 1px;
+  /* #endif */
 }
 
 .watermark-view {
   width: 100%;
   height: 100%;
   position: fixed;
-}
-
-.watermark {
-  font-size: 16px; /* 水印文字大小 */
-  color: #f0f2f6; /* 水印文字颜色，使用透明度控制可见度 */
-  position: absolute; /* 水印相对定位 */
-  transform: rotate(-45deg);
-  pointer-events: none; /* 防止水印文字干扰交互 */
 }
 
 .uni-scroll-view {

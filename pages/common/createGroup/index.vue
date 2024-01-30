@@ -56,7 +56,7 @@ import IMSDK, {
 import CustomNavBar from "@/components/CustomNavBar/index.vue";
 import MyAvatar from "@/components/MyAvatar/index.vue";
 import { navigateToDesignatedConversation } from "@/util/imCommon";
-import { getPurePath, toastWithCallback } from "@/util/common";
+import { getPurePath, toastWithCallback, uploadForm } from "@/util/common";
 export default {
   components: {
     CustomNavBar,
@@ -123,14 +123,24 @@ export default {
       uni.chooseImage({
         count: 1,
         sizeType: ["compressed"],
-        success: async ({ tempFilePaths }) => {
+        success: async ({ tempFilePaths, tempFiles }) => {
           const path = tempFilePaths[0];
           const nameIdx = path.lastIndexOf("/") + 1;
           const typeIdx = path.lastIndexOf(".") + 1;
-          const fileName = path.slice(nameIdx);
-          const fileType = path.slice(typeIdx);
+          let fileName = path.slice(nameIdx);
+          let fileType = path.slice(typeIdx);
+
+          if (uni.getSystemInfoSync().uniPlatform !== 'app') {
+            fileType = tempFiles[0].type
+            fileName = tempFiles[0].name
+          }
 
           try {
+            // #ifdef MP-WEIXIN
+            const url = await uploadForm(tempFiles[0])
+            // #endif
+
+            // #ifdef APP-PLUS || H5
             const {
               data: { url },
             } = await IMSDK.asyncApi(IMMethods.UploadFile, IMSDK.uuid(), {
@@ -138,7 +148,9 @@ export default {
               name: fileName,
               contentType: fileType,
               uuid: IMSDK.uuid(),
+              file: tempFiles[0]
             });
+            // #endif
             this.groupFaceUrl = url;
           } catch (error) {
             uni.$u.toast("上传失败");

@@ -3,12 +3,11 @@
     <template slot="left">
       <slot name="left">
         <view class="u-nav-slot">
-          <img
+          <image
             @click="leftClick"
             class="back_icon"
-            width="12"
-            height="20"
-            src="static/images/common_left_arrow.png"
+            style="width: 12px;height: 20px;"
+            src="@/static/images/common_left_arrow.png"
             alt=""
             srcset=""
           />

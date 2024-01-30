@@ -12,7 +12,7 @@
       />
       <my-avatar
         v-else
-        src="/static/images/chating_message_file.png"
+        src="@/static/images/chating_message_file.png"
         size="42"
       />
       <view class="result_item_details">

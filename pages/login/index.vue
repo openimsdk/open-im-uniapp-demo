@@ -2,7 +2,7 @@
   <view class="page_container">
     <view class="login">
       <view class="logo">
-        <img src="static/images/logo.png" alt="" />
+        <image style="width: 65px;height: 66px;" src="@/static/images/logo.png" alt="" />
         <view class="title" @click="toConfig">欢迎使用OpenIM</view>
       </view>
       <u-form
@@ -76,13 +76,11 @@
 </template>
 
 <script>
-import { v4 as uuidv4 } from "uuid";
 import md5 from "md5";
-import { version } from '@/common/config'
-import { businessLogin, businessSendSms } from "@/api/login";
+import config, { version } from '@/common/config'
+import { businessLogin } from "@/api/login";
 import AreaPicker from "@/components/AreaPicker";
 import { checkLoginError } from "@/util/common";
-import { SmsUserFor } from "@/constant";
 import IMSDK from "openim-uniapp-polyfill";
 
 let timer;
@@ -155,8 +153,9 @@ export default {
     },
     init() {
       if (process.env.NODE_ENV === "development") {
-        // this.loginInfo.phoneNumber = "12300000000";
-        // this.loginInfo.password = "123456q";
+        this.loginInfo.phoneNumber =
+          uni.getStorageSync("lastPhoneNumber") || "";
+        this.loginInfo.areaCode = uni.getStorageSync("lastAreaCode") || "86";
       } else {
         this.loginInfo.phoneNumber =
           uni.getStorageSync("lastPhoneNumber") || "";
@@ -179,19 +178,44 @@ export default {
         this.loading = true;
         this.saveLoginInfo();
         let data = {};
+        let platform;
         try {
+          // #ifdef H5
+          platform = 5
+          // #endif
+          // #ifdef MP-WEIXIN
+          platform = 6
+          // #endif
+          // #ifdef APP-PLUS
+          platform = uni.$u.os() === "ios" ? 1 : 2
+          // #endif
+
           data = await businessLogin({
             phoneNumber: this.loginInfo.phoneNumber,
             areaCode: `+${this.loginInfo.areaCode}`,
             password: md5(this.loginInfo.password),
-            platform: uni.$u.os() === "ios" ? 1 : 2,
+            platform,
             verifyCode: this.loginInfo.verificationCode,
           });
           const { imToken, userID } = data;
-          await IMSDK.asyncApi(IMSDK.IMMethods.Login, uuidv4(), {
+
+          // #ifdef H5 || MP-WEIXIN
+          await IMSDK.asyncApi(IMSDK.IMMethods.Login, IMSDK.uuid(), {
+            userID,
+            token: imToken,
+            platformID: platform,
+            wsAddr: config.getWsUrl(),
+            apiAddr: config.getApiUrl(),
+          });
+          // #endif
+
+          // #ifdef APP-PLUS
+          await IMSDK.asyncApi(IMSDK.IMMethods.Login, IMSDK.uuid(), {
             userID,
             token: imToken,
           });
+          // #endif
+
           this.saveLoginProfile(data);
           this.$store.commit("user/SET_AUTH_DATA", data);
           this.$store.dispatch("user/getSelfInfo");

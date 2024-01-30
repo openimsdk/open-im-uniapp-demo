@@ -5,22 +5,14 @@
 
     <view v-if="!isLoading" style="flex: 1;display: flex;flex-direction: column;">
       <view class="base_info">
-        <my-avatar
-          :desc="sourceUserInfo.remark || sourceUserInfo.nickname"
-          :src="sourceUserInfo.faceURL"
-          size="46"
-        />
+        <my-avatar :desc="sourceUserInfo.remark || sourceUserInfo.nickname" :src="sourceUserInfo.faceURL" size="46" />
         <view class="user_name">
           <text class="text">{{ getShowName }}</text>
           <text class="id" @click="copy(sourceUserInfo.userID)">{{
             sourceUserInfo.userID
           }}</text>
         </view>
-        <view
-          class="add_btn"
-          @click="toAddFriend"
-          v-if="!isFriend && !disableAdd && !isSelf"
-        >
+        <view class="add_btn" @click="toAddFriend" v-if="!isFriend && !disableAdd && !isSelf">
           <u-button type="primary" icon="man-add" text="添加"></u-button>
         </view>
       </view>
@@ -40,7 +32,7 @@
 
       <view class="action_row" v-if="showSendMessage">
         <view @click="toDesignatedConversation" class="action_item">
-          <img src="static/images/user_card_message.png" alt="" />
+          <image src="@/static/images/user_card_message.png" alt="" />
           <text>发消息</text>
         </view>
       </view>
@@ -130,15 +122,6 @@ export default {
       }
       return this.sourceUserInfo.nickname + suffix;
     },
-    getMuteTime() {
-      if (
-        !this.memberInfo.muteEndTime ||
-        this.memberInfo.muteEndTime < Date.now()
-      ) {
-        return "";
-      }
-      return dayjs(this.memberInfo.muteEndTime).format("YYYY/MM/DD HH:mm");
-    },
     showSendMessage() {
       const businessAllow =
         this.storeAppConfig.allowSendMsgNotFriend === CommonIsAllow.Allow;
@@ -187,9 +170,9 @@ export default {
         const { total, users } = await businessSearchUserInfo(this.sourceID);
         if (total > 0) {
           const { data } = await IMSDK.asyncApi(
-            IMSDK.IMMethods.GetUsersInfo,
+            'getUsersInfoWithCache',
             IMSDK.uuid(),
-            [this.sourceID],
+            { userIDList: [this.sourceID] },
           );
           const imData = data[0]?.friendInfo ?? data[0]?.publicInfo ?? {};
           info = {
@@ -220,7 +203,7 @@ export default {
             },
           );
           role = data[0]?.roleLevel;
-        } catch (e) {}
+        } catch (e) { }
       }
       this.showSetRole = role === GroupMemberRole.Owner;
       this.showSetMuteMember =
@@ -382,7 +365,7 @@ export default {
       color: #fff;
       border-radius: 12rpx;
 
-      img {
+      image {
         margin-right: 16rpx;
         width: 40rpx;
         height: 40rpx;

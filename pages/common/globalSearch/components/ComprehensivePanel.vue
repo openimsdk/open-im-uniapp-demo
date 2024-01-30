@@ -78,7 +78,7 @@
     </view>
 
     <u-empty
-      icon="/static/images/global_search_empty.png"
+      icon="@/static/images/global_search_empty.png"
       v-show="isEmpty"
       text="没有更多搜索结果"
     />

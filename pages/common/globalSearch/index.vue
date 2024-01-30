@@ -1,12 +1,12 @@
 <template>
   <view class="page_container">
     <view class="search_bar_wrap">
-      <img
+      <image
         @click="back"
         class="back_icon"
         width="12"
         height="20"
-        src="static/images/common_left_arrow.png"
+        src="@/static/images/common_left_arrow.png"
         alt=""
         srcset=""
       />
@@ -45,7 +45,7 @@
     />
 
     <u-empty
-      icon="/static/images/global_search_empty.png"
+      icon="@/static/images/global_search_empty.png"
       v-show="currentTab > 0 && genericDataSource.length === 0"
       text="没有更多搜索结果"
     />

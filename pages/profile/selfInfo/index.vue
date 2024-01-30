@@ -3,59 +3,21 @@
     <custom-nav-bar title="个人资料" />
 
     <view class="info_wrap">
-      <info-item
-        :loading="loadingState.faceURL"
-        @click="updateAvatar"
-        title="头像"
-      >
-        <my-avatar
-          :src="selfInfo.faceURL"
-          :desc="selfInfo.nickname"
-          size="30"
-          slot="value"
-        />
+      <info-item :loading="loadingState.faceURL" @click="updateAvatar" title="头像">
+        <my-avatar :src="selfInfo.faceURL" :desc="selfInfo.nickname" size="30" slot="value" />
       </info-item>
-      <info-item
-        @click="updateNickname"
-        title="姓名"
-        :content="selfInfo.nickname"
-      />
-      <info-item
-        :loading="loadingState.gender"
-        @click="updateGender"
-        title="性别"
-        :content="getGender"
-      />
-      <info-item
-        :loading="loadingState.birth"
-        @click="() => (showDatePicker = true)"
-        title="生日"
-        :content="getBirth"
-      />
+      <info-item @click="updateNickname" title="姓名" :content="selfInfo.nickname" />
+      <info-item :loading="loadingState.gender" @click="updateGender" title="性别" :content="getGender" />
+      <info-item :loading="loadingState.birth" @click="() => (showDatePicker = true)" title="生日" :content="getBirth" />
     </view>
 
     <view class="info_wrap">
-      <info-item
-        :showArrow="false"
-        title="手机号码"
-        :content="selfInfo.phoneNumber || '-'"
-      />
-      <info-item
-        :showArrow="false"
-        title="邮箱"
-        :content="selfInfo.email || '-'"
-      />
+      <info-item :showArrow="false" title="手机号码" :content="selfInfo.phoneNumber || '-'" />
+      <info-item :showArrow="false" title="邮箱" :content="selfInfo.email || '-'" />
     </view>
 
-    <u-datetime-picker
-      :minDate="0"
-      :maxDate="nowDate"
-      :show="showDatePicker"
-      @confirm="confirmDate"
-      @cancel="() => (showDatePicker = false)"
-      v-model="selfInfo.birth"
-      mode="date"
-    />
+    <u-datetime-picker :minDate="0" :maxDate="nowDate" :show="showDatePicker" @confirm="confirmDate"
+      @cancel="() => (showDatePicker = false)" v-model="selfInfo.birth" mode="date" />
   </view>
 </template>
 
@@ -66,7 +28,8 @@ import CustomNavBar from "@/components/CustomNavBar/index.vue";
 import MyAvatar from "@/components/MyAvatar/index.vue";
 import dayjs from "dayjs";
 import InfoItem from "./InfoItem.vue";
-import { getPurePath } from "@/util/common";
+import { getPurePath, uploadForm } from "@/util/common";
+
 export default {
   components: {
     CustomNavBar,
@@ -128,13 +91,24 @@ export default {
       uni.chooseImage({
         count: 1,
         sizeType: ["compressed"],
-        success: async ({ tempFilePaths }) => {
+        success: async ({ tempFilePaths, tempFiles }) => {
           const path = tempFilePaths[0];
           const nameIdx = path.lastIndexOf("/") + 1;
           const typeIdx = path.lastIndexOf(".") + 1;
-          const fileName = path.slice(nameIdx);
-          const fileType = path.slice(typeIdx);
+          let fileName = path.slice(nameIdx);
+          let fileType = path.slice(typeIdx);
           this.loadingState.faceURL = true;
+
+          if (uni.getSystemInfoSync().uniPlatform !== 'app') {
+            fileType = tempFiles[0].type
+            fileName = tempFiles[0].name
+          }
+
+          // #ifdef MP-WEIXIN
+          const url = await uploadForm(tempFiles[0])
+          // #endif
+
+          // #ifdef APP-PLUS || H5
           const {
             data: { url },
           } = await IMSDK.asyncApi(IMSDK.IMMethods.UploadFile, IMSDK.uuid(), {
@@ -142,7 +116,9 @@ export default {
             name: fileName,
             contentType: fileType,
             uuid: IMSDK.uuid(),
+            file: tempFiles[0]
           });
+          // #endif
           console.log(url);
           this.updateSelfInfo(
             {

@@ -2,16 +2,15 @@
   <page-meta :root-font-size="$store.getters.storeRootFontSize"></page-meta>
   <view :style="{ backgroundColor: '#f8f8f8' }" class="chating_container">
     <chating-header @click="pageClick" ref="chatingHeaderRef" />
-    <chating-list
-      @click="pageClick"
-      ref="chatingListRef"
-      @initSuccess="initSuccess"
-    />
-    <chating-footer
-      ref="chatingFooterRef"
-      :footerOutsideFlag="footerOutsideFlag"
-      @scrollToBottom="scrollToBottom"
-    />
+    <!-- #ifdef MP-WEIXIN -->
+    <view style="flex: 1;overflow: auto;">
+      <chating-list @click="pageClick" ref="chatingListRef" @initSuccess="initSuccess" />
+    </view>
+    <!-- #endif -->
+    <!-- #ifdef APP-PLUS || H5 -->
+    <chating-list @click="pageClick" ref="chatingListRef" @initSuccess="initSuccess" />
+    <!-- #endif -->
+    <chating-footer ref="chatingFooterRef" :footerOutsideFlag="footerOutsideFlag" @scrollToBottom="scrollToBottom" />
     <u-loading-page :loading="initLoading"></u-loading-page>
   </view>
 </template>
@@ -87,9 +86,9 @@ export default {
     },
 
     // page event
-    onlineCheckHandler() {
-      this.$refs.chatingHeaderRef.checkOnline();
-    },
+    // onlineCheckHandler() {
+    //   this.$refs.chatingHeaderRef.checkOnline();
+    // },
     atSomeOneHandler({ userID, nickname }) {
       console.log("atSomeOneHandler");
       if (plus.os.name == 'iOS') {
@@ -106,12 +105,12 @@ export default {
       this.$refs.chatingFooterRef.insertAt(userID, nickname);
     },
     setPageListener() {
-      uni.$on(PageEvents.OnlineStateCheck, this.onlineCheckHandler);
+      // uni.$on(PageEvents.OnlineStateCheck, this.onlineCheckHandler);
       uni.$on(PageEvents.ScrollToBottom, this.scrollToBottom);
       uni.$on(PageEvents.AtSomeOne, this.atSomeOneHandler);
     },
     disposePageListener() {
-      uni.$off(PageEvents.OnlineStateCheck, this.onlineCheckHandler);
+      // uni.$off(PageEvents.OnlineStateCheck, this.onlineCheckHandler);
       uni.$off(PageEvents.ScrollToBottom, this.scrollToBottom);
       uni.$off(PageEvents.AtSomeOne, this.atSomeOneHandler);
     },
@@ -136,11 +135,15 @@ export default {
   position: relative;
 
   .watermark {
-    font-size: 16px; /* 水印文字大小 */
-    color: rgba(0, 0, 0, 0.2); /* 水印文字颜色，使用透明度控制可见度 */
-    position: absolute; /* 水印相对定位 */
+    font-size: 16px;
+    /* 水印文字大小 */
+    color: rgba(0, 0, 0, 0.2);
+    /* 水印文字颜色，使用透明度控制可见度 */
+    position: absolute;
+    /* 水印相对定位 */
     transform: rotate(-45deg);
-    pointer-events: none; /* 防止水印文字干扰交互 */
+    pointer-events: none;
+    /* 防止水印文字干扰交互 */
 
   }
 

@@ -62,6 +62,7 @@
 
 <script>
 import md5 from "md5";
+import config from '@/common/config'
 import IMSDK from "openim-uniapp-polyfill";
 import MyAvatar from "@/components/MyAvatar/index.vue";
 import { businessRegister } from "@/api/login";
@@ -151,9 +152,19 @@ export default {
     },
     async doRegister() {
       this.loading = true;
+      let platform;
+      // #ifdef H5
+      platform = 5
+      // #endif
+      // #ifdef MP-WEIXIN
+      platform = 6
+      // #endif
+      // #ifdef APP-PLUS
+      platform = uni.$u.os() === "ios" ? 1 : 2
+      // #endif
       const options = {
         verifyCode: this.codeValue,
-        platform: uni.$u.os() === "ios" ? 1 : 2,
+        platform,
         autoLogin: true,
         user: {
           ...this.userInfo,
@@ -163,11 +174,24 @@ export default {
       };
       try {
         const data = await businessRegister(options);
-        const { imToken, chatToken, userID } = data;
+        const { imToken, userID } = data;
+
+        // #ifdef H5 || MP-WEIXIN
+        await IMSDK.asyncApi(IMSDK.IMMethods.Login, IMSDK.uuid(), {
+          userID,
+          token: imToken,
+          platformID: platform,
+          wsAddr: config.getWsUrl(),
+          apiAddr: config.getApiUrl(),
+        });
+        // #endif
+
+        // #ifdef APP-PLUS
         await IMSDK.asyncApi(IMSDK.IMMethods.Login, IMSDK.uuid(), {
           userID,
           token: imToken,
         });
+        // #endif
         this.saveLoginProfile(data);
         this.saveLoginInfo();
         this.$store.commit("user/SET_AUTH_DATA", data);

@@ -10,27 +10,27 @@
         <view class="user_state">
           <text class="nickname">{{ storeSelfInfo.nickname }}</text>
           <view class="tag" v-if="storeIsSyncing">
-            <img
+            <image
               class="loading"
               style="height: 24rpx; width: 24rpx"
-              src="static/images/loading.png"
+              src="@/static/images/loading.png"
               alt=""
             />
             <text class="status">同步中</text>
           </view>
           <view class="tag" v-if="connectStart == 0">
-            <img
+            <image
               class="loading"
               style="height: 24rpx; width: 24rpx"
-              src="static/images/loading.png"
+              src="@/static/images/loading.png"
               alt=""
             />
             <text class="status">连接中</text>
           </view>
           <view class="err-tag" v-if="connectStart == -1">
-            <img
+            <image
               style="height: 24rpx; width: 24rpx"
-              src="static/images/sync_error.png"
+              src="@/static/images/sync_error.png"
               alt=""
             />
             <text class="status">连接失败</text>

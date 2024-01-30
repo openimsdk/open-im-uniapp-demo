@@ -16,7 +16,6 @@
 </template>
 
 <script>
-import defaultAvatars from "@/common/defaultAvatars.js";
 import defaultGroupIcon from "static/images/contact_my_group.png";
 import defaultNotifyIcon from "static/images/default_notify_icon.png";
 export default {
@@ -58,7 +57,7 @@ export default {
       if (this.isGroup) {
         return defaultGroupIcon;
       }
-      this.avatarText = this.desc ? this.desc.slice(0, 1) : "未知";
+      this.avatarText = this.desc ? this.desc.slice(0, 1) : "";
       return "";
     },
     getDdefaultUrl() {
@@ -67,7 +66,7 @@ export default {
   },
   methods: {
     errorHandle() {
-      this.avatarText = this.desc ? this.desc.slice(0, 1) : "未知";
+      this.avatarText = this.desc ? this.desc.slice(0, 1) : "";
     },
     redirectShow() {
       if (this.avatarText) {

@@ -1,12 +1,12 @@
 <template>
   <view class="page_container">
     <view class="search_bar_wrap">
-      <img
+      <image
         @click="back"
         class="back_icon"
         width="12"
         height="20"
-        src="static/images/common_left_arrow.png"
+        src="@/static/images/common_left_arrow.png"
         alt=""
         srcset=""
       />

@@ -1,73 +1,27 @@
 <template>
   <view class="">
     <view class="forbidden_footer" v-if="getPlaceholder.length > 0">
-      <img
-        style="margin-right: 8rpx"
-        src="static/images/forbidden_footer.png"
-      />
+      <image style="margin-right: 8rpx" src="/static/images/forbidden_footer.png" />
       <text>{{ getPlaceholder }}</text>
     </view>
-    <view
-      v-else
-      :style="{ 'pointer-events': getPlaceholder ? 'none' : 'auto' }"
-    >
+    <view v-else :style="{ 'pointer-events': getPlaceholder ? 'none' : 'auto' }">
       <view class="chat_footer">
         <view class="input_content">
-          <CustomEditor
-            :placeholder="getPlaceholder"
-            class="custom_editor"
-            ref="customEditor"
-            @ready="editorReady"
-            @focus="editorFocus"
-            @blur="editorBlur"
-            @input="editorInput"
-            @tryAt="showAtPanel"
-          />
-          <view v-if="storeQuoteMessage" class="quote_message">
-            <view class="content">
-              <u-parse :content="getQuotedContent" />
-            </view>
-            <image
-              @click="cancelQuote"
-              style="width: 16px; height: 16px"
-              src="@/static/images/chating_footer_quote_close.png"
-              alt=""
-            />
-          </view>
+          <CustomEditor :placeholder="getPlaceholder" class="custom_editor" ref="customEditor" @ready="editorReady"
+            @focus="editorFocus" @blur="editorBlur" @input="editorInput" />
         </view>
 
         <view class="footer_action_area">
-          <image
-            v-show="!hasContent"
-            @click.prevent="updateActionBar"
-            src="@/static/images/chating_footer_add.png"
-            alt=""
-            srcset=""
-          />
-          <image
-            v-show="hasContent"
-            @touchend.prevent="sendTextMessage"
-            src="@/static/images/send_btn.png"
-            alt=""
-            srcset=""
-          />
+          <image v-show="!hasContent" @click.prevent="updateActionBar" src="@/static/images/chating_footer_add.png" alt=""
+            srcset="" />
+          <image v-show="hasContent" @click="sendTextMessage" src="@/static/images/send_btn.png" alt=""
+            srcset="" />
         </view>
       </view>
-      <chating-action-bar
-        @sendMessage="sendMessage"
-        @prepareMediaMessage="prepareMediaMessage"
-        v-show="actionBarVisible"
-      />
-      <u-action-sheet
-        :safeAreaInsetBottom="true"
-        round="12"
-        :actions="actionSheetMenu"
-        @select="selectClick"
-        :closeOnClickOverlay="true"
-        :closeOnClickAction="true"
-        :show="showActionSheet"
-        @close="showActionSheet = false"
-      >
+      <chating-action-bar @sendMessage="sendMessage" @prepareMediaMessage="prepareMediaMessage"
+        v-show="actionBarVisible" />
+      <u-action-sheet :safeAreaInsetBottom="true" round="12" :actions="actionSheetMenu" @select="selectClick"
+        :closeOnClickOverlay="true" :closeOnClickAction="true" :show="showActionSheet" @close="showActionSheet = false">
       </u-action-sheet>
     </view>
   </view>
@@ -75,12 +29,11 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import { formatInputHtml, getPurePath, html2Text } from "@/util/common";
+import { formatInputHtml, getPurePath, html2Text, getPicInfo, getFileType, getVideoSnshot, base64toFile, uploadForm, getFileSize } from "@/util/common";
 import { parseMessageByType, offlinePushInfo } from "@/util/imCommon";
 import {
   ChatingFooterActionTypes,
   UpdateMessageTypes,
-  GroupMemberListTypes,
 } from "@/constant";
 import IMSDK, {
   GroupMemberRole,
@@ -174,7 +127,7 @@ export default {
         !isSingle &&
         (this.storeCurrentGroup.status === GroupStatus.Dismissed ||
           this.storeCurrentMemberInGroup.groupID !==
-            this.storeCurrentGroup.groupID)
+          this.storeCurrentGroup.groupID)
       ) {
         return "您已不在该群组";
       }
@@ -182,10 +135,7 @@ export default {
         !isSingle &&
         this.storeCurrentMemberInGroup.muteEndTime > Date.now()
       ) {
-        const timeStr = dayjs(
-          this.storeCurrentMemberInGroup.muteEndTime,
-        ).format("YYYY/MM/DD HH:mm");
-        return `你已被禁言至${timeStr}`;
+        return `你已被禁言`;
       }
       if (
         isSingle &&
@@ -204,11 +154,11 @@ export default {
     },
   },
   mounted() {
-    this.setSendMessageListener();
+    // this.setSendMessageListener();
     this.setKeyboardListener();
   },
   beforeDestroy() {
-    this.disposeSendMessageListener();
+    // this.disposeSendMessageListener();
     this.disposeKeyboardListener();
   },
   methods: {
@@ -264,7 +214,6 @@ export default {
       return message;
     },
     async sendTextMessage() {
-      
       if (!this.hasContent) return;
       const message = await this.createTextMessage();
       this.sendMessage(message);
@@ -272,7 +221,9 @@ export default {
     sendMessage(message) {
       this.pushNewMessage(message);
       if (needClearTypes.includes(message.contentType)) {
+        // #ifdef H5 || APP-PLUS
         this.customEditorCtx.clear();
+        // #endif
       }
       this.$emit("scrollToBottom");
       IMSDK.asyncApi(IMMethods.SendMessage, IMSDK.uuid(), {
@@ -309,9 +260,6 @@ export default {
     },
 
     // action
-    cancelQuote() {
-      this.$store.commit("message/SET_QUOTE_MESSAGE", undefined);
-    },
     onClickActionBarOutside() {
       if (this.actionBarVisible) {
         this.actionBarVisible = false;
@@ -321,8 +269,10 @@ export default {
       this.actionBarVisible = !this.actionBarVisible;
     },
     editorReady(e) {
+      // #ifdef H5 || APP-PLUS
       this.customEditorCtx = e.context;
       this.customEditorCtx.clear();
+      // #endif
     },
     editorFocus() {
       this.isInputFocus = true;
@@ -332,15 +282,6 @@ export default {
     },
     editorInput(e) {
       this.inputHtml = e.detail.html;
-      uni.$u.throttle(this.updateTyping, 2000);
-    },
-    showAtPanel() {
-      if (!this.$store.getters.storeCurrentConversation.groupID) return;
-
-      uni.$u.route("/pages/conversation/groupMemberList/index", {
-        type: GroupMemberListTypes.ChooseAt,
-        groupID: this.$store.getters.storeCurrentConversation.groupID,
-      });
     },
     backspace() {
       this.customEditorCtx.undo();
@@ -354,20 +295,11 @@ export default {
       }
       this.showActionSheet = true;
     },
-    updateTyping() {
-      if (
-        this.storeCurrentConversation.conversationType === SessionType.Single
-      ) {
-        IMSDK.asyncApi(IMSDK.IMMethods.TypingStatusUpdate, IMSDK.uuid(), {
-          recvID: this.storeCurrentConversation.userID,
-          msgTip: "yes",
-        });
-      }
-    },
 
     // from comp
-    batchCreateImageMesage(paths) {
-      paths.forEach(async (path) => {
+    batchCreateImageMesage({ tempFilePaths, tempFiles }) {
+      // #ifdef APP-PLUS
+      tempFilePaths.forEach(async (path) => {
         const message = await IMSDK.asyncApi(
           IMMethods.CreateImageMessageFromFullPath,
           IMSDK.uuid(),
@@ -375,6 +307,59 @@ export default {
         );
         this.sendMessage(message);
       });
+      // #endif
+      // #ifdef H5
+      tempFiles.forEach(async (file) => {
+        const { width, height } = await getPicInfo(file);
+        const baseInfo = {
+          uuid: IMSDK.uuid(),
+          type: getFileType(file.name),
+          size: file.size,
+          width,
+          height,
+          url: file,
+        }
+        const options = {
+          sourcePicture: baseInfo,
+          bigPicture: baseInfo,
+          snapshotPicture: baseInfo,
+          sourcePath: "",
+          file: file,
+        };
+        const { data } = await IMSDK.asyncApi(
+          'createImageMessageByFile',
+          IMSDK.uuid(),
+          options,
+        );
+        this.sendMessage(data);
+      });
+      // #endif
+      // #ifdef MP-WEIXIN
+      tempFiles.forEach(async (file) => {
+        const { width, height } = await getPicInfo(file);
+        const url = await uploadForm(file)
+        const baseInfo = {
+          uuid: IMSDK.uuid(),
+          type: getFileType(file.path),
+          size: file.size,
+          width,
+          height,
+          url,
+        }
+        const options = {
+          sourcePicture: baseInfo,
+          bigPicture: baseInfo,
+          snapshotPicture: baseInfo,
+          sourcePath: url,
+        };
+        const message = await IMSDK.asyncApi(
+          'createImageMessageByURL',
+          IMSDK.uuid(),
+          options,
+        );
+        this.sendMessage(message);
+      });
+      // #endif
     },
     selectClick({ idx }) {
       if (idx === 0) {
@@ -388,7 +373,69 @@ export default {
           );
         }
       } else {
-        const whenGetFile = (data) => {
+        const whenGetFile = async (data) => {
+          // #ifdef H5
+          const snapShotFile = await getVideoSnshot(URL.createObjectURL(data.path));
+          const { width, height } = await getPicInfo(snapShotFile);
+          const options = {
+            videoFile: data.path,
+            snapshotFile: snapShotFile,
+            videoPath: "",
+            duration: Number(data.duration.toFixed()),
+            videoType: getFileType(data.path.name),
+            snapshotPath: "",
+            videoUUID: IMSDK.uuid(),
+            videoUrl: "",
+            videoSize: data.path.size,
+            snapshotUUID: IMSDK.uuid(),
+            snapshotSize: snapShotFile.size,
+            snapshotUrl: URL.createObjectURL(snapShotFile),
+            snapshotWidth: width,
+            snapshotHeight: height,
+            snapShotType: getFileType(data.path.name),
+          };
+          const { data: msg } = await IMSDK.asyncApi(
+            'createVideoMessageByFile',
+            IMSDK.uuid(),
+            options,
+          );
+          this.sendMessage(msg);
+          // #endif
+
+          // #ifdef MP-WEIXIN
+          const videoUrl = await uploadForm({
+            path: data.tempFilePath,
+            size: data.size
+          })
+          const snapshotSize = await getFileSize(data.thumbTempFilePath)
+          const snapshotUrl = await uploadForm({
+            path: data.thumbTempFilePath,
+            size: snapshotSize
+          })
+          const mpOptions = {
+            videoPath: '',
+            duration: Number(data.duration.toFixed()),
+            videoType: getFileType(data.tempFilePath),
+            snapshotPath: '',
+            videoUUID: IMSDK.uuid(),
+            videoUrl,
+            videoSize: data.size,
+            snapshotUUID: IMSDK.uuid(),
+            snapshotSize: 1024,
+            snapshotUrl,
+            snapshotWidth: data.width,
+            snapshotHeight: data.height,
+            snapShotType: getFileType(data.thumbTempFilePath),
+          }
+          const message = await IMSDK.asyncApi(
+            'createVideoMessageByURL',
+            IMSDK.uuid(),
+            mpOptions,
+          );
+          this.sendMessage(message);
+          // #endif
+
+          // #ifdef APP-PLUS
           const purePath = getPurePath(data.path);
           IMSDK.getVideoCover(purePath).then(async ({ path }) => {
             console.log(getPurePath(path));
@@ -404,6 +451,7 @@ export default {
             );
             this.sendMessage(message);
           });
+          // #endif
         };
         if (this.actionSheetMenu[0].type === ChatingFooterActionTypes.Album) {
           this.chooseOrShotVideo(["album"]).then(whenGetFile);
@@ -418,8 +466,8 @@ export default {
           count: 9,
           sizeType: ["compressed"],
           sourceType,
-          success: function ({ tempFilePaths }) {
-            resolve(tempFilePaths);
+          success: function ({ tempFilePaths, tempFiles }) {
+            resolve({ tempFilePaths, tempFiles });
           },
           fail: function (err) {
             console.log(err);
@@ -430,11 +478,25 @@ export default {
     },
     chooseOrShotVideo(sourceType) {
       return new Promise((resolve, reject) => {
+        // #ifdef MP-WEIXIN
+        uni.chooseMedia({
+          mediaType: ['video'],
+          compressed: true,
+          sourceType,
+          success: function ({ tempFiles }) {
+            resolve(tempFiles[0]);
+          },
+          fail: function (err) {
+            reject(err);
+          },
+        });
+        // #endif
+        // #ifdef APP-PLUS || H5
         uni.chooseVideo({
           compressed: true,
           sourceType,
           extension: ["mp4"],
-          success: function ({ tempFilePath, duration }) {
+          success: function ({ tempFilePath, duration, tempFile }) {
             const idx = tempFilePath.lastIndexOf(".");
             const videoType = tempFilePath.slice(idx + 1);
             if (tempFilePath.includes("_doc/")) {
@@ -443,25 +505,28 @@ export default {
               )}`;
             }
             console.log(tempFilePath);
+            // #ifdef APP-PLUS
             resolve({
               path: tempFilePath,
               videoType,
               duration,
             });
+            // #endif
+            // #ifdef H5
+            resolve({
+              path: tempFile,
+              videoType,
+              duration,
+            });
+            // #endif
           },
           fail: function (err) {
             console.log(err);
             reject(err);
           },
         });
+        // #endif
       });
-    },
-    insertAt(userID, nickname) {
-      const { atUserList } = formatInputHtml(this.inputHtml);
-      if (atUserList.find((item) => item.atUserID === userID)) {
-        return;
-      }
-      this.$refs.customEditor.createCanvasData(userID, nickname);
     },
 
     // message status
@@ -536,6 +601,11 @@ export default {
 
   .input_content {
     flex: 1;
+    /*  #ifdef  MP-WEIXIN  */
+    height: 30px;
+    word-break: break-all;
+    overflow: auto;
+    /*  #endif  */
     min-height: 30px;
     max-height: 120px;
     margin: 0 24rpx;

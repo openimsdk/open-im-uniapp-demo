@@ -109,9 +109,9 @@ export default {
             const { total, users } = await businessSearchUserInfo(this.keyword);
             if (total > 0) {
               const { data } = await IMSDK.asyncApi(
-                IMSDK.IMMethods.GetUsersInfo,
+                'getUsersInfoWithCache',
                 IMSDK.uuid(),
-                [users[0].userID],
+                { userIDList:[users[0].userID] },
               );
               const imData = data[0]?.friendInfo ?? data[0]?.publicInfo ?? {};
 

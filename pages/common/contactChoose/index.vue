@@ -1,13 +1,5 @@
 <template>
   <view class="contact_choose_container">
-    <u-modal
-      :show="showConfirmModal"
-      showCancelButton
-      asyncClose
-      @confirm="modalConfirm"
-      @cancel="() => (showConfirmModal = false)"
-      :content="`确定要发送${cardInfo.nickname}的名片吗？`"
-    />
     <custom-nav-bar title="联系人" />
 
     <view class="search_bar_wrap">

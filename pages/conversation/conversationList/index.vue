@@ -1,5 +1,5 @@
 <template>
-  <view class="conversation_container">
+  <view class="conversation_container wx-top">
     <chat-header ref="chatHeaderRef" />
     <scroll-view
       class="scroll-view"
@@ -60,7 +60,9 @@ export default {
   },
   onReady() {
     console.log(this.storeConversationList)
+    // #ifdef APP-PLUS
     this.$nextTick(() => plus.navigator.closeSplashscreen());
+    // #endif
   },
   onLoad() {
     this._freshing = false;

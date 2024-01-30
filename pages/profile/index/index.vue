@@ -18,8 +18,8 @@
       </view>
 
       <view class="qr" @click="toSelfQr">
-        <img src="static/images/self_info_qr.png" alt="" />
-        <img src="static/images/common_right.png" alt="" />
+        <image src="@/static/images/self_info_qr.png" alt="" />
+        <image src="@/static/images/common_right.png" alt="" />
       </view>
     </view>
 
@@ -204,7 +204,7 @@ export default {
       }
     }
 
-    img {
+    image {
       width: 18px;
       height: 18px;
     }

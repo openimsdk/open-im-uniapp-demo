@@ -54,7 +54,9 @@ export default {
         .select("#editor2")
         .context((res) => {
           this.$emit("ready", res);
+          // #ifdef H5 || APP-PLUS
           this.editorCtx = res.context;
+          // #endif
         })
         .exec();
     },

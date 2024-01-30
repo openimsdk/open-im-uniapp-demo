@@ -1,4 +1,55 @@
 import PinYin from "./pinyin";
+import store from "@/store";
+import IMSDK from "openim-uniapp-polyfill";
+import { initiateFormData, completeFormData } from "@/api/file";
+
+export const getFileSize = (path) => {
+  return new Promise(async (resolve, reject) => {
+    uni.getFileInfo({
+      filePath: path,
+      success: function (res) {
+        resolve(res.size);
+      },
+      fail: function (error) {
+        reject(error);
+      }
+    });
+  })
+};
+
+export const uploadForm = (file) => {
+  return new Promise(async (resolve, reject) => {
+    const data = await initiateFormData({
+      name: `${store.getters.storeSelfInfo.userID}/${new Date().getTime()}.${getFileType(file.path)}`,
+      size: file.size,
+      contentType: getFileType(file.path),
+      group: ""
+    })
+    const imageID = data.id
+    uni.uploadFile({
+      url: data.url,
+      filePath: file.path,
+      name: 'file',
+      formData: {
+        ...data.formData
+      },
+      header: {
+        token: uni.getStorageSync("IMToken"),
+        operationID: IMSDK.uuid(),
+      },
+      success: async () => {
+        const { url } = await completeFormData({
+          id: imageID
+        })
+        resolve(url);
+      },
+      fail: (err) => {
+        reject(err);
+      },
+    });
+  })
+}
+
 
 export const html2Text = (html) => {
   if (!html) {
@@ -74,7 +125,7 @@ export const getDbDir = () => {
         },
         (error) => {
           reject(error);
-        },
+        }
       );
     });
   });
@@ -189,6 +240,77 @@ export const getPurePath = (path) => {
     path = plus.io.convertLocalFileSystemURL(path);
   }
   return path;
+};
+
+export const getPicInfo = (file) => {
+  return new Promise((resolve, reject) => {
+    let _URL;
+    if (window) {
+      _URL = window.URL || window.webkitURL;
+    } else {
+      uni.getImageInfo({
+        src: file.path,
+        success: function (image) {
+          resolve({ width: image.width, height: image.height });
+        },
+      });
+      return;
+    }
+    const img = new Image();
+    img.onload = function () {
+      resolve(img);
+    };
+    img.src = _URL.createObjectURL(file);
+  });
+};
+
+export const getFileType = (name) => {
+  const idx = name.lastIndexOf(".");
+  return name.slice(idx + 1);
+};
+
+export const base64toFile = (base64Str) => {
+  var arr = base64Str.split(","),
+    fileType = arr[0].match(/:(.*?);/)[1],
+    bstr = atob(arr[1]),
+    n = bstr.length,
+    u8arr = new Uint8Array(n);
+
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+
+  return new File([u8arr], `screenshot${Date.now()}.png`, {
+    type: fileType,
+  });
+};
+
+export const getVideoSnshot = (item) => {
+  return new Promise((reslove, reject) => {
+    var video = document.createElement("VIDEO");
+    video.setAttribute("autoplay", "autoplay");
+    video.setAttribute("muted", "muted");
+    video.innerHTML = "<source src=" + item + ' type="audio/mp4">';
+    var canvas = document.createElement("canvas");
+    var ctx = canvas.getContext("2d");
+    video.addEventListener("canplay", function () {
+      var anw = document.createAttribute("width");
+      //@ts-ignore
+      anw.nodeValue = video.videoWidth;
+      var anh = document.createAttribute("height");
+      //@ts-ignore
+      anh.nodeValue = video.videoHeight;
+      canvas.setAttributeNode(anw);
+      canvas.setAttributeNode(anh);
+      //@ts-ignore
+      ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      var base64 = canvas.toDataURL("image/png");
+      //@ts-ignore
+      video.pause();
+      const file = base64toFile(base64);
+      reslove(file);
+    });
+  });
 };
 
 export const filterEmptyValue = (obj) => {
@@ -328,16 +450,16 @@ export const copyFileToDoc = (from, to = "background") => {
                   (movedEntry) => {
                     resolve(movedEntry.fullPath);
                   },
-                  (err) => reject(err),
+                  (err) => reject(err)
                 );
               },
-              (err) => reject(err),
+              (err) => reject(err)
             );
           },
-          (err) => reject(err),
+          (err) => reject(err)
         );
       },
-      (err) => reject(err),
+      (err) => reject(err)
     );
   });
 };
