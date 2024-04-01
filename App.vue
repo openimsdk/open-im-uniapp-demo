@@ -489,6 +489,13 @@ export default {
           url: "/pages/conversation/conversationList/index?isRedirect=true",
         });
       };
+      let platformID;
+      // #ifdef H5
+      platformID = 5
+      // #endif
+      // #ifdef MP-WEIXIN
+      platformID = 6
+      // #endif
 			// #ifdef H5 || MP-WEIXIN
 			const IMToken = uni.getStorageSync("IMToken");
 			const IMUserID = uni.getStorageSync("IMUserID");
@@ -496,7 +503,7 @@ export default {
 				IMSDK.asyncApi(IMSDK.IMMethods.Login, IMSDK.uuid(), {
 					userID: IMUserID,
 					token: IMToken,
-					platformID: 6,
+					platformID,
 					wsAddr: config.getWsUrl(),
 					apiAddr: config.getApiUrl(),
 				})
