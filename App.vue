@@ -28,6 +28,10 @@ export default {
     this.setGlobalIMlistener();
     this.setPageListener();
     this.tryLogin();
+    console.warn(`建议开发前先查看接入文档（https://docs.openim.io/zh-Hans/sdks/quickstart/uniapp）。`);
+    // #ifdef H5 || MP-WEIXIN
+    console.warn(`运行H5或微信小程序，需要注意额外部署 OIMWS 服务，默认端口为 10003，当前 WsUrl 为${config.getWsUrl()}，文档地址https://docs.openim.io/zh-Hans/guides/gettingStarted/jssdk`);
+    // #endif
   },
   onShow: function () {
     console.log("App Show");
