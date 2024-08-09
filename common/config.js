@@ -1,7 +1,6 @@
-// const registerUrl = 'https://web.rentsoft.cn/chat'
-// const configUrl = 'https://web.rentsoft.cn/complete_admin'
-// const apiUrl = 'https://web.rentsoft.cn/api'
-// const wsUrl = 'wss://web.rentsoft.cn/msg_gateway'
+// const registerUrl = 'https://xxx.com/chat'
+// const apiUrl = 'https://xxx.com/api'
+// const wsUrl = 'wss://xxx.com/msg_gateway'
 
 const registerUrl = 'http://your-server-ip:10008'
 const configUrl = 'http://your-server-ip:10009'
