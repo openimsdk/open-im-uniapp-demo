@@ -270,14 +270,14 @@ export default {
     checkDisabledUser() {
       const friendIDList = this.storeFriendList.map((friend) => friend.userID);
       IMSDK.asyncApi(
-        IMSDK.IMMethods.GetSpecifiedGroupMembersInfo,
+        "getUsersInGroup",
         IMSDK.uuid(),
         {
           groupID: this.groupID,
           userIDList: friendIDList,
         },
       ).then(({ data }) => {
-        this.disabledUserIDList = data.map((member) => member.userID);
+        this.disabledUserIDList = data;
       });
     },
     checkDisabledGroup() {

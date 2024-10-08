@@ -82,7 +82,3 @@ export const businessSearchUser = (keyword) =>
       },
     }
   );
-
-// app config
-export const getAppConfigFromSvr = (content) =>
-  uni.$u?.http.post("/client_config/get");

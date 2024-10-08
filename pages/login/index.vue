@@ -3,7 +3,7 @@
     <view class="login">
       <view class="logo">
         <image style="width: 65px;height: 66px;" src="@/static/images/logo.png" alt="" />
-        <view class="title" @click="toConfig">欢迎使用OpenIM</view>
+        <view class="title" @click="toConfig">欢迎使用OpenCorp</view>
       </view>
       <u-form
         class="loginForm"
@@ -152,15 +152,9 @@ export default {
       });
     },
     init() {
-      if (process.env.NODE_ENV === "development") {
-        this.loginInfo.phoneNumber =
-          uni.getStorageSync("lastPhoneNumber") || "";
-        this.loginInfo.areaCode = uni.getStorageSync("lastAreaCode") || "86";
-      } else {
-        this.loginInfo.phoneNumber =
-          uni.getStorageSync("lastPhoneNumber") || "";
-        this.loginInfo.areaCode = uni.getStorageSync("lastAreaCode") || "86";
-      }
+      this.loginInfo.phoneNumber =
+        uni.getStorageSync("lastPhoneNumber") || "";
+      this.loginInfo.areaCode = uni.getStorageSync("lastAreaCode") || "86";
     },
     toConfig() {
       uni.$u.route("/pages/common/updateConfig/index");
@@ -221,8 +215,8 @@ export default {
           this.$store.dispatch("user/getSelfInfo");
           this.$store.dispatch("conversation/getConversationList");
           this.$store.dispatch("conversation/getUnReadCount");
-          this.$store.dispatch("contact/getFriendList");
-          this.$store.dispatch("contact/getGrouplist");
+          // this.$store.dispatch("contact/getFriendList");
+          // this.$store.dispatch("contact/getGrouplist");
           this.$store.dispatch("contact/getBlacklist");
           this.$store.dispatch("contact/getRecvFriendApplications");
           this.$store.dispatch("contact/getSentFriendApplications");

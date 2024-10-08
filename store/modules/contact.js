@@ -44,18 +44,51 @@ const mutations = {
 };
 
 const actions = {
-  getFriendList({ commit }) {
-    IMSDK.asyncApi(IMSDK.IMMethods.GetFriendList, uuidv4()).then(({ data }) => {
-      const friendInfoList = data.map((item) => item.friendInfo);
-      commit("SET_FRIEND_LIST", friendInfoList);
-    });
+  async getFriendList({ commit }) {
+    let offset = 0;
+    let friendInfoList = [];
+    let initialFetch = true;
+    while (true) {
+      try {
+        const count = initialFetch ? 10000 : 1000;
+        const { data } = await IMSDK.asyncApi("getFriendListPage", uuidv4(), {
+          offset,
+          count,
+        });
+        friendInfoList = [
+          ...friendInfoList,
+          ...data.map((item) => item.friendInfo),
+        ];
+        offset += count;
+        if (data.length < count) break;
+        initialFetch = false;
+      } catch (error) {
+        console.error("getFriendListPage error");
+      }
+    }
+    commit("SET_FRIEND_LIST", friendInfoList);
   },
-  getGrouplist({ commit }) {
-    IMSDK.asyncApi(IMSDK.IMMethods.GetJoinedGroupList, uuidv4()).then(
-      ({ data }) => {
-        commit("SET_GROUP_LIST", data);
-      },
-    );
+  async getGrouplist({ commit }) {
+    let offset = 0;
+    let groupList = [];
+    while (true) {
+      try {
+        const { data } = await IMSDK.asyncApi(
+          "getJoinedGroupListPage",
+          uuidv4(),
+          {
+            offset,
+            count: 1000,
+          }
+        );
+        groupList = [...groupList, ...data];
+        offset += 1000;
+        if (data.length < 1000) break;
+      } catch (error) {
+        console.error("getGrouplist error");
+      }
+    }
+    commit("SET_GROUP_LIST", groupList);
   },
   getBlacklist({ commit }) {
     IMSDK.asyncApi(IMSDK.IMMethods.GetBlackList, uuidv4()).then(({ data }) => {

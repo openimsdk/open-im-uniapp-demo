@@ -16,7 +16,7 @@ wsUrl = 'ws://your-server-ip:10001'
 wsUrl = 'ws://your-server-ip:10003'
 // #endif
 
-const version = 'OpenIM-Uni-Demo'
+const version = 'OpenCorp-Uni-Demo'
 
 // 高德地图web api key  用于根据经纬度生成快照  当前key已绑定安卓包名  需要自行申请替换
 const AmapWebKey = "";

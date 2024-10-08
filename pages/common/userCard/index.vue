@@ -30,7 +30,7 @@
         <user-info-row-item @click="toMoreInfo" lable="个人资料" arrow />
       </view>
 
-      <view class="action_row" v-if="showSendMessage">
+      <view class="action_row">
         <view @click="toDesignatedConversation" class="action_item">
           <image src="@/static/images/user_card_message.png" alt="" />
           <text>发消息</text>
@@ -78,7 +78,6 @@ export default {
       "storeFriendList",
       "storeCurrentMemberInGroup",
       "storeCurrentUserID",
-      "storeAppConfig",
       "storeSelfInfo",
     ]),
     isFriend() {
@@ -121,11 +120,6 @@ export default {
         suffix = `(${this.sourceUserInfo.remark})`;
       }
       return this.sourceUserInfo.nickname + suffix;
-    },
-    showSendMessage() {
-      const businessAllow =
-        this.storeAppConfig.allowSendMsgNotFriend === CommonIsAllow.Allow;
-      return businessAllow ? businessAllow : this.isFriend;
     },
   },
   onLoad(options) {

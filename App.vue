@@ -22,8 +22,6 @@ export default {
   onLaunch: function () {
     console.log("App Launch");
     // Igexin.turnOnPush();
-
-    this.$store.dispatch("user/getAppConfig");
     this.launchCheck();
     this.setGlobalIMlistener();
     this.setPageListener();
@@ -31,6 +29,7 @@ export default {
     console.warn(`建议开发前先查看文档（https://docs.openim.io/zh-Hans/sdks/quickstart/uniapp）。必须先按照文档配置，否则无法运行！`);
     // #ifdef H5 || MP-WEIXIN
     console.warn(`运行H5或微信小程序，需要注意额外部署 OIMWS 服务，默认端口为 10003，当前 WsUrl 为${config.getWsUrl()}，文档地址https://docs.openim.io/zh-Hans/guides/gettingStarted/jssdk`);
+    console.warn(`该客户端目前是3.8.1版本，OIMWS并不支持3.8.0及之后的的版本，无法运行H5/miniapp，等待官方推出全新jssdk。如果服务端是3.8.0之前的版本，回退客户端和sdk版本可以继续运行H5/miniapp`);
     // #endif
   },
   onShow: function () {
@@ -116,6 +115,9 @@ export default {
         console.log('OnUserTokenExpired', data)
         kickHander("您的登录已过期，请重新登陆！");
       });
+      IMSDK.subscribe('onUserTokenInvalid', (data) => {
+        kickHander("您的登录已无效，请重新登陆！");
+      });
 
       // sync
       const syncStartHandler = () => {
@@ -128,6 +130,8 @@ export default {
       const syncFinishHandler = () => {
         uni.hideLoading();
         this.$store.dispatch("conversation/getConversationList");
+        this.$store.dispatch("contact/getFriendList");
+        this.$store.dispatch("contact/getGrouplist");
         this.$store.dispatch("conversation/getUnReadCount");
         this.$store.commit("user/SET_IS_SYNCING", false);
       };
@@ -482,8 +486,8 @@ export default {
         this.$store.dispatch("user/getSelfInfo");
         this.$store.dispatch("conversation/getConversationList");
         this.$store.dispatch("conversation/getUnReadCount");
-        this.$store.dispatch("contact/getFriendList");
-        this.$store.dispatch("contact/getGrouplist");
+        // this.$store.dispatch("contact/getFriendList");
+        // this.$store.dispatch("contact/getGrouplist");
         this.$store.dispatch("contact/getBlacklist");
         this.$store.dispatch("contact/getRecvFriendApplications");
         this.$store.dispatch("contact/getSentFriendApplications");

@@ -173,46 +173,17 @@ export default {
         },
       };
       try {
-        const data = await businessRegister(options);
-        const { imToken, userID } = data;
-
-        // #ifdef H5 || MP-WEIXIN
-        await IMSDK.asyncApi(IMSDK.IMMethods.Login, IMSDK.uuid(), {
-          userID,
-          token: imToken,
-          platformID: platform,
-          wsAddr: config.getWsUrl(),
-          apiAddr: config.getApiUrl(),
-        });
-        // #endif
-
-        // #ifdef APP-PLUS
-        await IMSDK.asyncApi(IMSDK.IMMethods.Login, IMSDK.uuid(), {
-          userID,
-          token: imToken,
-        });
-        // #endif
-        this.saveLoginProfile(data);
+        await businessRegister(options);
         this.saveLoginInfo();
-        this.$store.commit("user/SET_AUTH_DATA", data);
-        this.$store.dispatch("user/getSelfInfo");
-        this.$store.dispatch("conversation/getConversationList");
-        this.$store.dispatch("contact/getFriendList");
-        this.$store.dispatch("contact/getGrouplist");
-        this.$store.dispatch("contact/getBlacklist");
-        this.$store.dispatch("contact/getRecvFriendApplications");
-        this.$store.dispatch("contact/getSentFriendApplications");
-        this.$store.dispatch("contact/getRecvGroupApplications");
-        this.$store.dispatch("contact/getSentGroupApplications");
-        uni.switchTab({
-          url: "/pages/conversation/conversationList/index",
-        });
+        uni.$u.toast('注册成功')
+        uni.$u.route("/pages/login/index")
       } catch (err) {
         console.log(err);
         uni.$u.toast(checkLoginError(err));
         // uni.$u.toast('注册失败')
+      } finally {
+        this.loading = false;
       }
-      this.loading = false;
     },
     saveLoginInfo() {
       uni.setStorage({
@@ -222,21 +193,6 @@ export default {
       uni.setStorage({
         key: "lastAreaCode",
         data: this.userInfo.areaCode,
-      });
-    },
-    saveLoginProfile(data) {
-      const { imToken, chatToken, userID } = data;
-      uni.setStorage({
-        key: "IMUserID",
-        data: userID,
-      });
-      uni.setStorage({
-        key: "IMToken",
-        data: imToken,
-      });
-      uni.setStorage({
-        key: "BusinessToken",
-        data: chatToken,
       });
     },
   },

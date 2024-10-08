@@ -383,11 +383,11 @@ export default {
         groupID: groupID ?? this.groupID,
         filter: 0,
         offset: this.groupMemberList.length,
-        count: 20,
+        count: 500,
       })
         .then(({ data }) => {
           this.groupMemberList = [...this.groupMemberList, ...data];
-          this.loadState.hasMore = data.length === 20;
+          this.loadState.hasMore = data.length === 500;
         })
         .finally(() => (this.loadState.loading = false));
     },

@@ -28,17 +28,6 @@
           </view>
         </u-input>
       </u-form-item>
-      <u-form-item v-if="isRegister" prop="invitationCode" label="邀请码">
-        <u-input
-          v-model="userInfo.invitationCode"
-          border="surround"
-          :placeholder="`请输入邀请码${
-            needInvitationCodeRegister ? '(必填)' : '(选填)'
-          }`"
-          clearable
-        >
-        </u-input>
-      </u-form-item>
     </u-form>
     <view class="action_btn">
       <u-button
@@ -86,29 +75,10 @@ export default {
       pageStatus: "normal",
     };
   },
-  computed: {
-    needInvitationCodeRegister() {
-      return this.$store.getters.storeAppConfig.needInvitationCodeRegister;
-    },
-  },
   onLoad(param) {
     this.isRegister = JSON.parse(param.isRegister);
   },
   methods: {
-    checkInvitationCodeState() {
-      if (this.needInvitationCodeRegister) {
-        this.rules.push({
-          invitationCode: [
-            {
-              type: "string",
-              required: true,
-              message: "请输入邀请码",
-              trigger: ["blur", "change"],
-            },
-          ],
-        });
-      }
-    },
     sendSms() {
       this.$refs.registerForm.validate().then((valid) => {
         const options = {
