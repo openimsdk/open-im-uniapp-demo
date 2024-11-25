@@ -28,11 +28,37 @@ OpenIM Uniapp Demo 是一个基于本地插件、OpenIM Server 和 Uniapp 的开
 
 ## 技术栈 🛠️
 
-- 这是一个 [Uniapp](https://uniapp.dcloud.net.cn/) 项目， 依赖于 [HBuilderX](https://www.dcloud.io/hbuilderx.html) 。
+- 这是一个 [Uniapp](https://uniapp.dcloud.net.cn/) 项目， 依赖于 [HBuilderX](https://www.dcloud.io/hbuilderx.html) 。开发前请先阅读 [文档](https://docs.openim.io/zh-Hans/sdks/quickstart/uniapp)。
 
-- 新版本 SDK 已经支持同时打包 APP、H5、小程序，请使用 npm 安装最新的依赖。如果开发 H5 和小程序需要后端额外部署 [OIMWS](https://docs.openim.io/zh-Hans/guides/gettingStarted/jssdk) 。
+- 运行安卓iOS平台需要安装原生插件，中间层 `openim-uniapp-polyfill` 结合 App 原生插件和 JSSDK 能力，兼容一套代码同时开发 APP、H5、小程序。
 
-- 新版本支持 H5、小程序的 SDK 在使用上会有所差异，开发前请参考 [文档](https://docs.openim.io/zh-Hans/sdks/quickstart/uniapp) 。
+<table style="text-align: center;">
+  <tr>
+    <th style="text-align: center;">-</th>
+    <th style="text-align: center;">安装 openim-uniapp-polyfill</th>
+    <th style="text-align: center;">安装 @openim/client-sdk</th>
+    <th style="text-align: center;">安装 App原生插件</th>
+    <th style="text-align: center;">制作自定义基座调试</th>
+  </tr>
+  <tr>
+    <td>仅开发H5、小程序</td>
+    <td colspan="5">直接参考 <a href="https://docs.openim.io/zh-Hans/sdks/quickstart/miniProgram">JSSDK 文档<a>，SDK 调用参考 Browser、MiniProgram </td>
+  </tr>
+  <tr>
+    <td>仅开发App端</td>
+    <td>✅</td>
+    <td>❌</td>
+    <td>✅</td>
+    <td>✅</td>
+  </tr>
+  <tr>
+    <td>同时开发App端、H5和小程序</td>
+    <td>✅</td>
+    <td>✅</td>
+    <td>✅</td>
+    <td>✅</td>
+  </tr>
+</table>
 
 ## 在线体验 🌐
 
@@ -63,7 +89,7 @@ OpenIM Uniapp Demo 是一个基于本地插件、OpenIM Server 和 Uniapp 的开
    - `common -> config.js`
 
      ```js
-      const wsUrl = "ws://your-server-ip:10001" // or "ws://your-server-ip:10003"
+      const wsUrl = "ws://your-server-ip:10001"
       const apiUrl = "http://your-server-ip:10002"
       const registerUrl = "http://your-server-ip:10008"
      ```

@@ -392,7 +392,7 @@ export default {
             snapshotUrl: URL.createObjectURL(snapShotFile),
             snapshotWidth: width,
             snapshotHeight: height,
-            snapShotType: getFileType(data.path.name),
+            snapShotType: 'png',
           };
           const { data: msg } = await IMSDK.asyncApi(
             'createVideoMessageByFile',

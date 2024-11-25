@@ -28,17 +28,20 @@ export default {
     this.tryLogin();
     console.warn(`建议开发前先查看文档（https://docs.openim.io/zh-Hans/sdks/quickstart/uniapp）。必须先按照文档配置，否则无法运行！`);
     // #ifdef H5 || MP-WEIXIN
-    console.warn(`运行H5或微信小程序，需要注意额外部署 OIMWS 服务，默认端口为 10003，当前 WsUrl 为${config.getWsUrl()}，文档地址https://docs.openim.io/zh-Hans/guides/gettingStarted/jssdk`);
-    console.warn(`该客户端目前是3.8.1版本，OIMWS并不支持3.8.0及之后的的版本，无法运行H5/miniapp，等待官方推出全新jssdk。如果服务端是3.8.0之前的版本，回退客户端和sdk版本可以继续运行H5/miniapp`);
+    console.warn(`该客户端目前是3.8.2版本，使用了 JSSDK 直接连接到 im-server，请确保im-server版本大于 3.8.2`);
     // #endif
   },
   onShow: function () {
     console.log("App Show");
+    // #ifdef APP-PLUS
     IMSDK.asyncApi(IMSDK.IMMethods.SetAppBackgroundStatus, IMSDK.uuid(), false);
+    // #endif
   },
   onHide: function () {
     console.log("App Hide");
+    // #ifdef APP-PLUS
     IMSDK.asyncApi(IMSDK.IMMethods.SetAppBackgroundStatus, IMSDK.uuid(), true);
+    // #endif
   },
   computed: {
     ...mapGetters([

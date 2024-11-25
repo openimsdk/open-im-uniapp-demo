@@ -4,7 +4,7 @@
     "dayjs": "^1.11.6",
     "image-tools": "^1.4.0",
     "md5": "^2.3.0",
-    "open-im-sdk": "^3.5.2",
+    "@openim/client-sdk": "^0.0.5",
     "openim-uniapp-polyfill": "^1.4.0",
     "uuid": "^9.0.0"
   }
