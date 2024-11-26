@@ -20,8 +20,6 @@
 
 OpenIM Uniapp Demo 是一个基于本地插件、OpenIM Server 和 Uniapp 的开源即时通讯应用程序。它演示了如何使用 OpenIM 将即时消息功能快速集成到任何单一应用程序中。
 
-注意：demo 只是用于演示 SDK 的引入与使用，并不是不是一个完整的应用。
-
 您可以通过以下两种方式之一，获得使用源代码创建非由OpenIM生成的编译版本的许可：
 1. 根据自由软件基金会的GPL v.3.0许可，受此政策概述的例外情况的限制；或
 2. 通过与OpenIM联系（contact@openim.io）获取商业许可。
@@ -30,9 +28,11 @@ OpenIM Uniapp Demo 是一个基于本地插件、OpenIM Server 和 Uniapp 的开
 
 - 这是一个 [Uniapp](https://uniapp.dcloud.net.cn/) 项目， 依赖于 [HBuilderX](https://www.dcloud.io/hbuilderx.html) 。开发前请先阅读 [文档](https://docs.openim.io/zh-Hans/sdks/quickstart/uniapp)。
 
-- 运行安卓iOS平台需要安装原生插件，中间层 `openim-uniapp-polyfill` 结合 App 原生插件和 JSSDK 能力，兼容一套代码同时开发 APP、H5、小程序。
+- 注意：Demo 只是用于演示 SDK 的引入与使用，并不是不是一个完整的应用。
 
-<table style="text-align: center;">
+- 运行 iOS 和 Android **必须**安装原生插件，中间层 `openim-uniapp-polyfill` 结合 App 原生插件和 JSSDK 能力，兼容一套代码同时开发 APP、H5、小程序（ SDK 和 im-server 版本 >= 3.8.2 ）。
+
+<table>
   <tr>
     <th style="text-align: center;">-</th>
     <th style="text-align: center;">安装 openim-uniapp-polyfill</th>
@@ -41,51 +41,45 @@ OpenIM Uniapp Demo 是一个基于本地插件、OpenIM Server 和 Uniapp 的开
     <th style="text-align: center;">制作自定义基座调试</th>
   </tr>
   <tr>
-    <td>仅开发H5、小程序</td>
-    <td colspan="5">直接参考 <a href="https://docs.openim.io/zh-Hans/sdks/quickstart/miniProgram">JSSDK 文档<a>，SDK 调用参考 Browser、MiniProgram </td>
+    <td style="text-align: center;">仅开发H5、小程序</td>
+    <td style="text-align: center;" colspan="5">直接参考 <a href="https://docs.openim.io/zh-Hans/sdks/quickstart/miniProgram">JSSDK 文档<a>，SDK 调用参考 Browser、MiniProgram </td>
   </tr>
   <tr>
-    <td>仅开发App端</td>
-    <td>✅</td>
-    <td>❌</td>
-    <td>✅</td>
-    <td>✅</td>
+    <td style="text-align: center;">仅开发App端</td>
+    <td style="text-align: center;">✅</td>
+    <td style="text-align: center;">❌</td>
+    <td style="text-align: center;">✅</td>
+    <td style="text-align: center;">✅</td>
   </tr>
   <tr>
-    <td>同时开发App端、H5和小程序</td>
-    <td>✅</td>
-    <td>✅</td>
-    <td>✅</td>
-    <td>✅</td>
+    <td style="text-align: center;">同时开发App端、H5和小程序</td>
+    <td style="text-align: center;">✅</td>
+    <td style="text-align: center;">✅</td>
+    <td style="text-align: center;">✅</td>
+    <td style="text-align: center;">✅</td>
   </tr>
 </table>
 
-## 在线体验 🌐
-
-前往 [下载](https://www.xcxwo.com/IM-UCER) APP 并体验。 
-
 ## 本地开发 🛠️
-
-> 推荐使用Hbuilder X 3.8.12.20230817
 
 按照以下步骤设置本地开发环境 :
 
-1. 运行 `npm install` 安装所有依赖项。
+1. 安装最新的正式版 [HBuilderX](https://www.dcloud.io/hbuilderx.html)。
 
-2. 在以下文件中将配置文件修改为您自己的 AppID :
-    > 使用Hbuilder打开manifest.json
+2. 运行 `npm install` 安装所有依赖项。
+
+3. 在以下文件中将配置文件修改为您自己的 AppID :
+    > 使用 Hbuilder 打开 manifest.json
 
     ![](./doc/config.png)
 
-3. 如果你想使用定位功能，在以下文件中将配置文件修改为您自己的高德地图 appkey :
-   > 使用Hbuilder打开manifest.json
+4. 如果你想使用定位功能，在以下文件中将配置文件修改为您自己的高德地图 appkey :
+   > 使用 Hbuilder 打开 manifest.json
 
     ![](./doc/config2.png)
 
-4. 在以下文件中将请求地址修改为您自己的OpenIM Server IP:
+5. 在以下文件中将请求地址修改为您自己的OpenIM Server IP:
    > 注意: 需要先 [部署](https://github.com/openimsdk/open-im-server#rocket-quick-start) OpenIM Server, OpenIM Server 默认端口为 10001、10002、10008。
-
-   > 如果是 H5、小程序平台 websocket 地址端口为 10003。
    - `common -> config.js`
 
      ```js
@@ -94,9 +88,7 @@ OpenIM Uniapp Demo 是一个基于本地插件、OpenIM Server 和 Uniapp 的开
       const registerUrl = "http://your-server-ip:10008"
      ```
 
-5. 选择云插件或本地插件
-
-    > 由于是基于原生插件开发的，所以只支持 Android 和 iOS。
+6. 选择云插件 (必须)
 
     ![](./doc/select.png)
 
@@ -104,16 +96,14 @@ OpenIM Uniapp Demo 是一个基于本地插件、OpenIM Server 和 Uniapp 的开
 
     ![](./doc/plugin.png)
 
-6. 云打包自定义调试基座
+7. 云打包自定义调试基座
 
   - 菜单 -> 运行 -> 运行到手机或模拟器 -> 制作自定义调试基座
 
   ![](./doc/dev.png)
   
 
-7. 在真实的机器或模拟器上运行
-
-  > 建议优先使用真实的机器进行开发。
+8. 在真实的机器或模拟器上运行 （ iOS 仅支持在真机调试 ）
 
   - 菜单 -> 运行 -> 运行到手机或模拟器 -> 运行到Android App基座
 
