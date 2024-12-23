@@ -139,4 +139,4 @@ OpenIM Uniapp Demo 是一个基于本地插件、OpenIM Server 和 Uniapp 的开
 
 ## 授权许可 :page_facing_up:
 
-OpenIM 是在 Apache 2.0 许可下授权的. 查看 [LICENSE](https://github.com/openimsdk/open-im-server/tree/main/LICENSE) 获取完整的许可文本。
+本仓库采用 GNU Affero 通用公共许可证第3版 (AGPL-3.0) 进行许可，并受以下附加条款的约束。不允许用于商业用途。详情请参阅 [此处](./LICENSE)。
