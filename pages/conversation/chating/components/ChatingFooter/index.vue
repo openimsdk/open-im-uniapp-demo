@@ -1,39 +1,138 @@
 <template>
   <view class="">
     <view class="forbidden_footer" v-if="getPlaceholder.length > 0">
-      <image style="margin-right: 8rpx" src="/static/images/forbidden_footer.png" />
+      <img
+        style="margin-right: 8rpx"
+        src="static/images/forbidden_footer.png"
+      />
       <text>{{ getPlaceholder }}</text>
     </view>
-    <view v-else :style="{ 'pointer-events': getPlaceholder ? 'none' : 'auto' }">
+    <view
+      v-show="getPlaceholder.length <= 0"
+      :style="{ 'pointer-events': getPlaceholder ? 'none' : 'auto' }"
+    >
       <view class="chat_footer">
+        <image
+          @click="updateRecordBtn"
+          style="width: 26px; height: 26px"
+          :src="
+            showRecord
+              ? '/static/images/chating_footer_audio_recording.png'
+              : '/static/images/chating_footer_audio.png'
+          "
+        />
         <view class="input_content">
-          <CustomEditor :placeholder="getPlaceholder" class="custom_editor" ref="customEditor" @ready="editorReady"
-            @focus="editorFocus" @blur="editorBlur" @input="editorInput" />
+          <CustomEditor
+            :placeholder="getPlaceholder"
+            v-show="!showRecord"
+            class="custom_editor"
+            ref="customEditor"
+            @ready="editorReady"
+            @focus="editorFocus"
+            @blur="editorBlur"
+            @input="editorInput"
+          />
+          <view v-if="storeQuoteMessage" class="quote_message">
+            <view class="content">
+              <u-parse :content="getQuotedContent" />
+            </view>
+            <image
+              @click="cancelQuote"
+              style="width: 16px; height: 16px"
+              src="@/static/images/chating_footer_quote_close.png"
+              alt=""
+            />
+          </view>
+          <button
+            class="record_btn"
+            @longpress="longpressRecord"
+            @touchmove="touchMoveSpeech"
+            @touchend="endRecord"
+            v-show="showRecord"
+            customStyle="height:30px;"
+          >
+            {{ recording ? "松手发送" : "按住说话" }}
+          </button>
         </view>
 
         <view class="footer_action_area">
-          <image v-show="!hasContent" @click.prevent="updateActionBar" src="@/static/images/chating_footer_add.png" alt=""
-            srcset="" />
-          <image v-show="hasContent" @click="sendTextMessage" src="@/static/images/send_btn.png" alt=""
-            srcset="" />
+          <image
+            @click="updateEmojiBar"
+            class="emoji_action"
+            src="@/static/images/chating_footer_emoji.png"
+            alt=""
+            srcset=""
+          />
+          <!-- <image
+            v-else
+            @click="updateEmojiBar"
+            class="emoji_action"
+            src="@/static/images/chating_footer_audio_recording.png"
+            alt=""
+            srcset=""
+          /> -->
+          <image
+            v-show="!hasContent"
+            @click.prevent="updateActionBar"
+            src="@/static/images/chating_footer_add.png"
+            alt=""
+            srcset=""
+          />
+          <image
+            v-show="hasContent && !emojiBarVisible"
+            @touchend.prevent="sendTextMessage"
+            src="@/static/images/send_btn.png"
+            alt=""
+            srcset=""
+          />
+          <image
+            v-show="hasContent && emojiBarVisible"
+            @click.prevent="sendTextMessage"
+            src="@/static/images/send_btn.png"
+            alt=""
+            srcset=""
+          />
         </view>
       </view>
-      <chating-action-bar @sendMessage="sendMessage" @prepareMediaMessage="prepareMediaMessage"
-        v-show="actionBarVisible" />
-      <u-action-sheet :safeAreaInsetBottom="true" round="12" :actions="actionSheetMenu" @select="selectClick"
-        :closeOnClickOverlay="true" :closeOnClickAction="true" :show="showActionSheet" @close="showActionSheet = false">
+      <chating-action-bar
+        @sendMessage="sendMessage"
+        @prepareMediaMessage="prepareMediaMessage"
+        v-show="actionBarVisible"
+      />
+      <chating-emoji-bar
+        @insertEmoji="emojiClick"
+        @backspace="backspace"
+        v-show="emojiBarVisible"
+      />
+      <u-action-sheet
+        :safeAreaInsetBottom="true"
+        round="12"
+        :actions="actionSheetMenu"
+        @select="selectClick"
+        :closeOnClickOverlay="true"
+        :closeOnClickAction="true"
+        :show="showActionSheet"
+        @close="showActionSheet = false"
+      >
       </u-action-sheet>
+      <record-overlay
+        @recordFinish="recordFinish"
+        ref="recordOverlayRef"
+        :visible="recording"
+      />
     </view>
   </view>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import { formatInputHtml, getPurePath, html2Text, getPicInfo, getFileType, getVideoSnshot, base64toFile, uploadForm, getFileSize } from "@/util/common";
-import { parseMessageByType, offlinePushInfo } from "@/util/imCommon";
+import { formatInputHtml, getPurePath, html2Text } from "@/util/common";
+import { parseMessageByType, offlinePushInfo, parseAt } from "@/util/imCommon";
 import {
   ChatingFooterActionTypes,
   UpdateMessageTypes,
+  GroupMemberListTypes,
+  PageEvents
 } from "@/constant";
 import IMSDK, {
   GroupMemberRole,
@@ -46,8 +145,16 @@ import IMSDK, {
 import UParse from "@/components/gaoyia-parse/parse.vue";
 import CustomEditor from "./CustomEditor.vue";
 import ChatingActionBar from "./ChatingActionBar.vue";
+import ChatingEmojiBar from "./ChatingEmojiBar.vue";
+import RecordOverlay from "./RecordOverlay.vue";
+import {
+  gotoAppPermissionSetting,
+  requestAndroidPermission,
+  judgeIosPermission,
+} from "@/util/permission";
 
 const needClearTypes = [
+  // MessageType.AdvanceTextMessage,
   MessageType.TextMessage,
   MessageType.AtTextMessage,
   MessageType.QuoteMessage,
@@ -82,7 +189,9 @@ export default {
   components: {
     CustomEditor,
     ChatingActionBar,
+    ChatingEmojiBar,
     UParse,
+    RecordOverlay,
   },
   props: {
     footerOutsideFlag: Number,
@@ -91,10 +200,16 @@ export default {
     return {
       customEditorCtx: null,
       inputHtml: "",
+      showRecord: false,
       actionBarVisible: false,
+      emojiBarVisible: false,
       isInputFocus: false,
       actionSheetMenu: [],
       showActionSheet: false,
+      recording: false,
+      recordTop: uni.getWindowInfo().windowHeight - 130,
+      conversationID: null,
+      isJoinGroup: true
     };
   },
   computed: {
@@ -104,6 +219,7 @@ export default {
       "storeCurrentGroup",
       "storeCurrentMemberInGroup",
       "storeBlackList",
+      "storeRevokeMap"
     ]),
     getQuotedContent() {
       if (!this.storeQuoteMessage) {
@@ -114,28 +230,23 @@ export default {
     hasContent() {
       return html2Text(this.inputHtml) !== "";
     },
+    isNomal() {
+      return this.storeCurrentMemberInGroup.roleLevel === GroupMemberRole.Nomal;
+    },
     getPlaceholder() {
       const isSingle =
         this.storeCurrentConversation.conversationType === SessionType.Single;
       if (!isSingle && this.storeCurrentGroup.status === GroupStatus.Muted) {
-        return this.storeCurrentMemberInGroup.roleLevel !==
-          GroupMemberRole.Nomal
-          ? ""
-          : "群主或管理员已开启全体禁言";
+        return !this.isNomal ? "" : "群主或管理员已开启全体禁言";
       }
-      if (
-        !isSingle &&
-        (this.storeCurrentGroup.status === GroupStatus.Dismissed ||
-          this.storeCurrentMemberInGroup.groupID !==
-          this.storeCurrentGroup.groupID)
-      ) {
+      if (!isSingle && !this.isJoinGroup) {
         return "您已不在该群组";
       }
       if (
         !isSingle &&
         this.storeCurrentMemberInGroup.muteEndTime > Date.now()
       ) {
-        return `你已被禁言`;
+        return `您已被管理员或群主禁言！`;
       }
       if (
         isSingle &&
@@ -151,18 +262,118 @@ export default {
   watch: {
     footerOutsideFlag(newVal) {
       this.onClickActionBarOutside();
+      this.onClickEmojiBarOutside();
     },
   },
   mounted() {
-    // this.setSendMessageListener();
+    this.setSendMessageListener();
     this.setKeyboardListener();
+    if (this.storeCurrentConversation.groupID) {
+      IMSDK.asyncApi(
+        IMMethods.IsJoinGroup,
+        IMSDK.uuid(),
+        this.storeCurrentConversation.groupID
+      ).then((res) => {
+        this.isJoinGroup = res.data
+      });
+    }
+    this.conversationID = this.storeCurrentConversation.conversationID
+    this.parseDraftText(this.storeCurrentConversation.draftText)
+    IMSDK.asyncApi(
+      IMMethods.SetConversationDraft,
+      IMSDK.uuid(),
+      {
+        conversationID: this.conversationID,
+        draftText: '',
+      }
+    );
   },
   beforeDestroy() {
-    // this.disposeSendMessageListener();
+    this.disposeSendMessageListener();
     this.disposeKeyboardListener();
+    if (this.inputHtml && this.inputHtml.trim()) {
+      IMSDK.asyncApi(
+        IMMethods.SetConversationDraft,
+        IMSDK.uuid(),
+        {
+          conversationID: this.conversationID,
+          draftText: html2Text(this.inputHtml),
+        }
+      );
+    }
   },
   methods: {
-    ...mapActions("message", ["pushNewMessage", "updateOneMessage"]),
+    ...mapActions("message", ["pushNewMessage", "updateOneMessage","updateQuoteMessageRevoke"]),
+    parseDraftText(draftText) {
+      let currentText = '';
+
+      for (let i = 0; i < draftText.length; i++) {
+        const currentChar = draftText[i];
+
+        if (currentChar === '<') {
+          if (currentText) {
+            const text = currentText
+            setTimeout(()=> {
+              this.$refs.customEditor.insertEmoji(text);
+            }, 100)
+            currentText = '';
+          }
+          const imgEndIndex = draftText.indexOf('>', i);
+          if (imgEndIndex !== -1) {
+            const imgTag = draftText.substring(i, imgEndIndex + 1);
+
+            if (imgTag.includes('class="at_el"')) {
+              const customDataReg = /data-custom=".+"/;
+              const atInfoArr = imgTag
+                .match(customDataReg)[0]
+                .slice(13, -1)
+                .split("&amp;");
+              this.$refs.customEditor.createCanvasData(atInfoArr[0].slice(7), atInfoArr[1].slice(15));
+            }
+            i = imgEndIndex;
+          }
+        } else {
+          currentText += currentChar;
+        }
+      }
+      if (currentText) {
+        setTimeout(()=> {
+          this.$refs.customEditor.insertEmoji(currentText);
+        }, 700)
+      }
+    },
+    longpressRecord() {
+      this.recording = true;
+      this.$nextTick(() => this.getRecordAreaData());
+    },
+    touchMoveSpeech(e) {
+      uni.$u.throttle(
+        this.$refs.recordOverlayRef.touchMoveSpeech(e, this.recordTop),
+        250,
+      );
+    },
+    endRecord() {
+      this.recording = false;
+      this.$refs.recordOverlayRef.checkStopType();
+    },
+    async recordFinish(path, duration) {
+      const message = await IMSDK.asyncApi(
+        IMMethods.CreateSoundMessageFromFullPath,
+        IMSDK.uuid(),
+        {
+          soundPath: getPurePath(path),
+          duration,
+        },
+      );
+      this.sendMessage(message);
+    },
+    getRecordAreaData() {
+      this.getEl(".record_area").then((data) => {
+        if (data) {
+          this.recordTop = data.top;
+        }
+      });
+    },
     getEl(el) {
       return new Promise((resolve) => {
         const query = uni.createSelectorQuery().in(this);
@@ -176,8 +387,8 @@ export default {
     },
     async createTextMessage() {
       let message = "";
-      const { text, atUserList } = formatInputHtml(this.inputHtml);
-      if (atUserList.length === 0) {
+      const { text, atUsersInfo } = formatInputHtml(this.inputHtml);
+      if (atUsersInfo.length === 0) {
         if (this.storeQuoteMessage) {
           message = await IMSDK.asyncApi(
             IMMethods.CreateQuoteMessage,
@@ -204,8 +415,8 @@ export default {
           IMSDK.uuid(),
           {
             text,
-            atUserIDList: atUserList.map((item) => item.atUserID),
-            atUsersInfo: atUserList,
+            atUserIDList: atUsersInfo.map((item) => item.atUserID),
+            atUsersInfo,
             message: quoteMessage,
           },
         );
@@ -214,16 +425,21 @@ export default {
       return message;
     },
     async sendTextMessage() {
+      // if(this.emojiBarVisible){
+      // 	uni.hideKeyboard()
+      // }
       if (!this.hasContent) return;
+      IMSDK.asyncApi('changeInputStates', IMSDK.uuid(), {
+        conversationID: this.storeCurrentConversation.conversationID,
+        focus: false,
+      });
       const message = await this.createTextMessage();
       this.sendMessage(message);
     },
     sendMessage(message) {
       this.pushNewMessage(message);
       if (needClearTypes.includes(message.contentType)) {
-        // #ifdef H5 || APP-PLUS
         this.customEditorCtx.clear();
-        // #endif
       }
       this.$emit("scrollToBottom");
       IMSDK.asyncApi(IMMethods.SendMessage, IMSDK.uuid(), {
@@ -260,33 +476,74 @@ export default {
     },
 
     // action
+    cancelQuote() {
+      this.$store.commit("message/SET_QUOTE_MESSAGE", undefined);
+    },
     onClickActionBarOutside() {
       if (this.actionBarVisible) {
         this.actionBarVisible = false;
       }
     },
+    onClickEmojiBarOutside() {
+      if (this.emojiBarVisible) {
+        this.emojiBarVisible = false;
+      }
+    },
     updateActionBar() {
+      this.onClickEmojiBarOutside();
       this.actionBarVisible = !this.actionBarVisible;
     },
+    updateEmojiBar() {
+      this.onClickActionBarOutside();
+      this.emojiBarVisible = !this.emojiBarVisible;
+    },
     editorReady(e) {
-      // #ifdef H5 || APP-PLUS
       this.customEditorCtx = e.context;
       this.customEditorCtx.clear();
-      // #endif
     },
     editorFocus() {
       this.isInputFocus = true;
+      this.$emit("scrollToBottom");
     },
     editorBlur() {
       this.isInputFocus = false;
     },
     editorInput(e) {
       this.inputHtml = e.detail.html;
+      uni.$u.throttle(this.updateTyping, 2000);
     },
     backspace() {
       this.customEditorCtx.undo();
     },
-
+    updateRecordBtn() {
+      if (!this.showRecord) {
+        this.checkRecordPermission();
+      }
+      this.showRecord = !this.showRecord;
+    },
+    async checkRecordPermission() {
+      if (uni.$u.os() === "ios") {
+        const iosFlag = judgeIosPermission("record");
+        if (iosFlag === 0) {
+          uni.$u.toast("您已禁止访问麦克风，请前往开启");
+          setTimeout(() => gotoAppPermissionSetting(), 250);
+        }
+        if (iosFlag === -1) {
+          let recorderManager = uni.getRecorderManager();
+          recorderManager.onStop(() => (recorderManager = null));
+          recorderManager.start();
+          setTimeout(() => recorderManager.stop());
+        }
+      } else {
+        const androidFlag = await requestAndroidPermission(
+          "android.permission.RECORD_AUDIO",
+        );
+        if (androidFlag === -1) {
+          uni.$u.toast("您已禁止访问麦克风，请前往开启");
+          setTimeout(() => gotoAppPermissionSetting(), 250);
+        }
+      }
+    },
     prepareMediaMessage(type) {
       if (type === ChatingFooterActionTypes.Album) {
         this.actionSheetMenu = [...albumChoose];
@@ -295,11 +552,23 @@ export default {
       }
       this.showActionSheet = true;
     },
+    updateTyping() {
+      if (
+        this.storeCurrentConversation.conversationType === SessionType.Single
+      ) {
+        IMSDK.asyncApi('changeInputStates', IMSDK.uuid(), {
+          conversationID: this.storeCurrentConversation.conversationID,
+          focus: true,
+        });
+      }
+    },
 
     // from comp
-    batchCreateImageMesage({ tempFilePaths, tempFiles }) {
-      // #ifdef APP-PLUS
-      tempFilePaths.forEach(async (path) => {
+    emojiClick(emoji) {
+      this.$refs.customEditor.insertEmoji(emoji);
+    },
+    batchCreateImageMesage(paths) {
+      paths.forEach(async (path) => {
         const message = await IMSDK.asyncApi(
           IMMethods.CreateImageMessageFromFullPath,
           IMSDK.uuid(),
@@ -307,59 +576,6 @@ export default {
         );
         this.sendMessage(message);
       });
-      // #endif
-      // #ifdef H5
-      tempFiles.forEach(async (file) => {
-        const { width, height } = await getPicInfo(file);
-        const baseInfo = {
-          uuid: IMSDK.uuid(),
-          type: getFileType(file.name),
-          size: file.size,
-          width,
-          height,
-          url: file,
-        }
-        const options = {
-          sourcePicture: baseInfo,
-          bigPicture: baseInfo,
-          snapshotPicture: baseInfo,
-          sourcePath: "",
-          file: file,
-        };
-        const { data } = await IMSDK.asyncApi(
-          'createImageMessageByFile',
-          IMSDK.uuid(),
-          options,
-        );
-        this.sendMessage(data);
-      });
-      // #endif
-      // #ifdef MP-WEIXIN
-      tempFiles.forEach(async (file) => {
-        const { width, height } = await getPicInfo(file);
-        const url = await uploadForm(file)
-        const baseInfo = {
-          uuid: IMSDK.uuid(),
-          type: getFileType(file.path),
-          size: file.size,
-          width,
-          height,
-          url,
-        }
-        const options = {
-          sourcePicture: baseInfo,
-          bigPicture: baseInfo,
-          snapshotPicture: baseInfo,
-          sourcePath: url,
-        };
-        const message = await IMSDK.asyncApi(
-          'createImageMessageByURL',
-          IMSDK.uuid(),
-          options,
-        );
-        this.sendMessage(message);
-      });
-      // #endif
     },
     selectClick({ idx }) {
       if (idx === 0) {
@@ -373,69 +589,7 @@ export default {
           );
         }
       } else {
-        const whenGetFile = async (data) => {
-          // #ifdef H5
-          const snapShotFile = await getVideoSnshot(URL.createObjectURL(data.path));
-          const { width, height } = await getPicInfo(snapShotFile);
-          const options = {
-            videoFile: data.path,
-            snapshotFile: snapShotFile,
-            videoPath: "",
-            duration: Number(data.duration.toFixed()),
-            videoType: getFileType(data.path.name),
-            snapshotPath: "",
-            videoUUID: IMSDK.uuid(),
-            videoUrl: "",
-            videoSize: data.path.size,
-            snapshotUUID: IMSDK.uuid(),
-            snapshotSize: snapShotFile.size,
-            snapshotUrl: URL.createObjectURL(snapShotFile),
-            snapshotWidth: width,
-            snapshotHeight: height,
-            snapShotType: 'png',
-          };
-          const { data: msg } = await IMSDK.asyncApi(
-            'createVideoMessageByFile',
-            IMSDK.uuid(),
-            options,
-          );
-          this.sendMessage(msg);
-          // #endif
-
-          // #ifdef MP-WEIXIN
-          const videoUrl = await uploadForm({
-            path: data.tempFilePath,
-            size: data.size
-          })
-          const snapshotSize = await getFileSize(data.thumbTempFilePath)
-          const snapshotUrl = await uploadForm({
-            path: data.thumbTempFilePath,
-            size: snapshotSize
-          })
-          const mpOptions = {
-            videoPath: '',
-            duration: Number(data.duration.toFixed()),
-            videoType: getFileType(data.tempFilePath),
-            snapshotPath: '',
-            videoUUID: IMSDK.uuid(),
-            videoUrl,
-            videoSize: data.size,
-            snapshotUUID: IMSDK.uuid(),
-            snapshotSize: 1024,
-            snapshotUrl,
-            snapshotWidth: data.width,
-            snapshotHeight: data.height,
-            snapShotType: getFileType(data.thumbTempFilePath),
-          }
-          const message = await IMSDK.asyncApi(
-            'createVideoMessageByURL',
-            IMSDK.uuid(),
-            mpOptions,
-          );
-          this.sendMessage(message);
-          // #endif
-
-          // #ifdef APP-PLUS
+        const whenGetFile = (data) => {
           const purePath = getPurePath(data.path);
           IMSDK.getVideoCover(purePath).then(async ({ path }) => {
             console.log(getPurePath(path));
@@ -451,7 +605,6 @@ export default {
             );
             this.sendMessage(message);
           });
-          // #endif
         };
         if (this.actionSheetMenu[0].type === ChatingFooterActionTypes.Album) {
           this.chooseOrShotVideo(["album"]).then(whenGetFile);
@@ -466,8 +619,8 @@ export default {
           count: 9,
           sizeType: ["compressed"],
           sourceType,
-          success: function ({ tempFilePaths, tempFiles }) {
-            resolve({ tempFilePaths, tempFiles });
+          success: function ({ tempFilePaths }) {
+            resolve(tempFilePaths);
           },
           fail: function (err) {
             console.log(err);
@@ -478,25 +631,11 @@ export default {
     },
     chooseOrShotVideo(sourceType) {
       return new Promise((resolve, reject) => {
-        // #ifdef MP-WEIXIN
-        uni.chooseMedia({
-          mediaType: ['video'],
-          compressed: true,
-          sourceType,
-          success: function ({ tempFiles }) {
-            resolve(tempFiles[0]);
-          },
-          fail: function (err) {
-            reject(err);
-          },
-        });
-        // #endif
-        // #ifdef APP-PLUS || H5
         uni.chooseVideo({
           compressed: true,
           sourceType,
           extension: ["mp4"],
-          success: function ({ tempFilePath, duration, tempFile }) {
+          success: function ({ tempFilePath, duration }) {
             const idx = tempFilePath.lastIndexOf(".");
             const videoType = tempFilePath.slice(idx + 1);
             if (tempFilePath.includes("_doc/")) {
@@ -505,28 +644,25 @@ export default {
               )}`;
             }
             console.log(tempFilePath);
-            // #ifdef APP-PLUS
             resolve({
               path: tempFilePath,
               videoType,
               duration,
             });
-            // #endif
-            // #ifdef H5
-            resolve({
-              path: tempFile,
-              videoType,
-              duration,
-            });
-            // #endif
           },
           fail: function (err) {
             console.log(err);
             reject(err);
           },
         });
-        // #endif
       });
+    },
+    insertAt(userID, nickname) {
+      const { atUsersInfo } = formatInputHtml(this.inputHtml);
+      if (atUsersInfo.find((item) => item.atUserID === userID)) {
+        return;
+      }
+      this.$refs.customEditor.createCanvasData(userID, nickname);
     },
 
     // message status
@@ -556,7 +692,9 @@ export default {
     // keyboard
     keyboardChangeHander({ height }) {
       if (height > 0) {
-
+        if (this.emojiBarVisible) {
+          this.emojiBarVisible = false;
+        }
         if (this.actionBarVisible) {
           this.actionBarVisible = false;
         }
@@ -601,24 +739,19 @@ export default {
 
   .input_content {
     flex: 1;
-    /*  #ifdef  MP-WEIXIN  */
-    height: 30px;
-    word-break: break-all;
-    overflow: auto;
-    /*  #endif  */
     min-height: 30px;
     max-height: 120px;
     margin: 0 24rpx;
     border-radius: 8rpx;
     position: relative;
 
-    // .record_btn {
-    //   // background-color: #3c9cff;
-    //   background: #fff;
-    //   color: black;
-    //   height: 30px;
-    //   font-size: 24rpx;
-    // }
+    .record_btn {
+      // background-color: #3c9cff;
+      background: #fff;
+      color: black;
+      height: 30px;
+      font-size: 24rpx;
+    }
   }
 
   .quote_message {
@@ -642,9 +775,9 @@ export default {
     display: flex;
     align-items: center;
 
-    // .emoji_action {
-    //   margin-right: 24rpx;
-    // }
+    .emoji_action {
+      margin-right: 24rpx;
+    }
 
     image {
       width: 26px;

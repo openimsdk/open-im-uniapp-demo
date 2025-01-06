@@ -15,7 +15,7 @@
       </view>
     </custom-nav-bar>
 
-    <view v-show="!empty && !searching" @click="startSearch" class="result_row">
+    <view v-show="!empty && !searching" @click="startSearch(keyword)" class="result_row">
       <image class="icon" :src="getIcon" alt="" />
       <view class="">
         <text>查找：</text>
@@ -76,19 +76,19 @@ export default {
         this.empty = !this.empty;
       }
     },
-    async startSearch() {
-      if (!this.keyword) return;
+    async startSearch(value) {
+      if (!value) return;
       this.searching = true;
       try {
         if (this.isSearchGroup) {
           let info = this.$store.getters.storeGroupList.find(
-            (item) => item.groupID === this.keyword,
+            (item) => item.groupID === value,
           );
           if (!info) {
             const { data } = await IMSDK.asyncApi(
               IMSDK.IMMethods.GetSpecifiedGroupsInfo,
               IMSDK.uuid(),
-              [this.keyword],
+              [value],
             );
             info = data[0];
           }
@@ -103,10 +103,10 @@ export default {
           }
         } else {
           let info = this.$store.getters.storeFriendList.find(
-            (item) => item.userID === this.keyword,
+            (item) => item.userID === value,
           );
           if (!info) {
-            const { total, users } = await businessSearchUserInfo(this.keyword);
+            const { total, users } = await businessSearchUserInfo(value);
             if (total > 0) {
               const { data } = await IMSDK.asyncApi(
                 IMSDK.IMMethods.GetUsersInfo,

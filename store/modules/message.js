@@ -39,16 +39,18 @@ const actions = {
       console.log(data);
       const isFistPage = !params.startClientMsgID && !params.lastMinSeq;
       const messages = data.messageList ?? [];
-      const imageList = filterPreviewImage([...messages]);
+      if (!params.conversationID.includes("sn_")) {
+        const imageList = filterPreviewImage([...messages]);
+        commit("SET_PREVIEW_IMAGE_LIST", [
+          ...imageList,
+          ...(isFistPage ? [] : state.previewImageList),
+        ]);
+      }
       emptyFlag = messages.length === 0;
       lastMinSeq = data.lastMinSeq;
       commit("SET_HISTORY_MESSAGE_LIST", [
         ...messages,
         ...(isFistPage ? [] : state.historyMessageList),
-      ]);
-      commit("SET_PREVIEW_IMAGE_LIST", [
-        ...imageList,
-        ...(isFistPage ? [] : state.previewImageList),
       ]);
       commit("SET_HAS_MORE_MESSAGE", !data.isEnd && messages.length === 20);
     } catch (e) {

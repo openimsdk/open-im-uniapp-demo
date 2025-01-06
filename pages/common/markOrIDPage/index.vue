@@ -3,15 +3,23 @@
     <custom-nav-bar :title="getTitle">
       <view class="nav_right_action" slot="more">
         <text v-show="!loading" @click="saveOrCopy">{{ getConfirmText }}</text>
-        <template v-if="loading">
-          <u-loading-icon />
-        </template>
+        <u-loading-icon v-show="loading" />
+        <!-- <u-button :loading="loading" @click="saveOrCopy" type="primary" :text="getConfirmText" /> -->
       </view>
     </custom-nav-bar>
 
     <view class="content_row">
-      <u-input :disabled="!isRemark && !isSelfNickname" v-model="content" disabledColor="transparent" maxlength="16"
-        placeholder="请输入内容" clearable>
+      <u-input
+        :disabled="!isRemark && !isSelfNickname"
+        v-model="content"
+        disabledColor="transparent"
+        maxlength="16"
+        placeholder="请输入内容"
+        clearable
+      >
+        <!-- <template slot="suffix">
+					<u-button :loading="loading" @click="saveOrCopy" type="primary" :text="getConfirmText" />
+				</template> -->
       </u-input>
     </view>
   </view>

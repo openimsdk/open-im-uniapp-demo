@@ -51,7 +51,7 @@ const actions = {
         uuidv4(),
         {
           offset: isFirstPage ? 0 : state.conversationList.length,
-          count: 10,
+          count: 500,
         },
       );
       commit("SET_CONVERSATION_LIST", [
@@ -112,6 +112,16 @@ const actions = {
     commit("SET_CURRENT_GROUP", {});
     commit("SET_CURRENT_CONVERSATION", {});
   },
+};
+
+const getMessageText = (message) => {
+  if (message.atTextElem) {
+    return message.atTextElem.text;
+  }
+  if (message.quoteElem) {
+    return message.quoteElem.text;
+  }
+  return message.textElem.content;
 };
 
 export default {

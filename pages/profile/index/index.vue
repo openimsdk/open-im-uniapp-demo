@@ -18,8 +18,8 @@
       </view>
 
       <view class="qr" @click="toSelfQr">
-        <image src="@/static/images/self_info_qr.png" alt="" />
-        <image src="@/static/images/common_right.png" alt="" />
+        <img src="static/images/self_info_qr.png" alt="" />
+        <img src="static/images/common_right.png" alt="" />
       </view>
     </view>
 
@@ -115,6 +115,11 @@ export default {
             url: "/pages/profile/selfInfo/index",
           });
           break;
+        case 1:
+          uni.navigateTo({
+            url: "/pages/profile/messageNotification/index",
+          });
+          break;
         case 2:
           uni.navigateTo({
             url: "/pages/profile/accountSetting/index",
@@ -204,7 +209,7 @@ export default {
       }
     }
 
-    image {
+    img {
       width: 18px;
       height: 18px;
     }

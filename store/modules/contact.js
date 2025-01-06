@@ -57,7 +57,7 @@ const actions = {
         });
         friendInfoList = [
           ...friendInfoList,
-          ...data.map((item) => item.friendInfo),
+          ...data,
         ];
         offset += count;
         if (data.length < count) break;
@@ -91,10 +91,7 @@ const actions = {
     commit("SET_GROUP_LIST", groupList);
   },
   getBlacklist({ commit }) {
-    IMSDK.asyncApi(IMSDK.IMMethods.GetBlackList, uuidv4(), {
-      offset: 0,
-      count: 1000,
-    }).then(({ data }) => {
+    IMSDK.asyncApi(IMSDK.IMMethods.GetBlackList, uuidv4()).then(({ data }) => {
       commit("SET_BLACK_LIST", data);
     });
   },
@@ -102,12 +99,6 @@ const actions = {
     IMSDK.asyncApi(
       IMSDK.IMMethods.GetFriendApplicationListAsRecipient,
       uuidv4(),
-      // #ifdef H5 || MP-WEIXIN
-      {
-        offset: 0,
-        count: 1000,
-      },
-      // #endif
     ).then(({ data }) => {
       commit("SET_RECV_FRIEND_APPLICATIONS", data);
     });
@@ -116,12 +107,6 @@ const actions = {
     IMSDK.asyncApi(
       IMSDK.IMMethods.GetFriendApplicationListAsApplicant,
       uuidv4(),
-      // #ifdef H5 || MP-WEIXIN
-      {
-        offset: 0,
-        count: 1000,
-      },
-      // #endif
     ).then(({ data }) => {
       commit("SET_SENT_FRIEND_APPLICATIONS", data);
     });
@@ -130,12 +115,6 @@ const actions = {
     IMSDK.asyncApi(
       IMSDK.IMMethods.GetGroupApplicationListAsRecipient,
       uuidv4(),
-      // #ifdef H5 || MP-WEIXIN
-      {
-        offset: 0,
-        count: 1000,
-      },
-      // #endif
     ).then(({ data }) => {
       commit("SET_RECV_GROUP_APPLICATIONS", data);
     });
@@ -144,12 +123,6 @@ const actions = {
     IMSDK.asyncApi(
       IMSDK.IMMethods.GetGroupApplicationListAsApplicant,
       uuidv4(),
-      // #ifdef H5 || MP-WEIXIN
-      {
-        offset: 0,
-        count: 1000,
-      },
-      // #endif
     ).then(({ data }) => {
       commit("SET_SENT_GROUP_APPLICATIONS", data);
     });

@@ -37,6 +37,7 @@
 </template>
 
 <script>
+	import { myPreview } from "@/util/preview";
 	import props from './props.js'
 	// #ifdef APP-NVUE
 	// 由于weex为阿里的KPI业绩考核的产物，所以不支持百分比单位，这里需要通过dom查询组件的宽度
@@ -165,12 +166,16 @@
 			// 预览图片
 			onPreviewTap(url) {
 				const urls = this.urls.map((item) => {
-					return this.getSrc(item)
+					// return this.getSrc(item)
+					return uni.$u.test.object(item) ?
+					(this.previewKeyName && item[this.previewKeyName]) || item.src :
+					item
 				})
-				uni.previewImage({
-					current: url,
-					urls
-				})
+				myPreview(url, urls)
+				// uni.previewImage({
+				// 	current: url,
+				// 	urls
+				// })
 			},
 			// 获取图片的路径
 			getSrc(item) {

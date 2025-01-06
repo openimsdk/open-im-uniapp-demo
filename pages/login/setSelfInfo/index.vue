@@ -62,11 +62,9 @@
 
 <script>
 import md5 from "md5";
-import config from '@/common/config'
-import IMSDK from "openim-uniapp-polyfill";
 import MyAvatar from "@/components/MyAvatar/index.vue";
 import { businessRegister } from "@/api/login";
-import { checkLoginError, getPurePath } from "@/util/common";
+import { checkLoginError } from "@/util/common";
 export default {
   components: {
     MyAvatar,
@@ -152,19 +150,9 @@ export default {
     },
     async doRegister() {
       this.loading = true;
-      let platform;
-      // #ifdef H5
-      platform = 5
-      // #endif
-      // #ifdef MP-WEIXIN
-      platform = 6
-      // #endif
-      // #ifdef APP-PLUS
-      platform = uni.$u.os() === "ios" ? 1 : 2
-      // #endif
       const options = {
         verifyCode: this.codeValue,
-        platform,
+        platform: uni.$u.os() === "ios" ? 1 : 2,
         autoLogin: true,
         user: {
           ...this.userInfo,

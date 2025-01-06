@@ -1,5 +1,13 @@
 <template>
   <view class="contact_choose_container">
+    <u-modal
+      :show="showConfirmModal"
+      showCancelButton
+      asyncClose
+      @confirm="modalConfirm"
+      @cancel="() => (showConfirmModal = false)"
+      :content="`确定要发送${cardInfo.nickname}的名片吗？`"
+    />
     <custom-nav-bar title="联系人" />
 
     <view class="search_bar_wrap">
@@ -79,14 +87,14 @@
         </view>
       </template>
 
-      <choose-index-footer
-        :comfirmLoading="comfirmLoading"
-        v-if="showCheck"
-        @removeItem="updateCheckedUserOrGroup"
-        @confirm="confirm"
-        :choosedData="getCheckedInfo"
-      />
     </view>
+    <choose-index-footer
+      :comfirmLoading="comfirmLoading"
+      v-if="showCheck"
+      @removeItem="updateCheckedUserOrGroup"
+      @confirm="confirm"
+      :choosedData="getCheckedInfo"
+    />
   </view>
 </template>
 
@@ -110,9 +118,10 @@ import SettingItem from "@/components/SettingItem/index.vue";
 
 const showGroupTypes = [
   ContactChooseTypes.Mute,
+  ContactChooseTypes.ForWard,
   ContactChooseTypes.BatchForWard,
   ContactChooseTypes.MergeForWard,
-  ContactChooseTypes.ShareCard,
+  ContactChooseTypes.SendImage
 ];
 
 const showConversationTypes = [
@@ -121,6 +130,7 @@ const showConversationTypes = [
   ContactChooseTypes.MergeForWard,
   ContactChooseTypes.ShareCard,
   ContactChooseTypes.InviteMeeting,
+  ContactChooseTypes.SendImage
 ];
 
 export default {
@@ -248,7 +258,7 @@ export default {
     this.groupID = groupID;
     this.cardInfo = cardInfo ? JSON.parse(cardInfo) : {};
     this.mergeInfo = decodeURIComponent(mergeInfo);
-    this.forwardMessage = forwardMessage || "";
+    this.forwardMessage = decodeURIComponent(forwardMessage) || "";
     this.checkedUserIDList = checkedUserIDList
       ? JSON.parse(checkedUserIDList)
       : [];
@@ -358,6 +368,10 @@ export default {
 
       this.getCheckedInfo.map(async (item) => {
         let message = {};
+
+        if (this.type === ContactChooseTypes.SendImage) {
+          message = JSON.parse(this.forwardMessage)
+        }
 
         if (this.type === ContactChooseTypes.ForWard) {
           message = await IMSDK.asyncApi(
@@ -523,6 +537,7 @@ export default {
         let pages = getCurrentPages();
         let prevPage = pages[pages.length - 2];
         prevPage.$vm.scrollToBottom();
+        this.activeTab = 0;
         uni.navigateBack({
           delta: 1,
         });
@@ -602,7 +617,7 @@ export default {
 
       .member_list {
         flex: 1;
-        height: 100% !important;
+        height: 80% !important;
         /deep/uni-scroll-view {
           max-height: 100% !important;
         }

@@ -1,10 +1,11 @@
 <template>
   <view class="media_message_container" @click="clickMediaItem">
+    <!-- <view :style="{height:wrapperHeight}" class="media_message_container"> -->
     <u--image
       @load="onLoaded"
       :showLoading="true"
       width="120"
-      height="100%"
+      :height="maxHeight"
       mode="widthFix"
       :src="getImgUrl"
       @click="clickMediaItem"
@@ -26,6 +27,7 @@
 
 <script>
 import { secFormat } from "@/util/imCommon";
+import { myPreview } from "@/util/preview";
 import { MessageType } from "openim-uniapp-polyfill";
 export default {
   name: "",
@@ -54,17 +56,14 @@ export default {
       return secFormat(this.message.videoElem.duration);
     },
     maxHeight() {
-      let imageHeight = "";
-      if (this.isVideo) {
-        imageHeight = this.message.videoElem.snapshotHeight
-      }
-      if (!this.isVideo && this.message.pictureElem.sourcePicture) {
-        imageHeight = this.message.pictureElem.sourcePicture.height
-      }
-      if (!this.isVideo && this.message.pictureElem.snapshotPicture) {
-        imageHeight = this.message.pictureElem.snapshotPicture.height
-      }
-      return (imageHeight || 0) > 120 ? 120 : imageHeight;
+      const imageHeight = this.isVideo
+        ? this.message.videoElem.snapshotHeight
+        : this.message.pictureElem.sourcePicture.height;
+      const imageWidth = this.isVideo
+        ? this.message.videoElem.snapshotWidth
+        : this.message.pictureElem.sourcePicture.width;
+      const aspectRatio = imageHeight / imageWidth;
+      return 120 * aspectRatio;
     },
   },
   methods: {
@@ -76,39 +75,7 @@ export default {
       } else {
         const list = this.$store.getters.storePreviewImageList;
         const idx = list.findIndex((item) => item === this.message.pictureElem.sourcePicture.url);
-        uni.previewImage({
-          current: idx,
-          urls: list,
-          longPressActions :{
-            itemList: ['保存图片'],
-            success(data) {
-              uni.downloadFile({
-                url: list[data.index],
-                success(res){
-                  let url = res.tempFilePath
-                  uni.saveImageToPhotosAlbum({
-                    filePath: url,
-                    success() {
-                      uni.showToast({
-                        title:'已保存到系统相册',
-                        icon:"none"
-                      })
-                    },
-                    fail(err) {
-                      uni.showToast({
-                        title:'保存失败',
-                        icon:"none"
-                      })
-                    }
-                  })
-                }
-	            })
-            }
-          },
-          fail(err) {
-            console.log(err);
-          },
-        });
+        myPreview(idx, list)
       }
     },
     onLoaded() {

@@ -7,6 +7,8 @@ const state = {
   selfInfo: {},
   authData: {},
   isSyncing: false,
+  reinstall: false,
+  progress: 0,
   rootFontSize: uni.getStorageSync("RootFontSize") || "14px",
 };
 
@@ -23,6 +25,12 @@ const mutations = {
   },
   SET_IS_SYNCING(state, data) {
     state.isSyncing = data;
+  },
+  SET_REINSTALL(state, data) {
+    state.reinstall = data;
+  },
+  SET_PROGRESS(state, data) {
+    state.progress = data;
   },
   SET_ROOT_FONT_SIZE(state, data) {
     state.rootFontSize = data;

@@ -39,6 +39,7 @@ export default {
     getRenderList() {
       return this.storeHistoryMessageList.reverse();
     },
+
   },
   onLoad() {
     this.loadMessageList();
@@ -57,7 +58,6 @@ export default {
     },
     async loadMessageList(isLoadMore = false) {
       this.loading = true;
-      const lastMsgID = this.storeHistoryMessageList[0]?.clientMsgID;
       const options = {
         conversationID: this.storeCurrentConversation.conversationID,
         userID: "",

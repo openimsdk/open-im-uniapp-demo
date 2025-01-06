@@ -13,9 +13,6 @@ module.exports = (vm) => {
       if (config.custom.isIMApi) {
         config.baseURL = appConfig.getApiUrl();
       }
-      if (config.custom.isConfigApi) {
-        config.baseURL = appConfig.getConfigUrl();
-      }
       if (config.custom.isPgyerApi) {
         config.baseURL = "https://www.pgyer.com";
       }

@@ -4,6 +4,8 @@
 
     <view class="info_row">
       <user-info-row-item @click="toMark" lable="设置备注" arrow />
+      <user-info-row-item @click="toMore" lable="个人资料" arrow />
+      <user-info-row-item @click="toShare" lable="推荐给朋友" arrow />
     </view>
 
     <view class="info_row">
@@ -18,7 +20,7 @@
       </user-info-row-item>
     </view>
 
-    <view class="info_row">
+    <view v-if="isFriend" class="info_row">
       <u-button
         @click="() => (showConfirm = true)"
         type="error"
@@ -42,6 +44,7 @@
 import IMSDK from "openim-uniapp-polyfill";
 import CustomNavBar from "@/components/CustomNavBar/index.vue";
 import UserInfoRowItem from "../userCard/components/UserInfoRowItem.vue";
+import { ContactChooseTypes } from "@/constant";
 export default {
   components: {
     CustomNavBar,
@@ -55,6 +58,13 @@ export default {
     };
   },
   computed: {
+    isFriend() {
+      return (
+        this.$store.getters.storeFriendList.findIndex(
+          (friend) => friend.userID === this.sourceInfo.userID,
+        ) !== -1
+      );
+    },
     isBlacked() {
       return (
         this.$store.getters.storeBlackList.findIndex(
@@ -70,11 +80,21 @@ export default {
   methods: {
     change(isBlack) {
       this.blackLoading = true;
-      const funcName = isBlack
-        ? IMSDK.IMMethods.AddBlack
-        : IMSDK.IMMethods.RemoveBlack;
-      IMSDK.asyncApi(funcName, IMSDK.uuid(), this.sourceInfo.userID)
-        .catch((err) => this.showToast("操作失败"))
+      if (isBlack) {
+        IMSDK.asyncApi(IMSDK.IMMethods.AddBlack, IMSDK.uuid(), {
+          toUserID: this.sourceInfo.userID,
+          ex: "",
+        })
+          .catch(() => this.showToast("操作失败"))
+          .finally(() => (this.blackLoading = false));
+        return;
+      }
+      IMSDK.asyncApi(
+        IMSDK.IMMethods.RemoveBlack,
+        IMSDK.uuid(),
+        this.sourceInfo.userID
+      )
+        .catch(() => this.showToast("操作失败"))
         .finally(() => (this.blackLoading = false));
     },
     confirmRemove() {
@@ -99,6 +119,13 @@ export default {
         url: `/pages/common/markOrIDPage/index?isRemark=true&sourceInfo=${JSON.stringify(
           this.sourceInfo,
         )}`,
+      });
+    },
+    toShare() {
+      uni.navigateTo({
+        url: `/pages/common/contactChoose/index?type=${
+          ContactChooseTypes.ShareCard
+        }&cardInfo=${JSON.stringify(this.sourceInfo)}`,
       });
     },
     showToast(message) {

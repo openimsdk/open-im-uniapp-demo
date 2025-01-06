@@ -1,32 +1,72 @@
 <template>
-  <scroll-view :scroll-with-animation="withAnimation" @click="click" id="scroll_view" :style="{
-    backgroundSize: `100% ${bgHeight}`,
-  }" @scroll="throttleScroll" :scroll-top="scrollTop" scroll-y :scroll-into-view="scrollIntoView" upper-threshold="250"
-    @scrolltoupper="scrolltoupper">
-    <view id="scroll_wrap">
-      <view v-if="loadMoreStatus !== 'nomore'">
-        <u-loadmore nomoreText="" :status="loadMoreStatus" />
+  <scroll-view
+    :scroll-with-animation="withAnimation"
+    @click="click"
+    id="scroll_view"
+    :style="{
+      height: '1px',
+      backgroundImage: `url(${bgUrl})`,
+      backgroundSize: `100% ${bgHeight}`,
+    }"
+    @scroll="throttleScroll"
+    :scroll-top="scrollTop"
+    scroll-y
+    :scroll-into-view="scrollIntoView"
+    upper-threshold="250"
+    @scrolltoupper="scrolltoupper"
+  >
+    <!-- <view class="watermark-view">
+      <view v-for="i in 20" :key="i">
+        <view v-for="j in 20" :key="j">
+          <view
+            class="watermark"
+            :key="i + j"
+            :style="{ top: 150 * (i - 1) + 'px', left: 150 * (j - 1) + 'px' }"
+          >
+            {{ storeSelfInfo.nickname }}
+          </view>
+        </view>
       </view>
-      <view v-for="(item, index) in storeHistoryMessageList" :key="item.clientMsgID">
+    </view> -->
+    <view id="scroll_wrap">
+      <u-loadmore nomoreText="" :status="loadMoreStatus" />
+      <view
+        v-for="(item, index) in storeHistoryMessageList"
+        :key="item.clientMsgID"
+      >
         <view v-if="getTimeLine" class="time_gap_line">
           {{ getTimeLine(item, storeHistoryMessageList[index - 1]) }}
         </view>
-        <message-item-render :mutipleCheckVisible="mutipleCheckVisible" @messageItemRender="messageItemRender"
-          :source="item" :isSender="item.sendID === storeCurrentUserID" />
+        <message-item-render
+          :mutipleCheckVisible="mutipleCheckVisible"
+          :menuOutsideFlag="menuOutsideFlag"
+          @messageItemRender="messageItemRender"
+          :source="item"
+          :isSender="item.sendID === storeCurrentUserID"
+          @closeMune="closeMune"
+        />
         <view v-if="sendFailedDesc" class="time_gap_line send_failed_tip">
           {{ sendFailedDesc(item) }}
         </view>
       </view>
-      <view style="visibility: hidden; height: 12px" id="auchormessage_bottom_item"></view>
+      <view
+        style="visibility: hidden; height: 12px"
+        id="auchormessage_bottom_item"
+      ></view>
     </view>
-    <view v-show="getNewMesageCount && !needScoll">
-      <transition name="fade">
-        <view @click="scrollToBottom(false)" class="new_message_flag fade">
-          <image style="height: 10px; width: 11px" src="@/static/images/common_db_arrow.png" />
-          <text>{{ `${getNewMesageCount}条新消息` }}</text>
-        </view>
-      </transition>
-    </view>
+    <!-- <transition name="fade">
+      <view
+        @click="scrollToBottom(false)"
+        v-show="getNewMesageCount && !needScoll"
+        class="new_message_flag fade"
+      >
+        <image
+          style="height: 10px; width: 11px"
+          src="@/static/images/common_db_arrow.png"
+        />
+        <text>{{ `${getNewMesageCount}条新消息` }}</text>
+      </view>
+    </transition> -->
   </scroll-view>
 </template>
 
@@ -43,6 +83,7 @@ export default {
     MessageItemRender,
   },
   props: {
+    menuOutsideFlag: Number,
     mutipleCheckVisible: Boolean,
   },
   data() {
@@ -50,6 +91,9 @@ export default {
       scrollIntoView: "",
       scrollWithAnimation: false,
       scrollTop: 0,
+      old: {
+      	scrollTop: 0
+      },
       initFlag: true,
       isOverflow: false,
       needScoll: true,
@@ -58,6 +102,7 @@ export default {
         lastMinSeq: 0,
         loading: false,
       },
+      bgUrl: "",
       bgHeight: "",
     };
   },
@@ -112,6 +157,9 @@ export default {
       };
     },
   },
+  beforeMount() {
+    this.updateBgUrl();
+  },
   mounted() {
     this.loadMessageList();
   },
@@ -121,12 +169,14 @@ export default {
       if (
         this.initFlag &&
         clientMsgID ===
-        this.storeHistoryMessageList[this.storeHistoryMessageList.length - 1]
-          .clientMsgID
+          this.storeHistoryMessageList[this.storeHistoryMessageList.length - 1]
+            .clientMsgID
       ) {
         this.initFlag = false;
         setTimeout(() => this.scrollToBottom(true), 200);
+        // setTimeout(() => this.scrollToAnchor(`auchor${clientMsgID}`, false, true), 200)
         this.checkInitHeight();
+        // this.scrollToAnchor('message_bottom_item',true)
       }
     },
     async loadMessageList(isLoadMore = false) {
@@ -149,6 +199,7 @@ export default {
         }
       } catch (e) {
         console.log(e);
+        //TODO handle the exception
       }
       this.$nextTick(function () {
         if (isLoadMore && lastMsgID) {
@@ -162,6 +213,7 @@ export default {
     },
     onScroll(event) {
       const { scrollHeight, scrollTop } = event.target;
+      this.old.scrollTop = scrollTop
       this.needScoll =
         scrollHeight - scrollTop < uni.getWindowInfo().windowHeight * 1.2;
     },
@@ -189,10 +241,14 @@ export default {
           .in(this)
           .select("#scroll_wrap")
           .boundingClientRect((res) => {
-            this.scrollTop = res.height;
+            // let top = res.height - this.scrollViewHeight;
+            // if (top > 0) {
+            this.scrollTop = this.old.scrollTop
+            this.$nextTick(() => this.scrollTop = res.height);
             if (isInit) {
               this.$emit("initSuccess");
             }
+            // }
           })
           .exec();
       });
@@ -218,6 +274,15 @@ export default {
           .exec();
       });
     },
+    closeMune() {
+      this.$emit("closeMune");
+    },
+    updateBgUrl() {
+      const bgMap = uni.getStorageSync("IMBgMap") || {};
+      this.bgUrl =
+        bgMap[this.$store.getters.storeCurrentConversation.conversationID] ||
+        "";
+    },
   },
 };
 </script>
@@ -227,15 +292,20 @@ export default {
   flex: 1;
   background-repeat: no-repeat;
   position: relative;
-  /* #ifdef  H5 || APP-PLUS */
-  height: 1px;
-  /* #endif */
 }
 
 .watermark-view {
   width: 100%;
   height: 100%;
   position: fixed;
+}
+
+.watermark {
+  font-size: 16px; /* 水印文字大小 */
+  color: #f0f2f6; /* 水印文字颜色，使用透明度控制可见度 */
+  position: absolute; /* 水印相对定位 */
+  transform: rotate(-45deg);
+  pointer-events: none; /* 防止水印文字干扰交互 */
 }
 
 .uni-scroll-view {

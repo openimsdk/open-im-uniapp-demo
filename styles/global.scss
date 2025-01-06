@@ -4,21 +4,6 @@
   height: 100vh;
 }
 
-.wx-top {
-  /*  #ifdef  MP-WEIXIN  */
-  margin-top: 44px;
-  /*  #endif  */
-}
-
-/*  #ifdef  MP-WEIXIN  */
-.u-navbar__placeholder {
-  height: 135px !important;
-}
-.u-navbar__content {
-  height: 88px !important;
-}
-/*  #endif  */
-
 image {
   image-rendering: -moz-crisp-edges;
   image-rendering: -o-crisp-edges;

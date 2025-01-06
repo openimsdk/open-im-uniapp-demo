@@ -17,6 +17,7 @@ module.exports = (vm) => {
         // }
         // 如果需要catch返回，则进行reject
         // if (custom?.catch) {
+        console.error('http catch rejected', data)
         return Promise.reject(data);
         // } else {
         //     // 否则返回一个pending中的promise

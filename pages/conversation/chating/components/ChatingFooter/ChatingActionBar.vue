@@ -17,9 +17,21 @@
 </template>
 
 <script>
-import { ChatingFooterActionTypes } from "@/constant";
+import {
+  ChatingFooterActionTypes,
+  ContactChooseTypes,
+  PageEvents,
+} from "@/constant";
+import { AmapWebKey } from "@/common/config";
+import IMSDK, { IMMethods } from "openim-uniapp-polyfill";
+import { getPurePath } from "@/util/common";
+import {
+  gotoAppPermissionSetting,
+  requestAndroidPermission,
+} from "@/util/permission";
 
 export default {
+  components: {},
   data() {
     return {
       actionList: [
@@ -35,6 +47,30 @@ export default {
           title: "拍摄",
           icon: require("static/images/chating_action_camera.png"),
         },
+        // {
+        //   idx: 2,
+        //   type: ChatingFooterActionTypes.Call,
+        //   title: "视频通话",
+        //   icon: require("static/images/chating_action_call.png"),
+        // },
+        {
+          idx: 3,
+          type: ChatingFooterActionTypes.File,
+          title: "文件",
+          icon: require("static/images/chating_action_file.png"),
+        },
+        {
+          idx: 4,
+          type: ChatingFooterActionTypes.Card,
+          title: "名片",
+          icon: require("static/images/chating_action_card.png"),
+        },
+        {
+          idx: 5,
+          type: ChatingFooterActionTypes.Location,
+          title: "位置",
+          icon: require("static/images/chating_action_location.png"),
+        },
       ],
     };
   },
@@ -44,6 +80,75 @@ export default {
         case ChatingFooterActionTypes.Album:
         case ChatingFooterActionTypes.Camera:
           this.$emit("prepareMediaMessage", action.type);
+          break;
+        case ChatingFooterActionTypes.Call:
+          uni.$emit(PageEvents.RtcCall);
+          break;
+        case ChatingFooterActionTypes.Card:
+          uni.navigateTo({
+            url: `/pages/common/contactChoose/index?type=${ContactChooseTypes.Card}`,
+          });
+          break;
+        case ChatingFooterActionTypes.File:
+          if (uni.$u.os() != "ios") {
+            const flag = await requestAndroidPermission(
+              "android.permission.READ_EXTERNAL_STORAGE",
+            );
+            if (flag === -1) {
+              uni.$u.toast("您已禁止访问存储，请前往开启");
+              setTimeout(() => gotoAppPermissionSetting(), 250);
+              return;
+            }
+          }
+          IMSDK.pickFile().then(async (path) => {
+            console.log(path);
+            const idx = path.lastIndexOf("/");
+            const fileName = path.slice(idx + 1);
+            const message = await IMSDK.asyncApi(
+              IMMethods.CreateFileMessageFromFullPath,
+              IMSDK.uuid(),
+              {
+                filePath: getPurePath(path),
+                fileName,
+              },
+            );
+            this.$emit("sendMessage", message);
+          });
+          break;
+        case ChatingFooterActionTypes.Location:
+          uni.chooseLocation({
+            success: async (res) => {
+              if (res) {
+                const options = {
+                  name: res.name,
+                  latng: `${res.latitude},${res.longitude}`,
+                  addr: res.address,
+                  city: res.address,
+                  module: "locationPicker",
+                  latitude: res.latitude,
+                  longitude: res.longitude,
+                  url: `https://restapi.amap.com/v3/staticmap?size=600*300&markers=-1,https://cache.amap.com/lbs/static/cuntom_marker1.png,0:${res.longitude},${res.latitude}&key=${AmapWebKey}`,
+                };
+                const message = await IMSDK.asyncApi(
+                  IMMethods.CreateLocationMessage,
+                  IMSDK.uuid(),
+                  {
+                    description: JSON.stringify(options),
+                    longitude: res.longitude,
+                    latitude: res.latitude,
+                  },
+                );
+                this.$emit("sendMessage", message);
+              } else {
+                uni.$u.toast("获取位置失败");
+              }
+            },
+            fail: ({ errMsg }) => {
+              if (!errMsg.includes("cancel")) {
+                uni.$u.toast("获取位置失败");
+              }
+            },
+          });
           break;
         default:
           break;

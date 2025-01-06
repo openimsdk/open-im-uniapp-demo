@@ -4,6 +4,7 @@ export default {
   storeUnReadCount: (state) => state.conversation.unReadCount,
   storeCurrentGroup: (state) => state.conversation.currentGroup,
   storeCurrentMemberInGroup: (state) => state.conversation.currentMemberInGroup,
+  storeRevokeMap: (state) => state.conversation.revokeMap,
   storeFriendList: (state) => state.contact.friendList,
   storeBlackList: (state) => state.contact.blackList,
   storeGroupList: (state) => state.contact.groupList,
@@ -21,8 +22,9 @@ export default {
   storeQuoteMessage: (state) => state.message.quoteMessage,
   storeSelfInfo: (state) => state.user.selfInfo,
   storeCurrentUserID: (state) => state.user.selfInfo.userID,
-  storeAppConfig: (state) => state.user.appConfig,
   storeIsSyncing: (state) => state.user.isSyncing,
+  storeReinstall: (state) => state.user.reinstall,
+  storeProgress: (state) => state.user.progress,
   storeAuthData: (state) => state.user.authData,
   storeRootFontSize: (state) => state.user.rootFontSize,
 };

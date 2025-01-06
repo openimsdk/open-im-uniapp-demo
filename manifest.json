@@ -118,7 +118,7 @@
             "Tuoyun-OpenIMSDK" : {
                 "__plugin_info__" : {
                     "name" : "OpenIMSDK",
-                    "description" : "IM",
+                    "description" : "OpenIM SDK for uni-app advance v3.5.1-alpha.3-e-v1.4.1",
                     "platforms" : "Android,iOS",
                     "url" : "",
                     "android_package_name" : "",

@@ -45,14 +45,24 @@
       </view>
 
       <group-member-row
+        v-if="isJoinGroup"
         :isNomal="!isAdmin && !isOwner"
         :groupID="storeCurrentConversation.groupID"
         :memberCount="storeCurrentGroup.memberCount"
         :groupMemberList="groupMemberList"
       />
+      <view v-if="isJoinGroup" class="setting_row">
+        <setting-item
+          v-if="isOwner || isAdmin"
+          @click="toGroupManage"
+          title="群管理"
+          :border="false"
+        />
+      </view>
 
       <view class="setting_row">
         <setting-item
+          v-if="isJoinGroup"
           danger
           @click="() => (confirmType = isOwner ? 'Dismiss' : 'Quit')"
           :title="isOwner ? '解散群聊' : '退出群聊'"
@@ -71,23 +81,31 @@
     </view>
 
     <u-toast ref="uToast"></u-toast>
+    <action-sheet
+      :groupID="storeCurrentConversation.groupID"
+      :visible.sync="actionSheetVisible"
+    />
   </view>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
+import { GroupMemberListTypes } from "@/constant";
 import IMSDK, {
   GroupMemberRole,
+  GroupStatus,
+  GroupVerificationType,
   IMMethods,
+  MessageReceiveOptType,
 } from "openim-uniapp-polyfill";
 import CustomNavBar from "@/components/CustomNavBar/index.vue";
 import MyAvatar from "@/components/MyAvatar/index.vue";
 import SettingItem from "@/components/SettingItem/index.vue";
 import GroupMemberRow from "./components/GroupMemberRow.vue";
-import { getPurePath, uploadForm } from "@/util/common";
+import ActionSheet from "./components/ActionSheet.vue";
+import { getPurePath } from "@/util/common";
 
 const ConfirmTypes = {
-  Clear: "Clear",
   Dismiss: "Dismiss",
   Quit: "Quit",
 };
@@ -98,10 +116,12 @@ export default {
     MyAvatar,
     SettingItem,
     GroupMemberRow,
+    ActionSheet,
   },
   props: {},
   data() {
     return {
+      actionSheetVisible: false,
       confirmType: null,
       switchLoading: {
         pin: false,
@@ -109,10 +129,20 @@ export default {
         mute: false,
       },
       groupMemberList: [],
+      isJoinGroup: true
     };
   },
   onShow() {
     this.getGroupMemberList();
+    if (this.storeCurrentConversation.groupID) {
+      IMSDK.asyncApi(
+        IMMethods.IsJoinGroup,
+        IMSDK.uuid(),
+        this.storeCurrentConversation.groupID
+      ).then((res) => {
+        this.isJoinGroup = res.data
+      });
+    }
   },
   watch: {
     "storeCurrentGroup.memberCount"() {
@@ -140,8 +170,22 @@ export default {
     isAdmin() {
       return this.storeCurrentMemberInGroup.roleLevel === GroupMemberRole.Admin;
     },
-    getGroupTypeStr() {
-      return "工作群";
+    getGroupVerStr() {
+      if (
+        this.storeCurrentGroup.needVerification ===
+        GroupVerificationType.ApplyNeedInviteNot
+      ) {
+        return "群成员邀请无需验证";
+      }
+      if (
+        this.storeCurrentGroup.needVerification === GroupVerificationType.AllNot
+      ) {
+        return "允许所有人加群";
+      }
+      return "需要发送验证消息";
+    },
+    isAllMuted() {
+      return this.storeCurrentGroup.status === GroupStatus.Muted;
     },
   },
   methods: {
@@ -159,6 +203,11 @@ export default {
         .catch((err) => {
           console.log(err);
         });
+    },
+    toGroupManage() {
+      uni.navigateTo({
+        url: "/pages/conversation/groupManage/index",
+      });
     },
     toUpdateGroupName() {
       if (!this.isAdmin && !this.isOwner) {
@@ -189,6 +238,13 @@ export default {
         },
       });
     },
+    showActionSheet() {
+      if (!this.isAdmin && !this.isOwner) {
+        return;
+      }
+
+      this.actionSheetVisible = true;
+    },
     updateGroupAvatar() {
       if (!this.isAdmin && !this.isOwner) {
         return;
@@ -197,23 +253,13 @@ export default {
       uni.chooseImage({
         count: 1,
         sizeType: ["compressed"],
-        success: async ({ tempFilePaths, tempFiles }) => {
+        success: async ({ tempFilePaths }) => {
           const path = tempFilePaths[0];
           const nameIdx = path.lastIndexOf("/") + 1;
           const typeIdx = path.lastIndexOf(".") + 1;
-          let fileName = path.slice(nameIdx);
-          let fileType = path.slice(typeIdx);
-
-          if (uni.getSystemInfoSync().uniPlatform !== 'app') {
-            fileType = tempFiles[0].type
-            fileName = tempFiles[0].name
-          }
-
+          const fileName = path.slice(nameIdx);
+          const fileType = path.slice(typeIdx);
           try {
-            // #ifdef MP-WEIXIN
-            const url = await uploadForm(tempFiles[0])
-            // #endif
-            // #ifdef APP-PLUS || H5
             const {
               data: { url },
             } = await IMSDK.asyncApi(IMMethods.UploadFile, IMSDK.uuid(), {
@@ -221,9 +267,7 @@ export default {
               name: fileName,
               contentType: fileType,
               uuid: IMSDK.uuid(),
-              file: tempFiles[0]
             });
-            // #endif
             await IMSDK.asyncApi(IMSDK.IMMethods.SetGroupInfo, IMSDK.uuid(), {
               groupID: this.storeCurrentConversation.groupID,
               faceURL: url,
@@ -247,18 +291,13 @@ export default {
       IMSDK.asyncApi(funcName, IMSDK.uuid(), sourceID)
         .then(() => {
           uni.$u.toast("操作成功");
-          if (this.confirmType === ConfirmTypes.Clear) {
-            this.$store.commit("message/SET_HISTORY_MESSAGE_LIST", []);
-            this.$store.commit("message/SET_PREVIEW_IMAGE_LIST", []);
-          } else {
-            setTimeout(
-              () =>
-                uni.switchTab({
-                  url: "/pages/conversation/conversationList/index",
-                }),
-              250,
-            );
-          }
+          setTimeout(
+            () =>
+              uni.switchTab({
+                url: "/pages/conversation/conversationList/index",
+              }),
+            250,
+          );
         })
         .catch(() => uni.$u.toast("操作失败"))
         .finally(() => (this.confirmType = null));

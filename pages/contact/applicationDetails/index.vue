@@ -235,7 +235,7 @@ export default {
         color: $uni-text-color;
 
         .group_name {
-          @include nomalEllipsis();
+          @nomalEllipsis();
           max-width: 400rpx;
           color: $uni-color-primary;
           margin-left: 12rpx;

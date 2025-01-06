@@ -7,6 +7,7 @@
       :lazyLoad="false"
       :content="getContent"
     />
+    <!-- <u-parse :imgOptions="false" @navigate="navigate" :content="getContent" /> -->
   </view>
 </template>
 
@@ -37,6 +38,7 @@ export default {
   },
   methods: {
     navigate(link) {
+      // console.log(link);
       if (link.innerText.includes("@")) {
         this.$emit("showInfo", link.href);
       }

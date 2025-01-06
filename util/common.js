@@ -1,55 +1,11 @@
 import PinYin from "./pinyin";
-import store from "@/store";
-import IMSDK from "openim-uniapp-polyfill";
-import { initiateFormData, completeFormData } from "@/api/file";
 
-export const getFileSize = (path) => {
-  return new Promise(async (resolve, reject) => {
-    uni.getFileInfo({
-      filePath: path,
-      success: function (res) {
-        resolve(res.size);
-      },
-      fail: function (error) {
-        reject(error);
-      }
-    });
-  })
-};
-
-export const uploadForm = (file) => {
-  return new Promise(async (resolve, reject) => {
-    const data = await initiateFormData({
-      name: `${store.getters.storeSelfInfo.userID}/${new Date().getTime()}.${getFileType(file.path)}`,
-      size: file.size,
-      contentType: getFileType(file.path),
-      group: ""
-    })
-    const imageID = data.id
-    uni.uploadFile({
-      url: data.url,
-      filePath: file.path,
-      name: 'file',
-      formData: {
-        ...data.formData
-      },
-      header: {
-        token: uni.getStorageSync("IMToken"),
-        operationID: IMSDK.uuid(),
-      },
-      success: async () => {
-        const { url } = await completeFormData({
-          id: imageID
-        })
-        resolve(url);
-      },
-      fail: (err) => {
-        reject(err);
-      },
-    });
-  })
-}
-
+import excel from "static/images/file_message/file_excel.png";
+import ppt from "static/images/file_message/file_ppt.png";
+import word from "static/images/file_message/file_word.png";
+import zip from "static/images/file_message/file_zip.png";
+import pdf from "static/images/file_message/file_pdf.png";
+import unknown from "static/images/file_message/file_unknown.png";
 
 export const html2Text = (html) => {
   if (!html) {
@@ -72,7 +28,7 @@ export const parseBr = (content) => {
 };
 
 export const formatInputHtml = (html) => {
-  let atUserList = [];
+  let atUsersInfo = [];
   let text = html2Text(html);
   const imgReg = new RegExp("(i?)(<img)([^>]+>)", "gmi");
   const customDataReg = /data-custom=".+"/;
@@ -82,7 +38,7 @@ export const formatInputHtml = (html) => {
         .match(customDataReg)[0]
         .slice(13, -1)
         .split("&amp;");
-      atUserList.push({
+      atUsersInfo.push({
         atUserID: atInfoArr[0].slice(7),
         groupNickname: atInfoArr[1].slice(15),
       });
@@ -95,7 +51,7 @@ export const formatInputHtml = (html) => {
   });
   return {
     text,
-    atUserList,
+    atUsersInfo,
   };
 };
 
@@ -125,7 +81,7 @@ export const getDbDir = () => {
         },
         (error) => {
           reject(error);
-        }
+        },
       );
     });
   });
@@ -242,77 +198,6 @@ export const getPurePath = (path) => {
   return path;
 };
 
-export const getPicInfo = (file) => {
-  return new Promise((resolve, reject) => {
-    let _URL;
-    if (window) {
-      _URL = window.URL || window.webkitURL;
-    } else {
-      uni.getImageInfo({
-        src: file.path,
-        success: function (image) {
-          resolve({ width: image.width, height: image.height });
-        },
-      });
-      return;
-    }
-    const img = new Image();
-    img.onload = function () {
-      resolve(img);
-    };
-    img.src = _URL.createObjectURL(file);
-  });
-};
-
-export const getFileType = (name) => {
-  const idx = name.lastIndexOf(".");
-  return name.slice(idx + 1);
-};
-
-export const base64toFile = (base64Str) => {
-  var arr = base64Str.split(","),
-    fileType = arr[0].match(/:(.*?);/)[1],
-    bstr = atob(arr[1]),
-    n = bstr.length,
-    u8arr = new Uint8Array(n);
-
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
-
-  return new File([u8arr], `screenshot${Date.now()}.png`, {
-    type: fileType,
-  });
-};
-
-export const getVideoSnshot = (item) => {
-  return new Promise((reslove, reject) => {
-    var video = document.createElement("VIDEO");
-    video.setAttribute("autoplay", "autoplay");
-    video.setAttribute("muted", "muted");
-    video.innerHTML = "<source src=" + item + ' type="audio/mp4">';
-    var canvas = document.createElement("canvas");
-    var ctx = canvas.getContext("2d");
-    video.addEventListener("canplay", function () {
-      var anw = document.createAttribute("width");
-      //@ts-ignore
-      anw.nodeValue = video.videoWidth;
-      var anh = document.createAttribute("height");
-      //@ts-ignore
-      anh.nodeValue = video.videoHeight;
-      canvas.setAttributeNode(anw);
-      canvas.setAttributeNode(anh);
-      //@ts-ignore
-      ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-      var base64 = canvas.toDataURL("image/png");
-      //@ts-ignore
-      video.pause();
-      const file = base64toFile(base64);
-      reslove(file);
-    });
-  });
-};
-
 export const filterEmptyValue = (obj) => {
   for (let key in obj) {
     if (obj[key] === "") {
@@ -338,25 +223,25 @@ export const checkLoginError = (error) => {
     case 20003:
       return "手机号已经注册";
     case 20004:
-      return "账号已经注册";
+      return "账号已注册";
     case 20005:
-      return "频繁获取验证码";
+      return "操作过于频繁，请稍后再试";
     case 20006:
       return "验证码错误";
     case 20007:
       return "验证码过期";
     case 20008:
-      return "验证码失败次数过多";
+      return "验证码错误次数超过限制，请稍后再试";
     case 20009:
-      return "验证码已经使用";
+      return "验证码已被使用";
     case 20010:
-      return "邀请码已经使用";
+      return "邀请码已被使用";
     case 20011:
       return "邀请码不存在";
     case 20012:
-      return "限制登录注册";
-    case 20013:
-      return "拒绝添加好友";
+      return "操作限制";
+    case 20014:
+      return "账号已注册";
     default:
       return "操作失败";
   }
@@ -450,16 +335,53 @@ export const copyFileToDoc = (from, to = "background") => {
                   (movedEntry) => {
                     resolve(movedEntry.fullPath);
                   },
-                  (err) => reject(err)
+                  (err) => reject(err),
                 );
               },
-              (err) => reject(err)
+              (err) => reject(err),
             );
           },
-          (err) => reject(err)
+          (err) => reject(err),
         );
       },
-      (err) => reject(err)
+      (err) => reject(err),
     );
   });
+};
+
+export const getFileType = (name) => {
+  const idx = name.lastIndexOf(".");
+  return name.slice(idx + 1);
+};
+
+export const getFileIcon = (fileName) => {
+  const fileType = getFileType(fileName);
+
+  const wordType = ["doc", "docx", "docm", "dot"];
+
+  const pdfType = ["pdf"];
+
+  const pptType = ["pptx", "pptm", "ppt"];
+
+  const excelType = ["xlsx", "xlsm", "xlsb", "xltx"];
+
+  const zipType = ["zip", "rar", "tar", "gz"];
+
+  if (wordType.includes(fileType)) {
+    return word;
+  }
+  if (pdfType.includes(fileType)) {
+    return pdf;
+  }
+  if (pptType.includes(fileType)) {
+    return ppt;
+  }
+  if (excelType.includes(fileType)) {
+    return excel;
+  }
+  if (zipType.includes(fileType)) {
+    return zip;
+  }
+
+  return unknown;
 };

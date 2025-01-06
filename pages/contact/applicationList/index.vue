@@ -1,6 +1,12 @@
 <template>
   <view class="application_list_container">
     <custom-nav-bar :title="isGroupApplication ? '新的群聊' : '新的好友'" />
+    <!-- <view class="search_bar_wrap">
+			<u-search disabled class="search_bar" shape="square" :placeholder="`通过${isGroupApplication ? '群' : '用户'}ID搜索添加`"
+				:showAction="false" @click="toSearch" />
+		</view> -->
+
+    <!-- <u-tabs :scrollable="false" :list="tabList" @click="clickTab"></u-tabs> -->
 
     <view
       class="pane_row"
@@ -34,7 +40,21 @@
           <text class="empty_text">暂无数据</text>
         </view>
       </view>
+
+      <!-- <view class="pane_content">
+				<u-list v-if="getSendRenderData.length>0" class="application_list">
+					<u-list-item v-for="application in getSendRenderData"
+						:key="application[!isGroupApplication ? 'toUserID' : 'groupID']">
+						<application-item :application="application" />
+					</u-list-item>
+				</u-list>
+				<u-empty v-else mode="list" />
+			</view> -->
     </view>
+
+    <!-- <view v-if="isRecv ? getRecvRenderData.length>0 : getSendRenderData.length>0" class="view_all">
+			<u-button @click="previewAll" type="primary" :text="`查看全部${isGroupApplication ? '群通知' : '好友请求'}`"></u-button>
+		</view> -->
   </view>
 </template>
 

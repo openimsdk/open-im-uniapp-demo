@@ -39,3 +39,19 @@ export const noticeMessageTypes = [
   MessageType.GroupNameUpdated,
   MessageType.BurnMessageChange,
 ];
+
+export const GroupSystemMessageTypes = [
+  MessageType.GroupCreated,
+  MessageType.GroupInfoUpdated,
+  MessageType.MemberQuit,
+  MessageType.GroupOwnerTransferred,
+  MessageType.MemberKicked,
+  MessageType.MemberInvited,
+  MessageType.MemberEnter,
+  MessageType.GroupDismissed,
+  MessageType.GroupMemberMuted,
+  MessageType.GroupMuted,
+  MessageType.GroupCancelMuted,
+  MessageType.GroupMemberCancelMuted,
+  MessageType.GroupNameUpdated
+];

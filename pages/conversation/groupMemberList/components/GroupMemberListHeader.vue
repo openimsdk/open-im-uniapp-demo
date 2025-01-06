@@ -1,5 +1,18 @@
 <template>
   <custom-nav-bar @leftClick="leftClick" :title="getTitle">
+    <!-- <view @click="rightClick" class="more_container" :style="{'visibility': !checkVisible && !isTransfer ? 'visible' : 'hidden' }" slot="more">
+			<u-icon class="more_dot" name="more-dot-fill" size="23" color="#0C1C33" />
+			<u-transition :show="moreMenuVisible">
+				<view class="more_menu">
+					<view @click="inviteMember" class="menu_item">
+						<text>邀请群员</text>
+					</view>
+					<view v-if="!isNomal" @click="removeMember" class="menu_item">
+						<text>移除群员</text>
+					</view>
+				</view>
+			</u-transition>
+		</view> -->
   </custom-nav-bar>
 </template>
 

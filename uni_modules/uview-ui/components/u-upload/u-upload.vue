@@ -18,6 +18,25 @@
 							height: $u.addUnit(height)
 						}]"
 					/>
+					<view  v-else-if="(item.type && item.type === 'video')"
+					 class="u-upload__wrap__preview__image"
+					  :style="[{
+							width: $u.addUnit(width),
+							height: $u.addUnit(height)
+						}]">
+							<image
+							style="position: absolute;z-index: 1;"
+							:src="item.thumb"
+							@tap="onPreviewVideo(item)"
+							:style="[{
+								width: $u.addUnit(width),
+								height: $u.addUnit(height)
+							}]"
+						/>
+						<u-icon style="position: absolute;z-index: 2;  top: 50%;left: 50%;transform: translate(-50%, -50%); "
+						 @tap="onPreviewVideo(item)" name="play-circle" color="#ffffff" size="34"></u-icon>
+					</view>
+					
 					<view
 					    v-else
 					    class="u-upload__wrap__preview__other"
@@ -120,7 +139,15 @@
 				</view>
 			</template>
 		</view>
-
+		<!-- 全屏预览视频 -->
+		<view class="preview-full" v-if="previewVideoSrc!=''">
+			<video :autoplay="true" :src="previewVideoSrc" :show-fullscreen-btn="false">
+				<!-- 退出全屏预览按钮 -->
+				<cover-view class="preview-full-close" @click="previewVideoClose"> ×
+				</cover-view>
+			</video>
+		</view>
+		<!-- <video src="https://www.w3school.com.cn/i/movie.mp4" autoplay="true"></video> -->
 	</view>
 </template>
 
@@ -174,6 +201,7 @@
 				// #endif
 				lists: [],
 				isInCount: true,
+				previewVideoSrc:""
 			}
 		},
 		watch: {
@@ -319,26 +347,28 @@
 				});
 			},
 			onPreviewVideo(event) {
-				if (!this.data.previewFullImage) return;
-				const {
-					index
-				} = event.currentTarget.dataset;
-				const {
-					lists
-				} = this.data;
-				wx.previewMedia({
-					sources: lists
-						.filter((item) => isVideoFile(item))
-						.map((item) =>
-							Object.assign(Object.assign({}, item), {
-								type: 'video'
-							})
-						),
-					current: index,
-					fail() {
-						uni.$u.toast('预览视频失败')
-					},
-				});
+				// if (!this.data.previewFullImage) return;
+				console.log("event",event)
+				this.previewVideoSrc=event.url
+				// const {
+				// 	lists
+				// } = this.data;
+				// wx.previewMedia({
+				// 	sources: lists
+				// 		.filter((item) => isVideoFile(item))
+				// 		.map((item) =>
+				// 			Object.assign(Object.assign({}, item), {
+				// 				type: 'video'
+				// 			})
+				// 		),
+				// 	current: index,
+				// 	fail() {
+				// 		uni.$u.toast('预览视频失败')
+				// 	},
+				// });
+			},
+			previewVideoClose(){
+				this.previewVideoSrc=""
 			},
 			onClickPreview(event) {
 				const {
@@ -355,6 +385,36 @@
 </script>
 
 <style lang="scss" scoped>
+	.preview-full {
+			position: fixed;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			width: 100%;
+			height: 100%;
+			z-index: 1002;
+		}
+		
+		.preview-full video {
+			width: 100%;
+			height: 100%;
+			z-index: 1002;
+		}
+		
+		.preview-full-close {
+			position: fixed;
+			right: 16px;
+			top: 20px;
+			width: 40px;
+			height: 40px;
+			line-height: 30px;
+			text-align: center;
+			z-index: 1003;
+			color: #fff;
+			font-size: 32px;
+			font-weight: bold;
+		}
+	
 	@import '../../libs/css/components.scss';
 	$u-upload-preview-border-radius: 2px !default;
 	$u-upload-preview-margin: 0 8px 8px 0 !default;

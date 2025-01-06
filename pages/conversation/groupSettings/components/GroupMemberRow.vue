@@ -1,5 +1,12 @@
 <template>
   <view @click="toMemberList" class="member_row">
+    <!-- <view class="member_title">
+      <text>群成员</text>
+      <view class="member_desc">
+        <text>{{ `${memberCount}人` }}</text>
+        <u-icon name="arrow-right" color="#999" size="16" />
+      </view>
+    </view> -->
     <view class="member_list">
       <view class="member_item" v-for="(member, index) in groupMemberList">
         <my-avatar

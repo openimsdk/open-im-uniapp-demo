@@ -4,6 +4,7 @@
       <u-icon name="arrow-left" bold size="22" @click="back" />
     </view>
     <view class="title" v-if="isRegister">新用户注册</view>
+    <view class="title" v-else>忘记密码</view>
     <u-form
       labelPosition="top"
       :model="userInfo"
@@ -35,7 +36,7 @@
         type="primary"
         :disabled="isRegister && !checked[0]"
       >
-        下一步
+        {{ isRegister ? "下一步" : "获取验证码" }}
       </u-button>
     </view>
     <AreaPicker ref="AreaPicker" @chooseArea="chooseArea" />
@@ -57,7 +58,7 @@ export default {
         phoneNumber: "",
         email: "",
         areaCode: "86",
-        invitationCode: null,
+        invitationCode: "",
       },
       checked: [true],
       rules: {

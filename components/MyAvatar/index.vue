@@ -48,16 +48,16 @@ export default {
   },
   computed: {
     getAvatarUrl() {
-      if (this.isNotify) {
-        return defaultNotifyIcon;
-      }
       if (this.src) {
         return this.src;
       }
       if (this.isGroup) {
         return defaultGroupIcon;
       }
-      this.avatarText = this.desc ? this.desc.slice(0, 1) : "";
+      if (this.isNotify) {
+        return defaultNotifyIcon;
+      }
+      this.avatarText = this.desc ? this.desc.slice(0, 1) : "未知";
       return "";
     },
     getDdefaultUrl() {
@@ -66,7 +66,7 @@ export default {
   },
   methods: {
     errorHandle() {
-      this.avatarText = this.desc ? this.desc.slice(0, 1) : "";
+      this.avatarText = this.desc ? this.desc.slice(0, 1) : "未知";
     },
     redirectShow() {
       if (this.avatarText) {

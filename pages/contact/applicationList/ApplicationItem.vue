@@ -198,6 +198,8 @@ export default {
 
       .title {
         margin-bottom: 20rpx;
+        word-break: break-all;
+        width: 75%;
 
         .group_name {
           margin-left: 12rpx;

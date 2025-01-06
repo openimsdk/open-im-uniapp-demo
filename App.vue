@@ -7,41 +7,41 @@ import IMSDK, {
   SessionType,
 } from "openim-uniapp-polyfill";
 import config from "./common/config";
-import { getDbDir, toastWithCallback } from "@/util/common.js";
-import { conversationSort } from "@/util/imCommon";
+import { getDbDir, Igexin, toastWithCallback } from "@/util/common.js";
+import { conversationSort, parseMessageByType, prepareConversationState } from "@/util/imCommon";
 import { PageEvents, UpdateMessageTypes } from "@/constant";
 import { checkUpdateFormPgyer } from "@/api/checkUpdate";
 import NotificationUtil from "./util/notification";
+import newMessage from "@/static/audio/newMessage.wav";
 
 let cacheConversationList = [];
 let updateDownloadTask = null;
 let notificationIntance = null;
 let pausing = false;
+let innerAudioContext;
+let notification
 
 export default {
   onLaunch: function () {
     console.log("App Launch");
     // Igexin.turnOnPush();
+    innerAudioContext = uni.createInnerAudioContext();
+    innerAudioContext.autoplay = false;
+    innerAudioContext.src = newMessage;
+    notification = uni.requireNativePlugin('Tuoyun-OpenIMSDK-Notification');
     this.launchCheck();
     this.setGlobalIMlistener();
     this.setPageListener();
     this.tryLogin();
-    console.warn(`建议开发前先查看文档（https://docs.openim.io/zh-Hans/sdks/quickstart/uniapp）。必须先按照文档配置，否则无法运行！`);
-    // #ifdef H5 || MP-WEIXIN
-    console.warn(`该客户端目前是3.8.2版本，使用了 JSSDK 直接连接到 im-server，请确保im-server版本大于 3.8.2`);
-    // #endif
+    // this.checkVersion();
   },
   onShow: function () {
     console.log("App Show");
-    // #ifdef APP-PLUS
     IMSDK.asyncApi(IMSDK.IMMethods.SetAppBackgroundStatus, IMSDK.uuid(), false);
-    // #endif
   },
   onHide: function () {
     console.log("App Hide");
-    // #ifdef APP-PLUS
     IMSDK.asyncApi(IMSDK.IMMethods.SetAppBackgroundStatus, IMSDK.uuid(), true);
-    // #endif
   },
   computed: {
     ...mapGetters([
@@ -53,6 +53,7 @@ export default {
       "storeRecvGroupApplications",
       "storeHistoryMessageList",
       "storeIsSyncing",
+      "storeGroupList"
     ]),
     contactBadgeRely() {
       return {
@@ -101,35 +102,24 @@ export default {
           uni.$u.route("/pages/login/index");
         });
       };
-      IMSDK.subscribe(IMSDK.IMEvents.OnConnectFailed, ({ errCode }) => {
-        console.log('OnConnectFailed', errCode)
-      });
-      IMSDK.subscribe(IMSDK.IMEvents.OnConnecting, (data) => {
-        console.log('OnConnecting', data)
-      });
-      IMSDK.subscribe(IMSDK.IMEvents.OnConnectSuccess, (data) => {
-        console.log('OnConnectSuccess', data)
-      });
       IMSDK.subscribe(IMSDK.IMEvents.OnKickedOffline, (data) => {
-        console.log('OnKickedOffline', data)
         kickHander("您的账号在其他设备登录，请重新登陆！");
       });
       IMSDK.subscribe(IMSDK.IMEvents.OnUserTokenExpired, (data) => {
-        console.log('OnUserTokenExpired', data)
         kickHander("您的登录已过期，请重新登陆！");
       });
-      IMSDK.subscribe('onUserTokenInvalid', (data) => {
+      IMSDK.subscribe(IMSDK.IMEvents.OnUserTokenInvalid, (data) => {
         kickHander("您的登录已无效，请重新登陆！");
       });
 
       // sync
-      const syncStartHandler = () => {
-        uni.showLoading({
-          title: "同步中",
-          mask: true,
-        });
+      const syncStartHandler = ({ data }) => {
         this.$store.commit("user/SET_IS_SYNCING", true);
+        this.$store.commit("user/SET_REINSTALL", data);
       };
+      const syncProgressHandler = ({ data }) => {
+        this.$store.commit("user/SET_PROGRESS", data);
+      }
       const syncFinishHandler = () => {
         uni.hideLoading();
         this.$store.dispatch("conversation/getConversationList");
@@ -148,12 +138,18 @@ export default {
       IMSDK.subscribe(IMSDK.IMEvents.OnSyncServerStart, syncStartHandler);
       IMSDK.subscribe(IMSDK.IMEvents.OnSyncServerFinish, syncFinishHandler);
       IMSDK.subscribe(IMSDK.IMEvents.OnSyncServerFailed, syncFailedHandler);
+      IMSDK.subscribe(IMSDK.IMEvents.OnSyncServerProgress, syncProgressHandler);
 
       // self
       const selfInfoUpdateHandler = ({ data }) => {
         this.$store.commit("user/SET_SELF_INFO", {
           ...this.storeSelfInfo,
           ...data,
+        });
+        this.updateMessageNicknameAndFaceUrl({
+          sendID: data.userID,
+          senderNickname: data.nickname,
+          senderFaceUrl: data.faceURL,
         });
       };
 
@@ -252,8 +248,16 @@ export default {
           clientMsgID: revokedMessage.clientMsgID
         })
       };
+      const inputStatusChanged = ({ data }) => {
+        if (data.userID === this.storeCurrentConversation.userID && data.conversationID === this.storeCurrentConversation.conversationID) {
+          if (data.platformIDs.length > 0) {
+            uni.$emit(PageEvents.TypingUpdate);
+          }
+        }
+      }
 
       IMSDK.subscribe(IMSDK.IMEvents.OnRecvNewMessages, newMessagesHandler);
+      IMSDK.subscribe('onInputStatusChanged', inputStatusChanged);
       IMSDK.subscribe(
         IMSDK.IMEvents.OnRecvC2CReadReceipt,
         c2cReadReceiptHandler,
@@ -269,7 +273,7 @@ export default {
 
       // friend
       const friendInfoChangeHandler = ({ data }) => {
-        console.log(data);
+        uni.$emit(IMSDK.IMEvents.OnFriendInfoChanged, { data })
         if (data.userID === this.storeCurrentConversation?.userID) {
           this.updateMessageNicknameAndFaceUrl({
             sendID: data.userID,
@@ -333,6 +337,7 @@ export default {
         });
       };
       const groupMemberInfoChangedHandler = ({ data }) => {
+        uni.$emit(IMSDK.IMEvents.OnGroupMemberInfoChanged, { data })
         if (data.groupID === this.storeCurrentConversation?.groupID) {
           this.updateMessageNicknameAndFaceUrl({
             sendID: data.userID,
@@ -500,46 +505,12 @@ export default {
           url: "/pages/conversation/conversationList/index?isRedirect=true",
         });
       };
-      let platformID;
-      // #ifdef H5
-      platformID = 5
-      // #endif
-      // #ifdef MP-WEIXIN
-      platformID = 6
-      // #endif
-			// #ifdef H5 || MP-WEIXIN
-			const IMToken = uni.getStorageSync("IMToken");
-			const IMUserID = uni.getStorageSync("IMUserID");
-			 if (IMToken && IMUserID) {
-				IMSDK.asyncApi(IMSDK.IMMethods.Login, IMSDK.uuid(), {
-					userID: IMUserID,
-					token: IMToken,
-					platformID,
-					wsAddr: config.getWsUrl(),
-					apiAddr: config.getApiUrl(),
-				})
-					.then((res) => {
-						initStore()
-						console.log("success", res);
-					})
-					.catch((err) => {
-						console.log("error", err);
-						uni.removeStorage({
-							key: "IMToken",
-						});
-						uni.removeStorage({
-							key: "BusinessToken",
-						});
-					});
-			}
-			// #endif
-			// #ifdef APP-PLUS
       getDbDir()
         .then(async (path) => {
           const flag = await IMSDK.asyncApi(IMMethods.InitSDK, IMSDK.uuid(), {
-            platformID: uni.$u.os() === "ios" ? 1 : 2,
-            apiAddr: config.getApiUrl(),
-            wsAddr: config.getWsUrl(),
+            systemType: 'uni-app',
+            apiAddr: config.getApiUrl(), // SDK的API接口地址。如：http://xxx:10002
+            wsAddr: config.getWsUrl(), // SDK的websocket地址。如： ws://xxx:10001
             dataDir: path, // 数据存储路径
             logLevel: 6,
             logFilePath: path,
@@ -583,14 +554,13 @@ export default {
           }
         })
         .catch((err) => {
-          console.log("get dir failed", err);
+          console.log("get dir failed");
+          console.log(err);
           plus.navigator.closeSplashscreen();
         });
-				// #endif
     },
 
     launchCheck() {
-      // #ifdef APP-PLUS
       plus.globalEvent.addEventListener("newintent", (e) => {
         console.log(plus.runtime.arguments);
         let launchData = {};
@@ -615,13 +585,11 @@ export default {
             break;
         }
       });
-      // #endif
     },
     checkVersion(initiative = false) {
       if (uni.$u.os() === "ios") {
         return;
       }
-      // #ifdef APP-PLUS
       plus.runtime.getProperty(plus.runtime.appid, ({ version }) => {
         checkUpdateFormPgyer(version)
           .then(
@@ -674,7 +642,6 @@ export default {
             () => initiative && uni.$emit(PageEvents.CheckForUpdateResp),
           );
       });
-      // #endif
     },
     async checkDownloadedPkg(buildVersion) {
       const versionMap = uni.getStorageSync("IMVersionMap") || {};
@@ -804,6 +771,61 @@ export default {
       // 		sourceID: newServerMsg.groupID || newServerMsg.sendID,
       // 	}
       // })
+      const notificationFun = () => {
+        const isSelf = newServerMsg.sendID === this.$store.getters.storeCurrentUserID;
+        if (isSelf) return;
+
+        const isSingle = newServerMsg.groupID ? false : true;
+
+        console.log(this.storeGroupList, newServerMsg)
+
+        const group = this.storeGroupList.filter(
+          (group) => group.groupID === newServerMsg.groupID
+        );
+
+        const title = isSingle ? newServerMsg.senderNickname : group[0].groupName;
+        const desc = parseMessageByType(newServerMsg)
+
+        console.log('notification', title, desc)
+        notification.showNotice(0, title, desc, () => {
+			    prepareConversationState(cveItem)
+		    })
+      }
+      notificationFun()
+
+
+      const platform = uni.getSystemInfoSync().platform;
+      if (platform == "ios") {
+        if (this.storeSelfInfo.allowVibration === 1) {
+          plus.device.vibrate();
+        }
+
+        if (this.storeSelfInfo.allowBeep === 1) {
+          innerAudioContext.play();
+          // plus.device.beep();
+        }
+      } else if (platform == "android") {
+        if (this.storeSelfInfo.allowVibration === 1) {
+          plus.device.vibrate(500);
+        }
+        if (this.storeSelfInfo.allowBeep === 1) {
+          let main = plus.android.runtimeMainActivity();
+          let RingtoneManager = plus.android.importClass(
+            "android.media.RingtoneManager",
+          );
+          let uri = RingtoneManager.getActualDefaultRingtoneUri(
+            main,
+            RingtoneManager.TYPE_NOTIFICATION,
+          );
+          let MediaPlayer = plus.android.importClass(
+            "android.media.MediaPlayer",
+          );
+          let player = MediaPlayer.create(main, uri);
+          player.setLooping(false);
+          player.prepare();
+          player.start();
+        }
+      }
     },
     handleNewMessage(newServerMsg) {
       if (this.inCurrentConversation(newServerMsg)) {

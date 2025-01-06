@@ -3,10 +3,49 @@
     <custom-nav-bar title="账号设置" />
 
     <view class="info_wrap">
+      <setting-item
+        :loading="loading"
+        @switch="switchGlobalOpt"
+        title="勿扰模式"
+        :switchValue="globalOptEnable"
+        :is_switch="true"
+        :border="false"
+      />
+      <setting-item
+        :loading="loadingState.beep"
+        @switch="changeBeep"
+        :switchValue="selfInfo.allowBeep === 1"
+        title="新消息提示音"
+        :is_switch="true"
+        :border="false"
+      />
+      <setting-item
+        :loading="loadingState.vibration"
+        @switch="changeVibration"
+        :switchValue="selfInfo.allowVibration === 1"
+        title="新消息震动"
+        :is_switch="true"
+        :border="false"
+      />
+    </view>
+
+    <view class="info_wrap">
+      <!-- <setting-item @switch="changeNotify" :loading="loadingState.message" :switchValue="newMessageNotify" title="新消息通知"
+				:is_switch="true" :border="false" />
+			<setting-item v-show="newMessageNotify" @click="toNotificationDetails" title="消息通知设置" :border="false" /> -->
+      <setting-item
+        :loading="loadingState.allowAddFriend"
+        @switch="changeVibrationF"
+        :switchValue="selfInfo.allowAddFriend === 1"
+        title="禁止添加我为好友"
+        :is_switch="true"
+        :border="false"
+      />
       <setting-item @click="toBlockList" title="通讯录黑名单" :border="false" />
     </view>
 
     <view class="info_wrap">
+      <setting-item @click="toResetPwd" title="修改密码" :border="false" />
       <setting-item @click="deleteAllMsg" danger title="清空聊天记录" :border="false" />
     </view>
   </view>
@@ -73,7 +112,7 @@ export default {
         "vibration",
       );
     },
-    changeVibration(flag) {
+    changeVibrationF(flag) {
       this.loadingState.addFriend = true;
       this.updateSelfInfo(
         {
@@ -96,10 +135,16 @@ export default {
         uni.$u.toast("修改失败");
       }
       this.loadingState[key] = false;
+      this.loading = false
     },
     toBlockList() {
       uni.navigateTo({
         url: "/pages/profile/blockList/index",
+      });
+    },
+    toResetPwd() {
+      uni.navigateTo({
+        url: "/pages/profile/changePassword/index",
       });
     },
     deleteAllMsg() {
@@ -127,6 +172,29 @@ export default {
           }
         },
       });
+    },
+    async switchGlobalOpt(flag) {
+      this.loading = true;
+      this.updateSelfInfo(
+        {
+          globalRecvMsgOpt: flag ? 2 : 0,
+        },
+        "globalRecvMsgOpt",
+      );
+    },
+    toNotificationDetails() {
+      uni.navigateTo({
+        url: "/pages/profile/notificationDetails/index",
+      });
+    },
+    changeNotify(value) {
+      this.loadingState.message = true;
+      uni.setStorageSync(
+        `${this.$store.getters.storeCurrentUserID}_DisableNotify`,
+        !value,
+      );
+      this.newMessageNotify = value;
+      this.loadingState.message = false;
     },
   },
 };

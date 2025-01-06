@@ -1,10 +1,11 @@
 <template>
-  <u-navbar @click="click" placeholder class="chating_header wx-top">
+  <u-navbar @click="click" placeholder class="chating_header">
     <view @click="routeBack" class="u-nav-slot" slot="left">
-      <image
+      <img
         class="back_icon"
-        style="width: 12px;height: 20px;"
-        src="@/static/images/common_left_arrow.png"
+        width="12"
+        height="20"
+        src="static/images/common_left_arrow.png"
         alt=""
         srcset=""
       />
@@ -29,6 +30,29 @@
             :style="{ backgroundColor: isOnline ? '#10CC64' : '#999' }"
           />
           <view class="online_str" v-if="isSingle">{{ onlineStr }}</view>
+          <text v-show="isTyping">正在输入...</text>
+        </view>
+      </view>
+
+      <view
+        v-if="showGroupAnnouncement"
+        @click="toGroupAnnouncement(true)"
+        class="group_announcement_tab"
+      >
+        <view class="announcement_header">
+          <view class="announcement_header_left">
+            <image
+              src="@/static/images/chating_message_notice.png"
+              mode=""
+            ></image>
+            <text style="margin-left: 8rpx">群公告</text>
+          </view>
+          <view @click.stop="toGroupAnnouncement(false)">
+            <image src="@/static/images/announcement_close.png" mode=""></image>
+          </view>
+        </view>
+        <view class="announcement_content">
+          {{ getGroupAnnouncementContent }}
         </view>
       </view>
     </view>
@@ -49,13 +73,17 @@
 
 <script>
 import { mapGetters } from "vuex";
-import IMSDK, { SessionType, MessageReceiveOptType } from "openim-uniapp-polyfill";
+import IMSDK, { IMMethods, GroupAtType, SessionType, MessageReceiveOptType } from "openim-uniapp-polyfill";
 import { Platform } from '@/constant/im'
 import MyAvatar from "@/components/MyAvatar/index.vue";
+
 export default {
   name: "ChatingHeader",
   components: {
     MyAvatar,
+  },
+  props: {
+    mutipleCheckVisible: Boolean,
   },
   data() {
     return {
@@ -65,6 +93,7 @@ export default {
       callingData: null,
       showMoreMember: false,
       joinLock: false,
+      isJoinGroup: true
     };
   },
   computed: {
@@ -91,6 +120,18 @@ export default {
     groupMemberCount() {
       return `(${this.storeCurrentGroup?.memberCount ?? 0})`;
     },
+    showGroupAnnouncement() {
+      return (
+        this.$store.getters.storeCurrentConversation.groupAtType ===
+        GroupAtType.AtGroupNotice
+      );
+    },
+    getGroupAnnouncementContent() {
+      if (this.showGroupAnnouncement) {
+        return this.$store.getters.storeCurrentGroup.notification;
+      }
+      return "";
+    },
     canGoSetting() {
       if (this.isSingle) {
         return true;
@@ -109,6 +150,15 @@ export default {
       );
       this.getOnlineState();
     }
+    if (this.storeCurrentConversation.groupID) {
+      IMSDK.asyncApi(
+        IMMethods.IsJoinGroup,
+        IMSDK.uuid(),
+        this.storeCurrentConversation.groupID
+      ).then((res) => {
+        this.isJoinGroup = res.data
+      });
+    }
   },
   beforeDestroy() {
     IMSDK.asyncApi("unsubscribeUsersStatus", IMSDK.uuid(), [
@@ -121,10 +171,11 @@ export default {
   },
   methods: {
     userStatusChangeHandler({ data }) {
+      // console.log("userStatusChangeHandler", data);
       if (data.userID === this.storeCurrentConversation.userID) {
         this.isOnline = !!data.status;
-        if(data[0].status){
-          const platformStr = data[0].platformIDs.map(id => Platform[id]).join('/');
+        if(data.status){
+          const platformStr = data.platformIDs.map(id => Platform[id]).join('/');
           this.onlineStr = platformStr + '在线'
         } else {
           this.onlineStr = '离线'
@@ -135,6 +186,11 @@ export default {
       this.$emit("click", e);
     },
     routeBack() {
+      if (this.mutipleCheckVisible) {
+        this.$emit('mutipleCheckUpdate')
+        return
+      }
+      // uni.navigateBack()
       uni.switchTab({
         url: "/pages/conversation/conversationList/index",
       });
@@ -164,6 +220,33 @@ export default {
         .catch((err) => {
           console.log("getOnlineStateErr", err);
         });
+    },
+    updateTyping() {
+      if (this.isTyping) {
+        return;
+      }
+      this.isTyping = true;
+      setTimeout(() => {
+        this.isTyping = false;
+      }, 1500);
+    },
+    checkOnline() {
+      if (!this.isOnline && this.isSingle) {
+        this.getOnlineState();
+      }
+    },
+    toGroupAnnouncement(toPage) {
+      IMSDK.asyncApi(
+        IMSDK.IMMethods.ResetConversationGroupAtType,
+        IMSDK.uuid(),
+        this.$store.getters.storeCurrentConversation.conversationID,
+      );
+
+      if (toPage) {
+        uni.navigateTo({
+          url: `/pages/conversation/groupAnnouncement/index`,
+        });
+      }
     },
   },
 };

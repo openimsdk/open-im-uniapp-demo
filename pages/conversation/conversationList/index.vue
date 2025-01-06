@@ -1,5 +1,5 @@
 <template>
-  <view class="conversation_container wx-top">
+  <view class="conversation_container">
     <chat-header ref="chatHeaderRef" />
     <scroll-view
       class="scroll-view"
@@ -27,8 +27,8 @@
         />
       </u-swipe-action>
     </scroll-view>
-    <view class="loading_wrap" v-if="storeIsSyncing">
-      <u-loading-icon text="同步中"></u-loading-icon>
+    <view class="loading_wrap" v-if="storeProgress > 0 && storeProgress < 100">
+      <u-loading-icon :vertical="true" :text="storeProgress+'%'"></u-loading-icon>
     </view>
   </view>
 </template>
@@ -56,13 +56,10 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["storeConversationList", "storeIsSyncing"]),
+    ...mapGetters(["storeConversationList", "storeIsSyncing", "storeProgress"]),
   },
   onReady() {
-    console.log(this.storeConversationList)
-    // #ifdef APP-PLUS
     this.$nextTick(() => plus.navigator.closeSplashscreen());
-    // #endif
   },
   onLoad() {
     this._freshing = false;

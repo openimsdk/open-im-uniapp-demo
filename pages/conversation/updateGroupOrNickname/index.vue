@@ -3,16 +3,60 @@
     <custom-nav-bar :title="getTitle">
       <view class="nav_right_action" slot="more">
         <text v-show="!updateLoading" @click="comfirmUpdate">保存</text>
-        <template v-if="updateLoading">
-          <u-loading-icon />
-        </template>
+        <u-loading-icon v-show="updateLoading" />
+        <!-- <u-button :loading="loading" @click="saveOrCopy" type="primary" :text="getConfirmText" /> -->
       </view>
     </custom-nav-bar>
 
     <view class="content_row">
-      <u-input v-model="content" disabledColor="transparent" maxlength="16" placeholder="请输入内容" clearable>
+      <u-input
+        v-model="content"
+        disabledColor="transparent"
+        maxlength="16"
+        placeholder="请输入内容"
+        clearable
+      >
+        <!-- <template slot="suffix">
+					<u-button :loading="loading" @click="saveOrCopy" type="primary" :text="getConfirmText" />
+				</template> -->
       </u-input>
     </view>
+
+    <!-- <view class="desc_content">
+      <view class="title">
+        <text>{{ getTitle }}</text>
+      </view>
+      <view class="sub_title">
+        <text>{{ getSubTitle }}</text>
+      </view>
+    </view> -->
+
+    <!-- <view class="input_content">
+      <my-avatar
+        :src="sourceInfo.faceURL"
+        :desc="sourceInfo.nickname"
+        :isGroup="isGroup"
+        size="42"
+      />
+      <u--input
+        placeholder="请输入内容"
+        border="none"
+        v-model="content"
+        maxlength="20"
+        clearable
+      ></u--input>
+    </view> -->
+
+    <!-- <view class="action_row">
+      <u-button
+        :loading="updateLoading"
+        :disabled="!content && !isGroupMember"
+        @click="comfirmUpdate"
+        text="完成"
+        type="primary"
+      >
+      </u-button>
+    </view> -->
   </view>
 </template>
 
@@ -33,11 +77,19 @@ export default {
     };
   },
   computed: {
+    isGroup() {
+      return this.sourceInfo.nickname === undefined;
+    },
+    isGroupMember() {
+      return this.sourceInfo.roleLevel !== undefined;
+    },
     getTitle() {
-      return "修改群聊名称"
+      return this.isGroup ? "修改群聊名称" : "我在本群的昵称";
     },
     getSubTitle() {
-      return "修改群名称后，将在群内通知其他成员"
+      return this.isGroup
+        ? "修改群名称后，将在群内通知其他成员"
+        : "昵称修改后，只会在此群内显示，群内成员都可以看见。";
     },
   },
   onLoad(options) {
@@ -49,10 +101,22 @@ export default {
     comfirmUpdate() {
       this.updateLoading = true;
       let func;
-      func = IMSDK.asyncApi(IMSDK.IMMethods.SetGroupInfo, IMSDK.uuid(), {
-        groupID: this.sourceInfo.groupID,
-        groupName: this.content,
-      });
+      if (!this.isGroup) {
+        func = IMSDK.asyncApi(
+          IMSDK.IMMethods.SetGroupMemberInfo,
+          IMSDK.uuid(),
+          {
+            groupID: this.sourceInfo.groupID,
+            userID: this.sourceInfo.userID,
+            nickname: this.content,
+          },
+        );
+      } else {
+        func = IMSDK.asyncApi(IMSDK.IMMethods.SetGroupInfo, IMSDK.uuid(), {
+          groupID: this.sourceInfo.groupID,
+          groupName: this.content,
+        });
+      }
 
       func
         .then(() => {

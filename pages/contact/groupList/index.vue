@@ -1,6 +1,9 @@
 <template>
   <view class="group_list_container">
     <custom-nav-bar title="我的群组">
+      <!-- <view @click="toCreateGroup" class="nav_right_action" slot="more">
+				<text>发起群聊</text>
+			</view> -->
     </custom-nav-bar>
     <view class="search_bar_wrap">
       <u-search
@@ -98,6 +101,7 @@ export default {
       );
     },
     getMyJoinedGroupList() {
+      // console.log(this.storeGroupList.filter(group => group.ownerUserID !== this.storeCurrentUserID));
       return this.storeGroupList.filter(
         (group) => group.ownerUserID !== this.storeCurrentUserID,
       );

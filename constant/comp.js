@@ -4,20 +4,35 @@ export const AddGroupQrCodePrefix = "io.openim.app/joinGroup/";
 export const ChatingFooterActionTypes = {
   Album: "Album",
   Camera: "Camera",
+  Call: "Call",
+  File: "File",
+  Card: "Card",
+  Location: "Location",
 };
 
+export const MessageMenuTypes = {
+  Copy: "Copy",
+  Del: "Del",
+  Forward: "Forward",
+  Reply: "Reply",
+  Revoke: "Revoke",
+  Multiple: "Multiple",
+};
 
 export const ContactMenuTypes = {
   NewFriend: "NewFriend",
   NewGroup: "NewGroup",
   MyFriend: "MyFriend",
   MyGroup: "MyGroup",
+  Lable: "Lable",
 };
 
 export const GroupMemberListTypes = {
   Preview: "Preview",
   Transfer: "Transfer",
   Kickout: "Kickout",
+  SetAdmin: "SetAdmin",
+  Mute: 'Mute',
   ChooseAt: "ChooseAt",
   CallInvite: "CallInvite",
 };
@@ -30,6 +45,7 @@ export const ContactChooseTypes = {
   Card: "Card",
   ShareCard: "ShareCard",
   GetList: "GetList",
+  SendImage: 'SendImage'
 };
 
 export const UpdateMessageTypes = {

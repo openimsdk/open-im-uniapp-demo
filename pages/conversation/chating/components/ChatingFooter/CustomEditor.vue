@@ -2,6 +2,8 @@
   <view
     :insertImageFlag="insertImageFlag"
     :insertAtFlag="insertAtFlag"
+    :insertEmojiFlag="insertEmojiFlag"
+    :change:insertEmojiFlag="input.insertEmojiFlagUpdate"
     :change:insertAtFlag="input.insertAtFlagUpdate"
     :change:insertImageFlag="input.insertImageFlagUpdate"
     class="editor_wrap"
@@ -45,6 +47,8 @@ export default {
       insertImageFlag: null,
       insertAtFlag: null,
       lastStr: "",
+      emojiData: "",
+      insertEmojiFlag: null
     };
   },
   methods: {
@@ -54,9 +58,7 @@ export default {
         .select("#editor2")
         .context((res) => {
           this.$emit("ready", res);
-          // #ifdef H5 || APP-PLUS
           this.editorCtx = res.context;
-          // #endif
         })
         .exec();
     },
@@ -64,13 +66,28 @@ export default {
       this.imageData = imageData;
       this.insertImageFlag = true;
     },
+    insertEmoji(emoji) {
+      this.$nextTick(() => {
+        this.insertEmojiFlag = true;
+        this.emojiData = emoji;
+      });
+    },
+    internalInsertEmoji() {
+      this.editorCtx.insertText({
+        text: this.emojiData,
+        complete: () => {
+          this.insertEmojiFlag = false;
+          this.emojiData = null
+        },
+      });
+    },
     internalInsertImage() {
       this.editorCtx.insertImage({
         ...this.imageData,
         complete: () => {
           this.insertImageFlag = false;
           this.insertAtFlag = null;
-          plus.key.showSoftKeybord()
+          // plus.key.showSoftKeybord()
           // this.setDraftTextItem();
         },
       });
@@ -122,15 +139,12 @@ export default {
     },
     editorInput(e) {
       let str = e.detail.html;
-      const oldArr = this.lastStr.split("");
+      const oldArr = (this.lastStr ?? '').split("");
       let contentStr = str;
       oldArr.forEach((str) => {
         contentStr = contentStr.replace(str, "");
       });
       contentStr = html2Text(contentStr);
-      if (contentStr === "@") {
-        this.$emit("tryAt");
-      }
       this.$emit("input", e);
       this.lastStr = e.detail.html;
     },
@@ -141,6 +155,17 @@ export default {
 <script module="input" lang="renderjs">
 export default {
 	methods: {
+    insertEmojiFlagUpdate(newValue, oldValue, ownerVm, vm) {
+			if (newValue === null) {
+				return;
+			}
+			if (newValue) {
+				this.$el.querySelector('.ql-editor').setAttribute('inputmode', 'none')
+				ownerVm.callMethod('internalInsertEmoji')
+			} else {
+				this.$el.querySelector('.ql-editor').removeAttribute('inputmode')
+			}
+		},
 		insertImageFlagUpdate(newValue, oldValue, ownerVm, vm) {
 			if (newValue === null) {
 				return;
@@ -150,15 +175,6 @@ export default {
 				ownerVm.callMethod('internalInsertImage')
 			} else {
 				this.$el.querySelector('.ql-editor').removeAttribute('inputmode')
-			}
-		},
-		insertAtFlagUpdate(newValue, oldValue, ownerVm, vm){
-			if (newValue === null) {
-				return;
-			}
-			if (newValue) {
-				const data = this.truncateText(`@${newValue.nickname}`,120)
-				ownerVm.callMethod('internalInsertAtEl', {...data,...newValue})
 			}
 		},
 		truncateText(text, maxWidth) {

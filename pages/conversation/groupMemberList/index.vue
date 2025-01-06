@@ -243,28 +243,6 @@ export default {
       await this.loadSearchList();
     },
     confirm() {
-      if (this.type === GroupMemberListTypes.SetAdmin) {
-        const promiseArray = this.getChoosedData.map(async ({ userID }) => {
-          await IMSDK.asyncApi(IMSDK.IMMethods.SetGroupMemberRoleLevel, IMSDK.uuid(), {
-            groupID: this.getChoosedData[0].groupID,
-            userID: userID,
-            roleLevel: GroupMemberRole.Admin,
-          })
-        })
-
-        Promise.all(promiseArray)
-          .then(() => this.showToast("设置成功", () => uni.navigateBack()))
-          .catch(() => this.showToast("操作失败"))
-        return;
-      }
-      // if (this.type === GroupMemberListTypes.Mute) {
-      //   uni.navigateTo({
-      //     url: `/pages/common/setMemberMute/index?sourceInfo=${JSON.stringify(
-      //       this.getChoosedData,
-      //     )}&fromList=1`,
-      //   });
-      //   return
-      // }
       if (
         this.type === GroupMemberListTypes.ChooseAt ||
         this.type === GroupMemberListTypes.CallInvite
@@ -308,18 +286,15 @@ export default {
           reason: "",
           userIDList: this.getChoosedData.map((member) => member.userID),
         });
-      } else {
-        func = IMSDK.asyncApi(
-          IMSDK.IMMethods.TransferGroupOwner,
-          IMSDK.uuid(),
-          {
-            groupID: this.choosedTransferMember.groupID,
-            newOwnerUserID: this.choosedTransferMember.userID,
-          },
-        );
       }
       func
-        .then(() => this.showToast("操作成功", () => uni.navigateBack()))
+        .then(() => {
+          uni.$u.toast("操作成功");
+          this.showCheck = false;
+          uni.navigateBack({
+            delta: 1,
+          });
+        })
         .catch(() => this.showToast("操作失败"))
         .finally(() => (this.showConfirmModal = false));
     },
@@ -471,32 +446,14 @@ export default {
       }
     },
     setIMListener() {
-      IMSDK.subscribe(
-        IMSDK.IMEvents.OnGroupMemberInfoChanged,
-        this.groupMemberInfoChangeHandler,
-      );
-      IMSDK.subscribe(
-        IMSDK.IMEvents.OnGroupMemberAdded,
-        this.groupMemberAddedHandler,
-      );
-      IMSDK.subscribe(
-        IMSDK.IMEvents.OnGroupMemberDeleted,
-        this.groupMemberDeletedHandler,
-      );
+      uni.$on(IMSDK.IMEvents.OnGroupMemberInfoChanged, this.groupMemberInfoChangeHandler)
+      uni.$on(IMSDK.IMEvents.OnGroupMemberAdded, this.groupMemberAddedHandler)
+      uni.$on(IMSDK.IMEvents.OnGroupMemberDeleted, this.groupMemberDeletedHandler)
     },
     disposeIMListener() {
-      IMSDK.unsubscribe(
-        IMSDK.IMEvents.OnGroupMemberInfoChanged,
-        this.groupMemberInfoChangeHandler,
-      );
-      IMSDK.unsubscribe(
-        IMSDK.IMEvents.OnGroupMemberAdded,
-        this.groupMemberAddedHandler,
-      );
-      IMSDK.unsubscribe(
-        IMSDK.IMEvents.OnGroupMemberDeleted,
-        this.groupMemberDeletedHandler,
-      );
+      uni.$off(IMSDK.IMEvents.OnGroupMemberInfoChanged, this.groupMemberInfoChangeHandler)
+      uni.$off(IMSDK.IMEvents.OnGroupMemberAdded, this.groupMemberAddedHandler)
+      uni.$off(IMSDK.IMEvents.OnGroupMemberDeleted, this.groupMemberDeletedHandler)
     },
   },
   onBackPress(options) {

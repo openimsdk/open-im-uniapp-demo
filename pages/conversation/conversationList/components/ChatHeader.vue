@@ -9,31 +9,33 @@
       <view class="self_info_desc">
         <view class="user_state">
           <text class="nickname">{{ storeSelfInfo.nickname }}</text>
-          <view class="tag" v-if="storeIsSyncing">
-            <image
-              class="loading"
-              style="height: 24rpx; width: 24rpx"
-              src="@/static/images/loading.png"
-              alt=""
-            />
-            <text class="status">同步中</text>
-          </view>
-          <view class="tag" v-if="connectStart == 0">
-            <image
-              class="loading"
-              style="height: 24rpx; width: 24rpx"
-              src="@/static/images/loading.png"
-              alt=""
-            />
-            <text class="status">连接中</text>
-          </view>
-          <view class="err-tag" v-if="connectStart == -1">
-            <image
-              style="height: 24rpx; width: 24rpx"
-              src="@/static/images/sync_error.png"
-              alt=""
-            />
-            <text class="status">连接失败</text>
+          <view v-if="!storeReinstall">
+            <view class="tag" v-if="storeIsSyncing">
+              <img
+                class="loading"
+                style="height: 24rpx; width: 24rpx"
+                src="static/images/loading.png"
+                alt=""
+              />
+              <text class="status">同步中</text>
+            </view>
+            <view class="tag" v-if="connectStart == 0">
+              <img
+                class="loading"
+                style="height: 24rpx; width: 24rpx"
+                src="static/images/loading.png"
+                alt=""
+              />
+              <text class="status">连接中</text>
+            </view>
+            <view class="err-tag" v-if="connectStart == -1">
+              <img
+                style="height: 24rpx; width: 24rpx"
+                src="static/images/sync_error.png"
+                alt=""
+              />
+              <text class="status">连接失败</text>
+            </view>
           </view>
         </view>
       </view>
@@ -111,7 +113,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["storeSelfInfo", "storeIsSyncing"]),
+    ...mapGetters(["storeSelfInfo", "storeIsSyncing", "storeReinstall"]),
   },
   mounted() {
     this.subscribeAll();
@@ -120,9 +122,6 @@ export default {
     this.unsubscribeAll();
   },
   methods: {
-    setConnectStart() {
-      console.log("111111-------------------1");
-    },
     setStateStart() {
       this.connectStart = 0;
     },
@@ -138,7 +137,7 @@ export default {
       IMSDK.subscribe(IMSDK.IMEvents.OnConnectFailed, this.setStateError);
     },
     unsubscribeAll() {
-      IMSDK.unsubscribe(IMSDK.IMEvents.SendMessageProgress, this.setStateStart);
+      IMSDK.unsubscribe(IMSDK.IMEvents.OnConnecting, this.setStateStart);
       IMSDK.unsubscribe(IMSDK.IMEvents.OnConnectSuccess, this.setStateSuccess);
       IMSDK.unsubscribe(IMSDK.IMEvents.OnConnectFailed, this.setStateError);
     },

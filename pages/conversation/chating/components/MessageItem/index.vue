@@ -1,22 +1,34 @@
 <template>
   <view
     v-if="!getNoticeContent"
+    @click="clickMessageItem"
     :id="`auchor${source.clientMsgID}`"
     class="message_item"
     :class="{ message_item_self: isSender, message_item_active: isActive }"
   >
+    <view
+      v-if="mutipleCheckVisible"
+      class="check_wrap"
+      :class="{ check_wrap_active: source.checked, check_wrap_disabled: canMutipleCheck }"
+    >
+      <u-icon
+        v-show="source.checked"
+        name="checkbox-mark"
+        size="12"
+        color="#fff"
+      />
+    </view>
     <my-avatar
-      @longpress="atUser"
       @click="showInfo"
       size="42"
-      :desc="source.senderNickname"
-      :src="source.senderFaceUrl"
+      :desc="announcePublisher.nickname || source.senderNickname"
+      :src="announcePublisher.faceURL || source.senderFaceUrl"
     />
     <view class="message_container">
       <view class="message_sender" :style="{ 'flex-direction': !isSender ? 'row-reverse' : 'row' }" >
         <text>{{ formattedMessageTime }}</text>
         <text style="margin-left: 2rpx;margin-right: 2rpx;">{{ '' }}</text>
-        <text v-if="!isSingle">{{source.senderNickname }}</text>
+        <text v-if="!isSingle">{{ announcePublisher.nickname || source.senderNickname }}</text>
       </view>
       <view class="message_send_state_box">
         <view style="height: 100%;display: flex;justify-items: center;align-items: center;">
@@ -27,18 +39,54 @@
               v-if="isFailedMessage && !isPreview"
               src="@/static/images/chating_message_failed.png"
             />
+            <text v-if="readLimitSensitive" class="read_limit_count">{{
+              `${count}s`
+            }}</text>
           </view>
         </view>
-        <view class="message_content_wrap">
+        <view
+          @longpress.prevent="showMenu"
+          class="message_content_wrap message_content_wrap_shadow"
+        >
           <text-message-render
             v-if="showTextRender"
             :message="source"
             @showInfo="showInfo"
           />
           <media-message-render v-else-if="showMediaRender" :message="source" />
+          <audio-message-render
+            v-else-if="showAudioRender"
+            :message="source"
+            :isSender="isSender"
+          />
+          <face-message-render v-else-if="showFaceRender" :message="source" />
+          <file-message-render v-else-if="showFileRender" :message="source" />
+          <card-message-render v-else-if="showCardRender" :message="source" />
+          <merge-message-render v-else-if="showMergeRender" :message="source" />
+          <location-message-render
+            v-else-if="showLocationRender"
+            :message="source"
+          />
+          <group-announce-render
+            v-else-if="showGroupAnnouncement"
+            :message="source"
+          />
           <error-message-render v-else />
         </view>
       </view>
+      
+      <quote-message-render :message="source" v-if="isQuoteMessage" />
+
+      <transition name="fade">
+        <message-menu
+          v-if="menuState.visible"
+          :message="source"
+          :isSender="isSender"
+          :is_bottom="menuState.isBottom"
+          :paterWidth="menuState.paterWidth"
+          @close="menuState.visible = false"
+        />
+      </transition>
     </view>
   </view>
 
@@ -47,6 +95,7 @@
     class="notice_message_container"
     :id="`auchor${source.clientMsgID}`"
   >
+    <!-- <text>{{ getNoticeContent }}</text> -->
     <mp-html
       @linktap="navigate"
       :previewImg="false"
@@ -70,8 +119,18 @@ import MyAvatar from "@/components/MyAvatar/index.vue";
 import ChatingList from "../ChatingList.vue";
 import TextMessageRender from "./TextMessageRender.vue";
 import MediaMessageRender from "./MediaMessageRender.vue";
+import AudioMessageRender from "./AudioMessageRender.vue";
+import FaceMessageRender from "./FaceMessageRender.vue";
+import FileMessageRender from "./FileMessageRender.vue";
+import CardMessageRender from "./CardMessageRender.vue";
+import MergeMessageRender from "./MergeMessageRender.vue";
+import QuoteMessageRender from "./QuoteMessageRender.vue";
+import LocationMessageRender from "./LocationMessageRender.vue";
+import GroupAnnounceRender from "./GroupAnnounceRender.vue";
 import ErrorMessageRender from "./ErrorMessageRender.vue";
+import MessageMenu from "./MessageMenu.vue";
 import {
+  CustomType,
   noticeMessageTypes,
   PageEvents,
   UpdateMessageTypes,
@@ -91,7 +150,16 @@ export default {
     MyAvatar,
     TextMessageRender,
     MediaMessageRender,
+    AudioMessageRender,
+    FaceMessageRender,
+    FileMessageRender,
+    CardMessageRender,
+    MergeMessageRender,
+    QuoteMessageRender,
+    LocationMessageRender,
+    GroupAnnounceRender,
     ErrorMessageRender,
+    MessageMenu,
   },
   props: {
     source: Object,
@@ -99,17 +167,30 @@ export default {
       type: Boolean,
       default: false,
     },
+    mutipleCheckVisible: {
+      type: Boolean,
+      default: false,
+    },
+    menuOutsideFlag: Number,
     isPreview: Boolean,
     isActive: Boolean,
   },
   data() {
     return {
+      menuState: {
+        visible: false,
+        isBottom: false,
+        paterWidth: false,
+        sendingDelay: true,
+      },
+      count: 30,
       timer: null,
+      announcePublisher: {},
       conversationID: "",
     };
   },
   computed: {
-    ...mapGetters(["storeCurrentConversation", "storeSelfInfo"]),
+    ...mapGetters(["storeCurrentConversation", "storeSelfInfo", "storeRevokeMap"]),
     isSingle() {
       return this.storeCurrentConversation.conversationType === SessionType.Single;
     },
@@ -122,7 +203,31 @@ export default {
     showMediaRender() {
       return mediaRenderTypes.includes(this.source.contentType);
     },
+    showAudioRender() {
+      return this.source.contentType === MessageType.VoiceMessage;
+    },
+    showFaceRender() {
+      return this.source.contentType === MessageType.FaceMessage;
+    },
+    showFileRender() {
+      return this.source.contentType === MessageType.FileMessage;
+    },
+    showCardRender() {
+      return this.source.contentType === MessageType.CardMessage;
+    },
+    showMergeRender() {
+      return this.source.contentType === MessageType.MergeMessage;
+    },
+    showLocationRender() {
+      return this.source.contentType === MessageType.LocationMessage;
+    },
+    showGroupAnnouncement() {
+      return this.source.contentType === MessageType.GroupAnnouncementUpdated;
+    },
     getNoticeContent() {
+      if (this.showGroupAnnouncement) {
+        return "";
+      }
       const isNoticeMessage = noticeMessageTypes.includes(
         this.source.contentType,
       );
@@ -133,6 +238,12 @@ export default {
             this.$store.getters.storeCurrentUserID,
           );
     },
+    isQuoteMessage() {
+      return (
+        this.source.contentType === MessageType.QuoteMessage ||
+        this.source.atTextElem?.quoteMessage
+      );
+    },
     isSuccessMessage() {
       return this.source.status === MessageStatus.Succeed;
     },
@@ -142,13 +253,52 @@ export default {
     showSending() {
       return this.source.status === MessageStatus.Sending && !this.sendingDelay;
     },
+    readLimitSensitive() {
+      return (
+        this.source.attachedInfoElem?.isPrivateChat &&
+        this.source.isRead &&
+        !this.isPreview
+      );
+    },
+    canMutipleCheck() {
+      return this.source.disabled || this.source.contentType === MessageType.GroupAnnouncementUpdated;
+    },
   },
   mounted() {
     this.$emit("messageItemRender", this.source.clientMsgID);
     this.isReadObserver();
     this.setSendingDelay();
+    this.count = this.source.attachedInfoElem?.burnDuration || 30;
     this.conversationID =
       this.$store.getters.storeCurrentConversation.conversationID;
+  },
+  beforeDestroy() {
+    if (this.count !== 0 && !this.isPreview) {
+      this.checkPrivateMessage();
+    }
+  },
+  watch: {
+    menuOutsideFlag(newVal) {
+      if (this.menuState.visible) {
+        this.menuState.visible = false;
+      }
+    },
+    readLimitSensitive: {
+      handler(newVal) {
+        if (newVal) {
+          this.startCount();
+        }
+      },
+      immediate: true,
+    },
+    showGroupAnnouncement: {
+      handler(newVal) {
+        if (newVal) {
+          this.getAnnouncementPublisher();
+        }
+      },
+      immediate: true,
+    },
   },
   methods: {
     navigate(link) {
@@ -194,6 +344,67 @@ export default {
           });
         });
     },
+    async showMenu() {
+      if (this.isPreview || this.showGroupAnnouncement) {
+        return;
+      }
+      this.$emit("closeMune");
+      this.$nextTick(() => {
+        uni
+          .createSelectorQuery()
+          .in(this)
+          .select(".message_content_wrap")
+          .boundingClientRect((res) => {
+            console.log(res.top);
+            this.menuState.paterWidth = res.width;
+            this.menuState.isBottom = res.top < 250;
+            this.menuState.visible = true;
+          })
+          .exec();
+      });
+    },
+    getAnnouncementPublisher() {
+      let group = {};
+      try {
+        group = JSON.parse(this.source.notificationElem.detail).group;
+      } catch (e) {}
+      if (!group.notificationUserID) return;
+      IMSDK.asyncApi(
+        IMSDK.IMMethods.GetSpecifiedGroupMembersInfo,
+        IMSDK.uuid(),
+        {
+          groupID: group.groupID,
+          userIDList: [group.notificationUserID],
+        },
+      ).then(({ data }) => (this.announcePublisher = data[0] ?? {}));
+    },
+    checkPrivateMessage() {
+      if (this.source.attachedInfoElem?.isPrivateChat) {
+        this.clearPrivateMessage();
+      }
+      if (this.timer) {
+        clearInterval(this.timer);
+      }
+    },
+    startCount() {
+      this.timer = setInterval(() => {
+        if (this.count > 0) {
+          this.count -= 1;
+        } else {
+          this.checkPrivateMessage();
+        }
+      }, 1000);
+    },
+    clearPrivateMessage() {
+      IMSDK.asyncApi(IMSDK.IMMethods.DeleteMessage, IMSDK.uuid(), {
+        conversationID: this.conversationID,
+        clientMsgID: this.source.clientMsgID,
+      })
+        .then(() => {
+          this.$store.dispatch("message/deleteMessages", [this.source]);
+        })
+        .catch(() => uni.$u.toast("删除失败"));
+    },
     setSendingDelay() {
       if (this.source.status === MessageStatus.Sending) {
         setTimeout(() => {
@@ -231,21 +442,23 @@ export default {
                   },
                 });
               }
+              // if (!isNoticeMessage) {
+              //   IMSDK.asyncApi(
+              //     IMSDK.IMMethods.MarkMessagesAsReadByMsgID,
+              //     IMSDK.uuid(),
+              //     {
+              //       conversationID: this.$store.getters.storeCurrentConversation.conversationID,
+              //       clientMsgIDList: [this.source.clientMsgID]
+              //     }).then(() => (this.source.isRead = true));
+              // }
+
               observer.disconnect();
             }
           },
         );
     },
-    atUser() {
-      if (!this.isSender && this.source.groupID && !this.isPreview) {
-        uni.$emit(PageEvents.AtSomeOne, {
-          userID: this.source.sendID,
-          nickname: this.source.senderNickname,
-        });
-      }
-    },
     showInfo(userID) {
-      if (this.isPreview) {
+      if (this.showGroupAnnouncement || this.isPreview) {
         return;
       }
 
@@ -278,6 +491,16 @@ export default {
               this.$store.getters.storeCurrentGroup.applyMemberFriend ===
               AllowType.NotAllowed,
           });
+        });
+      }
+    },
+    clickMessageItem() {
+      if (this.mutipleCheckVisible && !this.canMutipleCheck) {
+        this.$store.dispatch("message/updateOneMessage", {
+          message: {
+            ...this.source,
+            checked: !this.source.checked,
+          },
         });
       }
     },

@@ -8,6 +8,7 @@
       {{ `+${userInfo.areaCode} ${userInfo.phoneNumber}` }}
     </view>
     <view class="code_container">
+      <!-- <view class="code_title">请输入验证码</view> -->
       <u-code-input
         fontSize="24"
         color="#000"
@@ -70,6 +71,12 @@ export default {
             uni.$u.route("/pages/login/setSelfInfo/index", {
               userInfo: JSON.stringify(this.userInfo),
               isRegister: this.isRegister,
+              codeValue: this.codeValue,
+            });
+          }else{
+            uni.$u.route("/pages/login/setPassword/index", {
+              userInfo: JSON.stringify(this.userInfo),
+              isRegister: !this.isRegister,
               codeValue: this.codeValue,
             });
           }

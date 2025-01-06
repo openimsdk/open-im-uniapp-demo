@@ -3,14 +3,31 @@
     <custom-nav-bar title="关于我们" />
     <view class="logo_area">
       <image src="@/static/images/about_logo.png" mode=""></image>
-      <view>{{ version }}</view>
+      <view>{{ v }}</view>
 
-      <info-item
+      <!-- <info-item
         v-if="$u.os() === 'android'"
         class="check"
         title="检查新版本"
         content=""
+      /> -->
+
+      <info-item
+        @click="show = true"
+        class="check"
+        title="上传调试日志"
+        content=""
       />
+
+      <u-modal showCancelButton :show="show" title="上传日志" @confirm="uploadLog" @cancel="show = false" >
+        <view class="slot-content">
+          <u--input
+            placeholder="日志数量"
+            border="surround"
+            v-model="line"
+          ></u--input>
+        </view>
+      </u-modal>
     </view>
   </view>
 </template>
@@ -20,6 +37,7 @@ import { version } from '@/common/config'
 import CustomNavBar from "@/components/CustomNavBar/index.vue";
 import { PageEvents } from "@/constant";
 import InfoItem from "../selfInfo/InfoItem.vue";
+import IMSDK from "openim-uniapp-polyfill";
 export default {
   components: {
     CustomNavBar,
@@ -27,20 +45,56 @@ export default {
   },
   data() {
     return {
+      show: false,
+      line: 10000,
       appVersion: "",
       version: "",
       loading: false,
     };
   },
+  computed: {
+    v(){
+      return version
+    }
+  },
   onLoad() {
-    this.version = version
     this.getAppVersion();
     uni.$on(PageEvents.CheckForUpdateResp, this.checkRespHandler);
   },
   onUnload() {
     uni.$off(PageEvents.CheckForUpdateResp, this.checkRespHandler);
   },
+  mounted() {
+    IMSDK.subscribe('uploadLogsProgress', this.uploadHandler);
+  },
+  beforeDestroy() {
+    IMSDK.unsubscribe('uploadLogsProgress', this.uploadHandler);
+  },
   methods: {
+    uploadLog() {
+      this.show = false
+      IMSDK.asyncApi(
+        'uploadLogs',
+        IMSDK.uuid(),
+        {
+          line: this.line,
+          ex: ""
+        }
+      )
+    },
+    uploadHandler({
+      data: { current, size },
+    }) {
+      const progress = (current / size) * 100;
+      if (current >= size) {
+        uni.hideLoading();
+        return;
+      }
+      uni.showLoading({
+        title: '上传中',
+        mask: true,
+      });
+    },
     getAppVersion() {
       plus.runtime.getProperty(
         plus.runtime.appid,

@@ -5,14 +5,18 @@
 
     <view v-if="!isLoading" style="flex: 1;display: flex;flex-direction: column;">
       <view class="base_info">
-        <my-avatar :desc="sourceUserInfo.remark || sourceUserInfo.nickname" :src="sourceUserInfo.faceURL" size="46" />
+        <my-avatar
+          :desc="sourceUserInfo.remark || sourceUserInfo.nickname"
+          :src="sourceUserInfo.faceURL"
+          size="46"
+        />
         <view class="user_name">
           <text class="text">{{ getShowName }}</text>
           <text class="id" @click="copy(sourceUserInfo.userID)">{{
             sourceUserInfo.userID
           }}</text>
         </view>
-        <view class="add_btn" @click="toAddFriend" v-if="!isFriend && !disableAdd && !isSelf">
+        <view class="add_btn" @click="toAddFriend" v-if="trySendRequest">
           <u-button type="primary" icon="man-add" text="添加"></u-button>
         </view>
       </view>
@@ -23,16 +27,13 @@
         <user-info-row-item lable="入群方式" :content="getJoinSource" />
       </view>
 
-      <view v-if="!isSelf && (showSetRole || showSetMuteMember)" class="info_row">
-      </view>
-
       <view v-if="isFriend" class="info_row">
         <user-info-row-item @click="toMoreInfo" lable="个人资料" arrow />
       </view>
 
-      <view class="action_row">
+      <view class="action_row" v-if="!isSelf">
         <view @click="toDesignatedConversation" class="action_item">
-          <image src="@/static/images/user_card_message.png" alt="" />
+          <img src="static/images/user_card_message.png" alt="" />
           <text>发消息</text>
         </view>
       </view>
@@ -69,7 +70,6 @@ export default {
       memberInfo: null,
       switchLoading: false,
       showSetRole: false,
-      showSetMuteMember: false,
       disableAdd: false,
     };
   },
@@ -86,6 +86,9 @@ export default {
           (friend) => friend.userID === this.sourceID,
         ) !== -1
       );
+    },
+    trySendRequest() {
+      return !this.isFriend && !this.isSelf && !this.disableAdd && this.sourceUserInfo.allowAddFriend !== 2
     },
     isSelf() {
       return this.sourceID === this.storeSelfInfo.userID;
@@ -121,20 +124,26 @@ export default {
       }
       return this.sourceUserInfo.nickname + suffix;
     },
+    getMuteTime() {
+      if (
+        !this.memberInfo.muteEndTime ||
+        this.memberInfo.muteEndTime < Date.now()
+      ) {
+        return "";
+      }
+      return dayjs(this.memberInfo.muteEndTime).format("YYYY/MM/DD HH:mm");
+    },
   },
   onLoad(options) {
     const { sourceID, sourceInfo, memberInfo, disableAdd } = options;
     this.disableAdd = disableAdd ? JSON.parse(disableAdd) : false;
     if (sourceID) {
       this.sourceID = sourceID;
-      this.getSourceUserInfo();
     } else {
       const info = JSON.parse(sourceInfo);
       this.sourceID = info.userID;
-      this.sourceUserInfo = {
-        ...info,
-      };
     }
+    this.getSourceUserInfo();
     if (memberInfo) {
       this.memberInfo = JSON.parse(memberInfo);
       this.checkCurrentMember();
@@ -158,15 +167,27 @@ export default {
       });
     },
     async getSourceUserInfo() {
-      let info = null;
+      let info = {};
+      const friendInfo = this.storeFriendList.find((item) => item.userID === this.sourceID);
+      if (friendInfo) {
+        info = { ...friendInfo };
+      }
+      else {
+        const { data } = await IMSDK.asyncApi(
+          IMSDK.IMMethods.GetUsersInfo,
+          IMSDK.uuid(),
+          [this.sourceID],
+        );
+        info = { ...(data[0] ?? {}) };
+      }
       this.isLoading = true
       try {
         const { total, users } = await businessSearchUserInfo(this.sourceID);
         if (total > 0) {
           const { data } = await IMSDK.asyncApi(
-            'getUsersInfoWithCache',
+            IMSDK.IMMethods.GetUsersInfo,
             IMSDK.uuid(),
-            { userIDList: [this.sourceID] },
+            [this.sourceID],
           );
           const imData = data[0]?.friendInfo ?? data[0]?.publicInfo ?? {};
           info = {
@@ -197,13 +218,9 @@ export default {
             },
           );
           role = data[0]?.roleLevel;
-        } catch (e) { }
+        } catch (e) {}
       }
       this.showSetRole = role === GroupMemberRole.Owner;
-      this.showSetMuteMember =
-        role === GroupMemberRole.Owner ||
-        (role === GroupMemberRole.Admin &&
-          this.memberInfo.roleLevel === GroupMemberRole.Nomal);
     },
     toAddFriend() {
       uni.$u.route("/pages/common/sendAddRequest/index", {
@@ -247,24 +264,12 @@ export default {
       }
     },
     setIMListener() {
-      IMSDK.subscribe(
-        IMSDK.IMEvents.OnFriendInfoChanged,
-        this.friendInfoChangeHandler,
-      );
-      IMSDK.subscribe(
-        IMSDK.IMEvents.OnGroupMemberInfoChanged,
-        this.groupMemberInfoChangeHandler,
-      );
+      uni.$on(IMSDK.IMEvents.OnFriendInfoChanged, this.friendInfoChangeHandler)
+      uni.$on(IMSDK.IMEvents.OnGroupMemberInfoChanged, this.groupMemberInfoChangeHandler)
     },
     disposeIMListener() {
-      IMSDK.unsubscribe(
-        IMSDK.IMEvents.OnFriendInfoChanged,
-        this.friendInfoChangeHandler,
-      );
-      IMSDK.unsubscribe(
-        IMSDK.IMEvents.OnGroupMemberInfoChanged,
-        this.groupMemberInfoChangeHandler,
-      );
+      uni.$off(IMSDK.IMEvents.OnFriendInfoChanged, this.friendInfoChangeHandler)
+      uni.$off(IMSDK.IMEvents.OnGroupMemberInfoChanged, this.groupMemberInfoChangeHandler)
     },
   },
 };
@@ -359,7 +364,7 @@ export default {
       color: #fff;
       border-radius: 12rpx;
 
-      image {
+      img {
         margin-right: 16rpx;
         width: 40rpx;
         height: 40rpx;

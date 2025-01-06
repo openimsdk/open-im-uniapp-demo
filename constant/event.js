@@ -6,6 +6,8 @@ export const PageEvents = {
   ScrollToBottom: "ScrollToBottom",
   AtSomeOne: "AtSomeOne",
   MutipleCheckUpdate: "MutipleCheckUpdate",
+  RtcCall: "RtcCall",
   CheckForUpdate: "CheckForUpdate",
   CheckForUpdateResp: "CheckForUpdateResp",
+  NativeCallEnd: "NativeCallEnd",
 };

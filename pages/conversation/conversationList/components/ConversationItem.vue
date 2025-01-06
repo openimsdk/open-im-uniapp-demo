@@ -51,10 +51,12 @@ import IMSDK, {
 import MyAvatar from "@/components/MyAvatar/index.vue";
 import UParse from "@/components/gaoyia-parse/parse.vue";
 import {
-  parseMessageByType,
+  getConversationContent,
   formatConversionTime,
   prepareConversationState,
+  parseAt
 } from "@/util/imCommon";
+import { formatInputHtml } from "@/util/common";
 
 export default {
   components: {
@@ -69,10 +71,6 @@ export default {
   },
   computed: {
     messagePrefix() {
-      if (this.source.draftText !== "") {
-        let text = this.source.draftText;
-        return "[草稿]";
-      }
       let prefix = "";
 
       if (
@@ -97,21 +95,27 @@ export default {
             prefix = "[群公告]";
             break;
         }
+        return prefix;
       }
 
-      return prefix;
+      if (this.source.draftText !== "") {
+        return "[草稿]";
+      }
     },
     latestMessage() {
       if (this.source.latestMsg === "") return "";
+      if (this.source.draftText && this.source.groupAtType === GroupAtType.AtNormal) {
+        return parseAt(formatInputHtml(this.source.draftText), true)
+      }
       let parsedMessage;
       try {
         parsedMessage = JSON.parse(this.source.latestMsg);
       } catch (e) {}
       if (!parsedMessage) return "";
-      return parseMessageByType(parsedMessage);
+      return getConversationContent(parsedMessage);
     },
     needActivePerfix() {
-      return this.source.groupAtType !== GroupAtType.AtNormal;
+      return this.source.groupAtType !== GroupAtType.AtNormal || this.source.draftText;
     },
     latestMessageTime() {
       return this.source.latestMsgSendTime

@@ -57,12 +57,10 @@ export default {
         const joinSource = this.isScan
           ? GroupJoinSource.QrCode
           : GroupJoinSource.Search;
-        const opid = IMSDK.uuid();
-        console.log(opid);
-        func = IMSDK.asyncApi(IMSDK.IMMethods.JoinGroup, opid, {
+        func = IMSDK.asyncApi(IMSDK.IMMethods.JoinGroup, IMSDK.uuid(), {
           groupID: this.sourceID,
           reqMsg: this.reason,
-          joinSource: 3,
+          joinSource,
         });
       } else {
         func = IMSDK.asyncApi(IMSDK.IMMethods.AddFriend, IMSDK.uuid(), {

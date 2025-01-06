@@ -10,6 +10,11 @@ export default {
             type: String,
             default: uni.$u.props.album.keyName
         },
+        // OpenIM 用于预览时使用原地址
+        previewKeyName: {
+          type: String,
+          default: uni.$u.props.album.keyName
+        },            
         // 单图时，图片长边的长度
         singleSize: {
             type: [String, Number],
