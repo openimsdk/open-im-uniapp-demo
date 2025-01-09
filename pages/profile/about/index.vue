@@ -5,13 +5,6 @@
       <image src="@/static/images/about_logo.png" mode=""></image>
       <view>{{ v }}</view>
 
-      <!-- <info-item
-        v-if="$u.os() === 'android'"
-        class="check"
-        title="检查新版本"
-        content=""
-      /> -->
-
       <info-item
         @click="show = true"
         class="check"
@@ -33,6 +26,7 @@
 </template>
 
 <script>
+import IMSDK from "openim-uniapp-polyfill";
 import { version } from '@/common/config'
 import CustomNavBar from "@/components/CustomNavBar/index.vue";
 import { PageEvents } from "@/constant";
@@ -47,7 +41,6 @@ export default {
     return {
       show: false,
       line: 10000,
-      appVersion: "",
       version: "",
       loading: false,
     };
@@ -81,19 +74,23 @@ export default {
           ex: ""
         }
       )
-    },
-    uploadHandler({
-      data: { current, size },
-    }) {
-      const progress = (current / size) * 100;
-      if (current >= size) {
-        uni.hideLoading();
-        return;
-      }
       uni.showLoading({
         title: '上传中',
         mask: true,
       });
+    },
+    uploadHandler({
+      data: { current, size },
+    }) {
+      console.log('uploadHandler',current,size)
+      if (current >= size) {
+        uni.hideLoading();
+        uni.showToast({
+          title: "上传成功",
+          icon: "none",
+        });
+        return;
+      }
     },
     getAppVersion() {
       plus.runtime.getProperty(
@@ -137,6 +134,7 @@ export default {
     margin-top: 26rpx;
     border-top: 1px #e8eaef solid;
     padding: 20rpx;
+    padding-bottom: 0;
     width: 90%;
   }
 

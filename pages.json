@@ -324,14 +324,6 @@
       }
     },
     {
-      "path": "pages/common/previewHistoryMessage/index",
-      "style": {
-        "navigationBarTitleText": "",
-        "enablePullDownRefresh": false,
-        "disableScroll": true
-      }
-    },
-    {
       "path": "pages/contact/searchAddedFriend/index",
       "style": {
         "navigationBarTitleText": "",

@@ -64,7 +64,7 @@ export default {
         groupID: "",
         count: 20,
         startClientMsgID: this.storeHistoryMessageList[0]?.clientMsgID ?? "",
-        lastMinSeq: 0,
+        viewType: 0,
       };
       try {
         const { emptyFlag } = await this.getHistoryMesageList(options);

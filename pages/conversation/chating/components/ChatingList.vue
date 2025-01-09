@@ -15,19 +15,6 @@
     upper-threshold="250"
     @scrolltoupper="scrolltoupper"
   >
-    <!-- <view class="watermark-view">
-      <view v-for="i in 20" :key="i">
-        <view v-for="j in 20" :key="j">
-          <view
-            class="watermark"
-            :key="i + j"
-            :style="{ top: 150 * (i - 1) + 'px', left: 150 * (j - 1) + 'px' }"
-          >
-            {{ storeSelfInfo.nickname }}
-          </view>
-        </view>
-      </view>
-    </view> -->
     <view id="scroll_wrap">
       <u-loadmore nomoreText="" :status="loadMoreStatus" />
       <view
@@ -54,19 +41,6 @@
         id="auchormessage_bottom_item"
       ></view>
     </view>
-    <!-- <transition name="fade">
-      <view
-        @click="scrollToBottom(false)"
-        v-show="getNewMesageCount && !needScoll"
-        class="new_message_flag fade"
-      >
-        <image
-          style="height: 10px; width: 11px"
-          src="@/static/images/common_db_arrow.png"
-        />
-        <text>{{ `${getNewMesageCount}条新消息` }}</text>
-      </view>
-    </transition> -->
   </scroll-view>
 </template>
 
@@ -99,7 +73,6 @@ export default {
       needScoll: true,
       withAnimation: false,
       messageLoadState: {
-        lastMinSeq: 0,
         loading: false,
       },
       bgUrl: "",
@@ -188,12 +161,11 @@ export default {
         groupID: "",
         count: 20,
         startClientMsgID: this.storeHistoryMessageList[0]?.clientMsgID ?? "",
-        lastMinSeq: this.messageLoadState.lastMinSeq,
+        viewType: 0,
       };
       try {
-        const { emptyFlag, lastMinSeq } =
+        const { emptyFlag } =
           await this.getHistoryMesageList(options);
-        this.messageLoadState.lastMinSeq = lastMinSeq;
         if (emptyFlag) {
           this.$emit("initSuccess");
         }
