@@ -95,13 +95,7 @@ OpenIM 为开发者提供开源即时通讯 SDK，作为 Twilio、Sendbird 等�
 
   ![](./docs/images/appid.png)
 
-5. 如果你想使用定位功能，在以下文件中将配置文件修改为您自己的高德地图
-
-- 使用 Hbuilder 打开 manifest.json
-
-  ![](./docs/images/map.png)
-
-6. 导入原生插件
+5. 导入原生插件
 
 - 使用 Hbuilder 打开 manifest.json
 
@@ -111,19 +105,19 @@ OpenIM 为开发者提供开源即时通讯 SDK，作为 Twilio、Sendbird 等�
 
   ![](./docs/images/download.png)
 
-7. 云打包自定义调试基座
+6. 云打包自定义调试基座
 
 - 菜单 -> 运行 -> 运行到手机或模拟器 -> 制作自定义调试基座 (使用自己的包名)
 
   ![](./docs/images/dev.png)
 
-8. 在真实的机器或模拟器上运行 （ iOS 仅支持在真机调试 ）
+7. 在真实的机器或模拟器上运行 （ iOS 仅支持在真机调试 ）
 
 - 菜单 -> 运行 -> 运行到手机或模拟器 -> 运行到Android App基座
 
   ![](./docs/images/run_dev.png)
 
-9. 开始开发测试！ 🎉
+8. 开始开发测试！ 🎉
 
 ## 音视频通话
 
@@ -227,3 +221,9 @@ OpenIM 为开发者提供开源即时通讯 SDK，作为 Twilio、Sendbird 等�
 2. iOS 制作自定义基座失败？
 
    答：插件源码不能经过其他操作系统。只能在 MacOS 环境下载插件、制作自定义基座和云打包。
+
+3. 如何使用地图、定位?
+  答： [参考文档](CONFIGKEY.md)
+
+4. 如何使用离线推送?
+  答： [参考文档](CONFIGKEY.md)
