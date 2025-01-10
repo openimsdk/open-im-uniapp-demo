@@ -60,8 +60,6 @@ export default {
       this.loading = true;
       const options = {
         conversationID: this.storeCurrentConversation.conversationID,
-        userID: "",
-        groupID: "",
         count: 20,
         startClientMsgID: this.storeHistoryMessageList[0]?.clientMsgID ?? "",
         viewType: 0,

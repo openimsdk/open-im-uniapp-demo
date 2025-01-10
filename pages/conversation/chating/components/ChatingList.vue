@@ -157,8 +157,6 @@ export default {
       const lastMsgID = this.storeHistoryMessageList[0]?.clientMsgID;
       const options = {
         conversationID: this.storeCurrentConversation.conversationID,
-        userID: "",
-        groupID: "",
         count: 20,
         startClientMsgID: this.storeHistoryMessageList[0]?.clientMsgID ?? "",
         viewType: 0,

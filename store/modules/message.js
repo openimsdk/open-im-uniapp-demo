@@ -27,7 +27,6 @@ const mutations = {
 const actions = {
   async getHistoryMesageList({ commit, state }, params) {
     let emptyFlag = true;
-    let lastMinSeq = 0;
     try {
       console.log("getHistoryMesageList:::");
       console.log(params);
@@ -37,7 +36,7 @@ const actions = {
         params,
       );
       console.log(data);
-      const isFistPage = !params.startClientMsgID && !params.lastMinSeq;
+      const isFistPage = !params.startClientMsgID
       const messages = data.messageList ?? [];
       if (!params.conversationID.includes("sn_")) {
         const imageList = filterPreviewImage([...messages]);
@@ -47,7 +46,6 @@ const actions = {
         ]);
       }
       emptyFlag = messages.length === 0;
-      lastMinSeq = data.lastMinSeq;
       commit("SET_HISTORY_MESSAGE_LIST", [
         ...messages,
         ...(isFistPage ? [] : state.historyMessageList),
@@ -58,7 +56,6 @@ const actions = {
     }
     return {
       emptyFlag,
-      lastMinSeq,
     };
   },
   pushNewPreviewImage({ state, commit }, url) {
