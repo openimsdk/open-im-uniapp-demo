@@ -311,7 +311,7 @@ export class IgexinTool {
 }
 
 // #ifdef APP-PLUS
-// export const Igexin = new IgexinTool();
+export const Igexin = new IgexinTool();
 // #endif
 
 export const copyFileToDoc = (from, to = "background") => {

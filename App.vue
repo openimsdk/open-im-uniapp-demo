@@ -24,7 +24,9 @@ let notification
 export default {
   onLaunch: function () {
     console.log("App Launch");
-    // Igexin.turnOnPush();
+    // #ifdef APP-PLUS
+    Igexin.turnOnPush();
+    // #endif
     innerAudioContext = uni.createInnerAudioContext();
     innerAudioContext.autoplay = false;
     innerAudioContext.src = newMessage;
@@ -98,7 +100,9 @@ export default {
           uni.removeStorage({
             key: "BusinessToken",
           });
-          // Igexin.unbindAlias(this.storeCurrentUserID)
+          // #ifdef APP-PLUS
+          Igexin.unbindAlias(this.storeCurrentUserID)
+          // #endif
           uni.$u.route("/pages/login/index");
         });
       };
@@ -491,6 +495,9 @@ export default {
     },
     tryLogin() {
       const initStore = () => {
+        // #ifdef APP-PLUS
+        Igexin.bindAlias(this.storeCurrentUserID)
+        // #endif
         this.$store.dispatch("user/getSelfInfo");
         this.$store.dispatch("conversation/getConversationList");
         this.$store.dispatch("conversation/getUnReadCount");
