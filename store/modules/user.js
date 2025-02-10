@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import IMSDK from "openim-uniapp-polyfill";
 import { businessGetUserInfo } from "@/api/login";
-import { filterEmptyValue } from "@/util/common";
+import { filterEmptyValue, Igexin } from "@/util/common";
 
 const state = {
   selfInfo: {},
@@ -44,6 +44,9 @@ const actions = {
         IMSDK.IMMethods.GetSelfUserInfo,
         uuidv4(),
       );
+      // #ifdef APP-PLUS
+      Igexin.bindAlias(data.userID)
+      // #endif
       const { users } = await businessGetUserInfo(data.userID);
       const businessData = users[0] ?? {};
       filterEmptyValue(businessData);

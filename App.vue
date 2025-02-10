@@ -495,9 +495,6 @@ export default {
     },
     tryLogin() {
       const initStore = () => {
-        // #ifdef APP-PLUS
-        Igexin.bindAlias(this.storeCurrentUserID)
-        // #endif
         this.$store.dispatch("user/getSelfInfo");
         this.$store.dispatch("conversation/getConversationList");
         this.$store.dispatch("conversation/getUnReadCount");
