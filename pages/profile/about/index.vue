@@ -31,7 +31,6 @@ import { version } from '@/common/config'
 import CustomNavBar from "@/components/CustomNavBar/index.vue";
 import { PageEvents } from "@/constant";
 import InfoItem from "../selfInfo/InfoItem.vue";
-import IMSDK from "openim-uniapp-polyfill";
 export default {
   components: {
     CustomNavBar,
