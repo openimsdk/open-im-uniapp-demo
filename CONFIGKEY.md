@@ -10,6 +10,8 @@
 
 ### 客户端配置
 
+> 在代码中把APP端推送相关代码启用，搜索 **Igexin** 相关代码，[示例](https://github.com/openimsdk/open-im-uniapp-demo/commit/82e1f5c7dd152f3d44ed05b8f8e53d66ef5f60ad)
+
 #### 1. 使用 uni-push 1.0
 
 - Hbuilder 打开 manifest.json 勾选 Push
