@@ -25,7 +25,7 @@ export default {
   onLaunch: function () {
     console.log("App Launch");
     // #ifdef APP-PLUS
-    Igexin.turnOnPush();
+    // Igexin.turnOnPush();
     // #endif
     innerAudioContext = uni.createInnerAudioContext();
     innerAudioContext.autoplay = false;
@@ -101,7 +101,7 @@ export default {
             key: "BusinessToken",
           });
           // #ifdef APP-PLUS
-          Igexin.unbindAlias(this.storeCurrentUserID)
+          // Igexin.unbindAlias(this.storeCurrentUserID)
           // #endif
           uni.$u.route("/pages/login/index");
         });

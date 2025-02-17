@@ -45,7 +45,7 @@ const actions = {
         uuidv4(),
       );
       // #ifdef APP-PLUS
-      Igexin.bindAlias(data.userID)
+      // Igexin.bindAlias(data.userID)
       // #endif
       const { users } = await businessGetUserInfo(data.userID);
       const businessData = users[0] ?? {};
