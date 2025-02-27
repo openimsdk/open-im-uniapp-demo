@@ -51,8 +51,10 @@ OpenIM 为开发者提供开源即时通讯 SDK，作为 Twilio、Sendbird 等�
 
 ### 说明
 
-- 只支持 Uniapp 打包成 Android/iOS 应用。并且 SDK 也暂未支持 UniappX （开发中）。
-- 暂时不支持一对一音视频。如果需要使用，可以运行其他仓库的项目。
+- `只支持` Uniapp 打包成 Android/iOS 应用。并且 SDK 也暂未支持 UniappX （开发中）。
+- 暂时 `不支持` 运行到 Web，如果需要移动端的 Web 项目，参考 [H5 demo](https://github.com/openimsdk/openim-h5-demo)。
+- 暂时 `不支持` 运行到小程序端。
+- 暂时 `不支持` 一对一音视频。如果需要使用，可以运行其他仓库的项目。
 
 ## 快速开始
 
