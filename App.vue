@@ -39,7 +39,7 @@ export default {
     // #ifdef H5 
     console.error(`暂时不支持运行到 Web，如果需要移动端的 Web 项目，参考 [H5 demo](https://github.com/openimsdk/openim-h5-demo)`);
     // #endif
-    // MP-WEIXIN
+    // #ifdef MP-WEIXIN
     console.error(`暂时不支持运行到小程序端`);
     // #endif
   },
