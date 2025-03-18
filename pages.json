@@ -1,0 +1,290 @@
+{
+  "pages": [
+    //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+    {
+      "path": "pages/login/index"
+    },
+    {
+      "path": "pages/login/registerOrForget/index"
+    },
+    {
+      "path": "pages/login/setSelfInfo/index"
+    },
+    {
+      "path": "pages/login/setPassword/index"
+    },
+    {
+      "path": "pages/login/verifyCode/index"
+    },
+    {
+      "path": "pages/profile/index/index"
+    },
+    {
+      "path": "pages/conversation/conversationList/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false,
+        "disableScroll": true,
+        "app-plus": {
+          "bounce": "none"
+        }
+      }
+    },
+    {
+      "path": "pages/contact/index/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "disableScroll": true,
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/conversation/chating/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false,
+        "disableScroll": true,
+        "app-plus": {
+          "softinputMode": "adjustResize"
+        }
+      }
+    },
+    {
+      "path": "pages/conversation/singleSettings/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/conversation/groupSettings/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/conversation/groupManage/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/conversation/groupMemberList/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/common/userCard/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/common/searchUserOrGroup/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/common/groupCard/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/common/userCardMore/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/common/markOrIDPage/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/common/detailsFileds/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/common/contactChoose/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false,
+        "disableScroll": true
+      }
+    },
+    {
+      "path": "pages/common/createGroup/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/contact/contactAdd/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/contact/switchJoinGroup/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/contact/friendList/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/contact/groupList/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/contact/searchUserOrGroup/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/contact/applicationList/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/contact/applicationListDetails/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/contact/applicationDetails/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/profile/selfInfo/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/profile/accountSetting/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/profile/blockList/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/conversation/updateGroupOrNickname/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/common/sendAddRequest/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/common/webviewWrapper/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/profile/about/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/workbench/index/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": false
+      }
+    }
+  ],
+  "tabBar": {
+    "color": "#8E9AB0",
+    "selectedColor": "#0089FF",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "height": "55px",
+    "list": [
+      {
+        "pagePath": "pages/conversation/conversationList/index",
+        "iconPath": "./static/images/tabbar_conversation.png",
+        "selectedIconPath": "static/images/tabbar_conversation_active.png",
+        "text": "OpenIM"
+      },
+      {
+        "pagePath": "pages/contact/index/index",
+        "iconPath": "./static/images/tabbar_contacts.png",
+        "selectedIconPath": "static/images/tabbar_contacts_active.png",
+        "text": "通讯录"
+      },
+      {
+        "pagePath": "pages/workbench/index/index",
+        "iconPath": "./static/images/tabbar_workbench.png",
+        "selectedIconPath": "static/images/tabbar_workbench_active.png",
+        "text": "发现"
+      },
+      {
+        "pagePath": "pages/profile/index/index",
+        "iconPath": "./static/images/tabbar_profile.png",
+        "selectedIconPath": "static/images/tabbar_profile_active.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "globalStyle": {
+    "navigationStyle": "custom",
+    "navigationBarTextStyle": "black",
+    "app-plus": {
+      "bounce": "none"
+    }
+  }
+}
