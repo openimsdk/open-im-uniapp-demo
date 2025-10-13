@@ -3,48 +3,26 @@
     <view>
       <view class="chat_footer">
         <view class="input_content">
-          <CustomEditor
-            class="custom_editor"
-            ref="customEditor"
-            @ready="editorReady"
-            @focus="editorFocus"
-            @blur="editorBlur"
-            @input="editorInput"
-          />
+          <CustomEditor v-show="!VoiceBarVisible" class="custom_editor" ref="customEditor" @ready="editorReady"
+            @focus="editorFocus" @blur="editorBlur" @input="editorInput" />
+          <chating-voice-bar @sendMessage="sendMessage" @prepareMediaMessage="prepareMediaMessage"
+            v-show="VoiceBarVisible" />
         </view>
 
         <view class="footer_action_area">
-          <image
-            v-show="!hasContent"
-            @click.prevent="updateActionBar"
-            src="@/static/images/chating_footer_add.png"
-            alt=""
-            srcset=""
-          />
-          <image
-            v-show="hasContent"
-            @touchend.prevent="sendTextMessage"
-            src="@/static/images/send_btn.png"
-            alt=""
-            srcset=""
-          />
+          <image v-show="!hasContent" @click.prevent="updateActionBar" src="@/static/images/chating_footer_add.png"
+            alt="" srcset="" />
+          <image v-show="!hasContent" style="padding-left: 24rpx;" @click.prevent="updateVoiceBar"
+            src="@/static/images/chating_footer_audio.png" alt="" srcset="" />
+          <image v-show="hasContent" @touchend.prevent="sendTextMessage" src="@/static/images/send_btn.png" alt=""
+            srcset="" />
         </view>
       </view>
-      <chating-action-bar
-        @sendMessage="sendMessage"
-        @prepareMediaMessage="prepareMediaMessage"
-        v-show="actionBarVisible"
-      />
-      <u-action-sheet
-        :safeAreaInsetBottom="true"
-        round="12"
-        :actions="actionSheetMenu"
-        @select="selectClick"
-        :closeOnClickOverlay="true"
-        :closeOnClickAction="true"
-        :show="showActionSheet"
-        @close="showActionSheet = false"
-      >
+      <chating-action-bar @sendMessage="sendMessage" @prepareMediaMessage="prepareMediaMessage"
+        v-show="actionBarVisible" />
+
+      <u-action-sheet :safeAreaInsetBottom="true" round="12" :actions="actionSheetMenu" @select="selectClick"
+        :closeOnClickOverlay="true" :closeOnClickAction="true" :show="showActionSheet" @close="showActionSheet = false">
       </u-action-sheet>
     </view>
   </view>
@@ -54,18 +32,12 @@
 import { mapGetters, mapActions } from "vuex";
 import { getPurePath, html2Text } from "@/util/common";
 import { offlinePushInfo } from "@/util/imCommon";
-import {
-  ChatingFooterActionTypes,
-  UpdateMessageTypes,
-} from "@/constant";
-import IMSDK, {
-  IMMethods,
-  MessageStatus,
-  MessageType,
-} from "openim-uniapp-polyfill";
+import { ChatingFooterActionTypes, UpdateMessageTypes, } from "@/constant";
+import IMSDK, { IMMethods, MessageStatus, MessageType, } from "openim-uniapp-polyfill";
 import UParse from "@/components/gaoyia-parse/parse.vue";
 import CustomEditor from "./CustomEditor.vue";
 import ChatingActionBar from "./ChatingActionBar.vue";
+import ChatingVoiceBar from "./ChatingVoiceBar.vue";
 
 const needClearTypes = [MessageType.TextMessage];
 
@@ -86,6 +58,7 @@ export default {
   components: {
     CustomEditor,
     ChatingActionBar,
+    ChatingVoiceBar,
     UParse,
   },
   props: {
@@ -99,6 +72,8 @@ export default {
       isInputFocus: false,
       actionSheetMenu: [],
       showActionSheet: false,
+      VoiceBarVisible: false,
+      videoCoverPath: ''
     };
   },
   computed: {
@@ -128,11 +103,11 @@ export default {
       let message = "";
       const text = html2Text(this.inputHtml);
       message = await IMSDK.asyncApi(
-            IMMethods.CreateTextMessage,
-            IMSDK.uuid(),
-            text
-          );
-          console.log(message);
+        IMMethods.CreateTextMessage,
+        IMSDK.uuid(),
+        text
+      );
+      console.log(message);
       return message;
     },
     async sendTextMessage() {
@@ -185,6 +160,9 @@ export default {
     updateActionBar() {
       this.actionBarVisible = !this.actionBarVisible;
     },
+    updateVoiceBar() {
+      this.VoiceBarVisible = !this.VoiceBarVisible;
+    },
     editorReady(e) {
       this.customEditorCtx = e.context;
       this.customEditorCtx.clear();
@@ -202,8 +180,11 @@ export default {
     prepareMediaMessage(type) {
       if (type === ChatingFooterActionTypes.Album) {
         this.actionSheetMenu = [...albumChoose];
+        this.showActionSheet = true;
+      } else if (type === ChatingFooterActionTypes.Voice) {
+        console.log("切换到语音输入模式");
+        this.updateVoiceBar();
       }
-      this.showActionSheet = true;
     },
 
     // from comp
@@ -246,7 +227,9 @@ export default {
     },
 
     // keyboard
-    keyboardChangeHander({ height }) {
+    keyboardChangeHander({
+      height
+    }) {
       if (height > 0) {
         if (this.actionBarVisible) {
           this.actionBarVisible = false;
@@ -258,6 +241,15 @@ export default {
     },
     disposeKeyboardListener() {
       uni.offKeyboardHeightChange(this.keyboardChangeHander);
+    },
+    // 生命周期钩子：组件卸载前
+    beforeUnmount() {
+      // 确保移除全局触摸事件监听器
+      document.removeEventListener('touchend', this.handleGlobalTouchEnd);
+      // 停止正在进行的录音
+      if (this.isRecording && this.recorderManager) {
+        this.recorderManager.stop();
+      }
     },
   },
 };

@@ -73,7 +73,7 @@ import { tipMessaggeFormat, formatMessageTime } from "@/util/imCommon";
 
 const textRenderTypes = [MessageType.TextMessage];
 
-const mediaRenderTypes = [MessageType.PictureMessage];
+const mediaRenderTypes = [MessageType.PictureMessage,MessageType.VoiceMessage];
 
 export default {
   components: {

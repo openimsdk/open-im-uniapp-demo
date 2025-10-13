@@ -128,6 +128,8 @@ export const parseMessageByType = (pmsg) => {
       return pmsg.textElem.content;
     case MessageType.PictureMessage:
       return `[图片]`;
+    case MessageType.VoiceMessage:
+      return `[语音]`;
     case MessageType.FriendAdded:
       return "你们已经是好友了，开始聊天吧~";
     case MessageType.MemberEnter:
